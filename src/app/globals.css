@@ -1,8 +1,85 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark RPG Theme - Weltraum / Episch */
+  --background: #0a0a0f;
+  --background-secondary: #12121a;
+  --background-tertiary: #1a1a2e;
+  --foreground: #e8e8f0;
+  --foreground-muted: #888899;
+  --foreground-dim: #555566;
+
+  /* Orb Colors */
+  --orb-glow: #6366f1;
+  --orb-glow-secondary: #8b5cf6;
+  --orb-border: #3b3b5c;
+
+  /* Domain Colors - Episch & Distinkt */
+  --domain-coding: #6366f1;      /* Indigo - Coding/Tech */
+  --domain-labor: #22c55e;       /* Grün - Labor/Science */
+  --domain-design: #f472b6;      /* Pink - Kreativ/Design */
+  --domain-fitness: #ef4444;     /* Rot - Fitness/Körper */
+  --domain-finance: #f59e0b;     /* Gold - Finanzen */
+  --domain-language: #06b6d4;    /* Cyan - Sprachen */
+  --domain-music: #a855f7;       /* Lila - Musik */
+  --domain-social: #ec4899;      /* Magenta - Sozial */
+
+  /* Accent Colors */
+  --accent-primary: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-success: #22c55e;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --accent-info: #06b6d4;
+
+  /* XP Bar */
+  --xp-bar-bg: #1e1e2e;
+  --xp-bar-fill: linear-gradient(90deg, #6366f1, #8b5cf6);
+
+  /* Level Tiers */
+  --level-novice: #6b7280;       /* Grau - Lv 1-19 */
+  --level-apprentice: #22c55e;   /* Grün - Lv 20-39 */
+  --level-journeyman: #3b82f6;   /* Blau - Lv 40-59 */
+  --level-expert: #a855f7;       /* Lila - Lv 60-79 */
+  --level-master: #f59e0b;       /* Gold - Lv 80-99 */
+  --level-legend: #ef4444;       /* Rot/Feuer - Lv 100 */
+
+  /* Character Attributes - RPG Stats (PRD Section 2.1) */
+  --attr-str: #ef4444;           /* Red - Strength (Stärke) */
+  --attr-dex: #22c55e;           /* Green - Dexterity (Geschicklichkeit) */
+  --attr-int: #6366f1;           /* Indigo - Intelligence (Intelligenz) */
+  --attr-cha: #f472b6;           /* Pink - Charisma */
+  --attr-wis: #8b5cf6;           /* Purple - Wisdom (Weisheit) */
+  --attr-vit: #f59e0b;           /* Gold - Vitality (Vitalität) */
+
+  /* Faction Colors - Life Balance (PRD Section 2.15) */
+  --faction-karriere: #3b82f6;   /* Blue - Karriere/Arbeit */
+  --faction-familie: #ec4899;    /* Pink - Familie */
+  --faction-hobbys: #8b5cf6;     /* Purple - Hobbys */
+  --faction-fitness: #22c55e;    /* Green - Fitness/Gesundheit */
+  --faction-lernen: #f59e0b;     /* Amber - Lernen/Bildung */
+  --faction-freunde: #06b6d4;    /* Cyan - Freundeskreis */
+  --faction-finanzen: #eab308;   /* Yellow/Gold - Finanzen */
+
+  /* Mental Stats Colors - Seele & Kopf (PRD Section 2.14) */
+  --mental-stimmung: #fbbf24;         /* Yellow - Mood */
+  --mental-motivation: #f97316;       /* Orange - Motivation */
+  --mental-stress: #ef4444;           /* Red - Stress */
+  --mental-fokus: #3b82f6;            /* Blue - Focus */
+  --mental-kreativitaet: #a855f7;     /* Purple - Creativity */
+  --mental-soziale-batterie: #22c55e; /* Green - Social Battery */
+
+  /* Radar Chart Styling - erhöhte Sichtbarkeit */
+  --radar-grid: rgba(255, 255, 255, 0.25);
+  --radar-fill: rgba(139, 92, 246, 0.5);
+  --radar-stroke: #a78bfa;
+
+  /* Legacy Level Colors */
+  --level-bronze: #cd7f32;
+  --level-silver: #c0c0c0;
+  --level-gold: #ffd700;
+  --level-platinum: #e5e4e2;
+  --level-diamond: #b9f2ff;
 }
 
 @theme inline {
@@ -12,15 +89,228 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Starfield Background Effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, transparent 0%, var(--background) 70%),
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Orb Glow Effect */
+.orb-glow {
+  box-shadow:
+    0 0 20px rgba(99, 102, 241, 0.3),
+    0 0 40px rgba(99, 102, 241, 0.2),
+    0 0 60px rgba(99, 102, 241, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.orb-glow:hover {
+  box-shadow:
+    0 0 30px rgba(99, 102, 241, 0.5),
+    0 0 60px rgba(99, 102, 241, 0.3),
+    0 0 90px rgba(99, 102, 241, 0.2);
+}
+
+/* XP Progress Bar */
+.xp-bar {
+  background: var(--xp-bar-bg);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.xp-bar-fill {
+  background: var(--xp-bar-fill);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+/* Animated Orb Pulse */
+@keyframes orbPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes orbGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: translateY(0) translateX(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-10px) translateX(5px) scale(1);
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-60px) translateX(-10px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Orb with animated glow */
+.orb-animated {
+  animation: orbGlow 3s ease-in-out infinite;
+}
+
+/* Floating particles container */
+.orb-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.orb-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: floatParticle 3s ease-out infinite;
+}
+
+/* Loading Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--background-secondary) 25%,
+    var(--background-tertiary) 50%,
+    var(--background-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Level-Up Flash */
+@keyframes levelUp {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--accent-success);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px 20px var(--accent-success);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.level-up-flash {
+  animation: levelUp 0.6s ease-out;
+}
+
+/* Card Styles */
+.card {
+  background: var(--background-secondary);
+  border: 1px solid var(--orb-border);
+  border-radius: 12px;
+}
+
+.card-glow {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+/* Connection Line Styles */
+.connection-prerequisite {
+  stroke: var(--accent-danger);
+  stroke-dasharray: 5, 5;
+}
+
+.connection-synergy {
+  stroke: var(--accent-success);
+}
+
+.connection-related {
+  stroke: var(--accent-primary);
+  stroke-dasharray: 10, 5;
+}
+
+/* Attribute Bar Styles - RPG Stats */
+.attribute-bar {
+  background: var(--background-tertiary);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.attribute-bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+.attribute-bar-fill {
+  height: 100%;
+  transition: width 0.6s ease-out;
+  border-radius: 4px;
+  position: relative;
+}
+
+.attribute-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 0 4px 4px 0;
 }

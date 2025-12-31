@@ -1,0 +1,387 @@
+import { createBrowserClient } from '@/lib/supabase';
+import type { Habit, HabitLog, HabitWithLogs, HabitType, HabitFrequency, FactionId } from '@/lib/database.types';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
+
+// ============================================
+// HABITS DATA ACCESS
+// ============================================
+
+const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+// ============================================
+// READ OPERATIONS
+// ============================================
+
+export async function getHabits(userId: string = TEST_USER_ID): Promise<Habit[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching habits:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getHabit(habitId: string): Promise<Habit | null> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('id', habitId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    console.error('Error fetching habit:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getHabitsWithLogs(
+  userId: string = TEST_USER_ID,
+  daysBack: number = 7
+): Promise<HabitWithLogs[]> {
+  const supabase = createBrowserClient();
+
+  // Get habits
+  const habits = await getHabits(userId);
+
+  // Get logs for these habits
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysBack);
+
+  const { data: logs, error } = await supabase
+    .from('habit_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('logged_at', startDate.toISOString())
+    .order('logged_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching habit logs:', error);
+    throw error;
+  }
+
+  // Check if completed today
+  const today = new Date().toISOString().split('T')[0];
+
+  return habits.map(habit => {
+    const habitLogs = (logs || []).filter(log => log.habit_id === habit.id);
+    const completedToday = habitLogs.some(
+      log => log.logged_at.split('T')[0] === today && log.completed
+    );
+
+    return {
+      ...habit,
+      logs: habitLogs,
+      completedToday,
+    };
+  });
+}
+
+export async function getTodaysHabits(userId: string = TEST_USER_ID): Promise<HabitWithLogs[]> {
+  const habits = await getHabitsWithLogs(userId, 1);
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
+
+  return habits.filter(habit => {
+    if (habit.frequency === 'daily') return true;
+    if (habit.frequency === 'specific_days') {
+      return habit.target_days.includes(today);
+    }
+    return true;
+  });
+}
+
+export async function getHabitsByFaction(
+  factionId: FactionId,
+  userId: string = TEST_USER_ID
+): Promise<Habit[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('faction_id', factionId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching habits by faction:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// ============================================
+// WRITE OPERATIONS
+// ============================================
+
+export interface CreateHabitInput {
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  habit_type?: HabitType;
+  frequency?: HabitFrequency;
+  target_days?: string[];
+  xp_per_completion?: number;
+  faction_id?: FactionId;
+}
+
+export async function createHabit(
+  input: CreateHabitInput,
+  userId: string = TEST_USER_ID
+): Promise<Habit> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habits')
+    .insert({
+      user_id: userId,
+      name: input.name,
+      description: input.description || null,
+      icon: input.icon || '✅',
+      color: input.color || '#10B981',
+      habit_type: input.habit_type || 'positive',
+      frequency: input.frequency || 'daily',
+      target_days: input.target_days || [],
+      xp_per_completion: input.xp_per_completion || 10,
+      faction_id: input.faction_id || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating habit:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateHabit(
+  habitId: string,
+  updates: Partial<CreateHabitInput>
+): Promise<Habit> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habits')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', habitId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating habit:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteHabit(habitId: string): Promise<void> {
+  const supabase = createBrowserClient();
+
+  // Soft delete - just mark as inactive
+  const { error } = await supabase
+    .from('habits')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('id', habitId);
+
+  if (error) {
+    console.error('Error deleting habit:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// HABIT LOGGING
+// ============================================
+
+export interface LogHabitResult {
+  log: HabitLog;
+  habit: Habit;
+  xpGained: number;
+  newStreak: number;
+}
+
+export async function logHabitCompletion(
+  habitId: string,
+  completed: boolean = true,
+  notes?: string,
+  userId: string = TEST_USER_ID
+): Promise<LogHabitResult> {
+  const supabase = createBrowserClient();
+
+  // Get habit
+  const habit = await getHabit(habitId);
+  if (!habit) {
+    throw new Error('Habit not found');
+  }
+
+  // Create log
+  const { data: log, error } = await supabase
+    .from('habit_logs')
+    .insert({
+      habit_id: habitId,
+      user_id: userId,
+      completed,
+      notes: notes || null,
+      logged_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error logging habit:', error);
+    throw error;
+  }
+
+  // Get updated habit (streak is updated by trigger)
+  const updatedHabit = await getHabit(habitId);
+  if (!updatedHabit) {
+    throw new Error('Failed to get updated habit');
+  }
+
+  // Calculate XP (only for completed positive habits or avoided negative habits)
+  let xpGained = 0;
+  if (completed && habit.habit_type === 'positive') {
+    xpGained = habit.xp_per_completion;
+  } else if (!completed && habit.habit_type === 'negative') {
+    // For negative habits, not doing them is good (but we track differently)
+    xpGained = 0; // Could add XP for avoiding bad habits
+  }
+
+  // Update faction stats if XP was gained
+  if (xpGained > 0 && habit.faction_id) {
+    try {
+      await updateFactionStats(habit.faction_id, xpGained, userId);
+    } catch (err) {
+      console.error('Error updating faction stats:', err);
+    }
+  }
+
+  // Log activity
+  if (completed && habit.habit_type === 'positive') {
+    try {
+      await logActivity({
+        userId,
+        activityType: 'habit_completed',
+        factionId: habit.faction_id,
+        title: `${habit.icon} ${habit.name} abgeschlossen`,
+        description: updatedHabit.current_streak > 1
+          ? `${updatedHabit.current_streak} Tage Streak!`
+          : undefined,
+        xpAmount: xpGained,
+        relatedEntityType: 'habit',
+        relatedEntityId: habitId,
+      });
+    } catch (err) {
+      console.error('Error logging activity:', err);
+    }
+  }
+
+  return {
+    log,
+    habit: updatedHabit,
+    xpGained,
+    newStreak: updatedHabit.current_streak,
+  };
+}
+
+export async function getHabitLogs(
+  habitId: string,
+  limit: number = 30,
+  userId: string = TEST_USER_ID
+): Promise<HabitLog[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_logs')
+    .select('*')
+    .eq('habit_id', habitId)
+    .eq('user_id', userId)
+    .order('logged_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching habit logs:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// ============================================
+// STATISTICS
+// ============================================
+
+export interface HabitStats {
+  totalHabits: number;
+  activeHabits: number;
+  completedToday: number;
+  totalStreaks: number;
+  longestStreak: number;
+  totalCompletions: number;
+}
+
+export async function getHabitStats(userId: string = TEST_USER_ID): Promise<HabitStats> {
+  const habits = await getHabitsWithLogs(userId, 1);
+
+  const positiveHabits = habits.filter(h => h.habit_type === 'positive');
+
+  return {
+    totalHabits: habits.length,
+    activeHabits: habits.filter(h => h.is_active).length,
+    completedToday: positiveHabits.filter(h => h.completedToday).length,
+    totalStreaks: positiveHabits.reduce((sum, h) => sum + h.current_streak, 0),
+    longestStreak: Math.max(...habits.map(h => h.longest_streak), 0),
+    totalCompletions: habits.reduce((sum, h) => sum + h.total_completions, 0),
+  };
+}
+
+export async function getHabitCompletionRate(
+  habitId: string,
+  daysBack: number = 30,
+  userId: string = TEST_USER_ID
+): Promise<number> {
+  const supabase = createBrowserClient();
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysBack);
+
+  const { data, error } = await supabase
+    .from('habit_logs')
+    .select('completed')
+    .eq('habit_id', habitId)
+    .eq('user_id', userId)
+    .gte('logged_at', startDate.toISOString());
+
+  if (error) {
+    console.error('Error calculating completion rate:', error);
+    return 0;
+  }
+
+  if (!data || data.length === 0) return 0;
+
+  const completed = data.filter(log => log.completed).length;
+  return Math.round((completed / daysBack) * 100);
+}
