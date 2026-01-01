@@ -14,11 +14,11 @@ interface ClickableLifeBalanceRadarProps {
 const FACTION_ORDER: FactionId[] = [
   'karriere',
   'hobbys',
-  'gesundheit',
+  'koerper',
   'finanzen',
-  'freunde',
-  'lernen',
-  'familie',
+  'soziales',
+  'weisheit',
+  'geist',
 ];
 
 export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBalanceRadarProps) {

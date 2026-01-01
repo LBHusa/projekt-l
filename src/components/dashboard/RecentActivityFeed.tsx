@@ -34,12 +34,12 @@ const ACTIVITY_COLORS: Record<string, string> = {
 
 const FACTION_COLORS: Record<FactionId, string> = {
   karriere: '#F59E0B',
-  familie: '#EF4444',
   hobbys: '#8B5CF6',
-  gesundheit: '#10B981',
-  lernen: '#3B82F6',
-  freunde: '#EC4899',
+  koerper: '#10B981',
+  geist: '#A855F7',
   finanzen: '#14B8A6',
+  soziales: '#EC4899',
+  weisheit: '#3B82F6',
 };
 
 interface RecentActivityFeedProps {

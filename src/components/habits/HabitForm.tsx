@@ -19,12 +19,12 @@ const HABIT_COLORS = [
 
 const FACTIONS: { id: FactionId; name: string; icon: string }[] = [
   { id: 'karriere', name: 'Karriere', icon: '💼' },
-  { id: 'familie', name: 'Familie', icon: '❤️' },
   { id: 'hobbys', name: 'Hobbys', icon: '🎨' },
-  { id: 'gesundheit', name: 'Gesundheit', icon: '💪' },
-  { id: 'lernen', name: 'Lernen', icon: '📚' },
-  { id: 'freunde', name: 'Freunde', icon: '👥' },
+  { id: 'koerper', name: 'Korper', icon: '💪' },
+  { id: 'geist', name: 'Geist', icon: '🧘' },
   { id: 'finanzen', name: 'Finanzen', icon: '💰' },
+  { id: 'soziales', name: 'Soziales', icon: '👥' },
+  { id: 'weisheit', name: 'Weisheit', icon: '📚' },
 ];
 
 const DAYS = [

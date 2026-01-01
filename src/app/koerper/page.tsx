@@ -20,7 +20,7 @@ const WORKOUT_TYPE_CONFIG: Record<WorkoutType, { label: string; icon: string; co
   other: { label: 'Andere', icon: '🎯', color: 'text-gray-400' },
 };
 
-export default function GesundheitPage() {
+export default function KoerperPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [metrics, setMetrics] = useState<BodyMetric[]>([]);
@@ -32,8 +32,8 @@ export default function GesundheitPage() {
         const supabase = createBrowserClient();
 
         const [factionData, factionStats] = await Promise.all([
-          getFaction('gesundheit'),
-          getUserFactionStat('gesundheit'),
+          getFaction('koerper'),
+          getUserFactionStat('koerper'),
         ]);
 
         if (factionData) {
@@ -74,7 +74,7 @@ export default function GesundheitPage() {
 
         setMetrics(metricsData || []);
       } catch (err) {
-        console.error('Error loading gesundheit data:', err);
+        console.error('Error loading koerper data:', err);
       } finally {
         setLoading(false);
       }
@@ -90,7 +90,7 @@ export default function GesundheitPage() {
           <div className="w-16 h-16 rounded-full bg-green-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Dumbbell className="w-8 h-8 text-green-400" />
           </div>
-          <p className="text-white/50">Lade Gesundheits-Daten...</p>
+          <p className="text-white/50">Lade Korper-Daten...</p>
         </div>
       </div>
     );
@@ -100,7 +100,7 @@ export default function GesundheitPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-400">
-          Gesundheit-Bereich nicht gefunden
+          Korper-Bereich nicht gefunden
         </div>
       </div>
     );
@@ -335,7 +335,7 @@ export default function GesundheitPage() {
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
           <FactionSkillsSection
-            factionId="gesundheit"
+            factionId="koerper"
             factionColor={faction.color}
           />
         </div>
