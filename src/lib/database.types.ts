@@ -1257,3 +1257,90 @@ export interface GeistStats {
   totalWords: number;
   todaysMood: MoodLog | null;
 }
+
+// =============================================
+// KOERPER: Training / Workout System
+// =============================================
+
+export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'full_body' | 'cardio';
+export type Equipment = 'barbell' | 'dumbbell' | 'machine' | 'bodyweight' | 'cable' | 'kettlebell' | 'resistance_band' | 'none';
+export type WorkoutSessionType = 'strength' | 'cardio' | 'flexibility' | 'mixed' | 'hiit';
+export type SetType = 'warmup' | 'working' | 'dropset' | 'failure';
+
+export interface Exercise {
+  id: string;
+  name: string;
+  muscle_group: MuscleGroup;
+  equipment: Equipment | null;
+  description: string | null;
+  is_custom: boolean;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface WorkoutSession {
+  id: string;
+  user_id: string;
+  name: string | null;
+  workout_type: WorkoutSessionType;
+  started_at: string;
+  ended_at: string | null;
+  duration_minutes: number | null;
+  calories_burned: number | null;
+  notes: string | null;
+  xp_earned: number;
+  created_at: string;
+}
+
+export interface WorkoutExercise {
+  id: string;
+  workout_id: string;
+  exercise_id: string;
+  exercise_order: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface ExerciseSet {
+  id: string;
+  workout_exercise_id: string;
+  set_number: number;
+  set_type: SetType;
+  reps: number | null;
+  weight_kg: number | null;
+  duration_seconds: number | null;
+  distance_meters: number | null;
+  rest_seconds: number | null;
+  notes: string | null;
+  created_at: string;
+}
+
+// Extended types for UI
+export interface WorkoutExerciseWithDetails extends WorkoutExercise {
+  exercise: Exercise;
+  sets: ExerciseSet[];
+}
+
+export interface WorkoutWithDetails extends WorkoutSession {
+  exercises: WorkoutExerciseWithDetails[];
+  total_sets: number;
+  total_volume_kg: number;
+}
+
+export interface PersonalRecord {
+  user_id: string;
+  exercise_id: string;
+  exercise_name: string;
+  muscle_group: MuscleGroup;
+  max_weight: number;
+  reps_at_max: number;
+  achieved_at: string;
+}
+
+export interface WorkoutStats {
+  total_workouts: number;
+  total_duration_minutes: number;
+  total_xp_earned: number;
+  workouts_this_week: number;
+  favorite_muscle_group: MuscleGroup | null;
+}
