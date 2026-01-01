@@ -149,7 +149,8 @@ export interface CreateHabitInput {
   frequency?: HabitFrequency;
   target_days?: string[];
   xp_per_completion?: number;
-  faction_id?: FactionId;
+  faction_id?: FactionId; // Legacy - single faction (converted to 100% weight)
+  factions?: { faction_id: FactionId; weight: number }[]; // Multi-faction support
 }
 
 export async function createHabit(
@@ -157,6 +158,14 @@ export async function createHabit(
   userId: string = TEST_USER_ID
 ): Promise<Habit> {
   const supabase = createBrowserClient();
+
+  // Determine primary faction_id for legacy column
+  // If multi-faction provided, use the one with highest weight
+  let primaryFactionId = input.faction_id || null;
+  if (input.factions && input.factions.length > 0) {
+    const sorted = [...input.factions].sort((a, b) => b.weight - a.weight);
+    primaryFactionId = sorted[0].faction_id;
+  }
 
   const { data, error } = await supabase
     .from('habits')
@@ -170,7 +179,7 @@ export async function createHabit(
       frequency: input.frequency || 'daily',
       target_days: input.target_days || [],
       xp_per_completion: input.xp_per_completion || 10,
-      faction_id: input.faction_id || null,
+      faction_id: primaryFactionId,
     })
     .select()
     .single();
@@ -178,6 +187,14 @@ export async function createHabit(
   if (error) {
     console.error('Error creating habit:', error);
     throw error;
+  }
+
+  // Set multi-faction assignments after habit creation
+  if (input.factions && input.factions.length > 0) {
+    await setHabitFactions(data.id, input.factions);
+  } else if (input.faction_id) {
+    // Legacy: single faction with 100% weight
+    await setHabitFactions(data.id, [{ faction_id: input.faction_id, weight: 100 }]);
   }
 
   return data;
@@ -189,12 +206,23 @@ export async function updateHabit(
 ): Promise<Habit> {
   const supabase = createBrowserClient();
 
+  // Extract factions from updates (not part of habits table)
+  const { factions, ...habitUpdates } = updates;
+
+  // Determine primary faction_id for legacy column if factions provided
+  let updateData: Record<string, unknown> = {
+    ...habitUpdates,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (factions && factions.length > 0) {
+    const sorted = [...factions].sort((a, b) => b.weight - a.weight);
+    updateData.faction_id = sorted[0].faction_id;
+  }
+
   const { data, error } = await supabase
     .from('habits')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq('id', habitId)
     .select()
     .single();
@@ -202,6 +230,16 @@ export async function updateHabit(
   if (error) {
     console.error('Error updating habit:', error);
     throw error;
+  }
+
+  // Update faction assignments if provided
+  if (factions !== undefined) {
+    if (factions.length > 0) {
+      await setHabitFactions(habitId, factions);
+    } else {
+      // Empty array = remove all faction assignments
+      await setHabitFactions(habitId, []);
+    }
   }
 
   return data;
