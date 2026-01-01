@@ -292,7 +292,7 @@ export async function logWorkout(
   return logActivity({
     userId,
     activityType: 'workout_logged',
-    factionId: 'gesundheit',
+    factionId: 'koerper',
     title: `${workoutName} absolviert`,
     description: `${durationMinutes} Minuten Training`,
     xpAmount: xpGained,
@@ -312,7 +312,7 @@ export async function logBookFinished(
   return logActivity({
     userId,
     activityType: 'book_finished',
-    factionId: 'lernen',
+    factionId: 'weisheit',
     title: `"${bookTitle}" fertig gelesen`,
     description: rating ? `Bewertung: ${'⭐'.repeat(rating)}` : undefined,
     xpAmount: xpGained,
@@ -332,7 +332,7 @@ export async function logCourseCompleted(
   return logActivity({
     userId,
     activityType: 'course_completed',
-    factionId: 'lernen',
+    factionId: 'weisheit',
     title: `Kurs "${courseTitle}" abgeschlossen`,
     description: platform ? `auf ${platform}` : undefined,
     xpAmount: xpGained,
@@ -401,7 +401,7 @@ export async function logSocialEvent(
   return logActivity({
     userId,
     activityType: 'event_logged',
-    factionId: 'freunde',
+    factionId: 'soziales',
     title: eventTitle,
     description: `Mit ${participantCount} Person${participantCount === 1 ? '' : 'en'}`,
     xpAmount: xpGained,

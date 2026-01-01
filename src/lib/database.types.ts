@@ -198,12 +198,12 @@ export interface Database {
           } | null;
           factions: {
             karriere: number;
-            familie: number;
             hobbys: number;
-            fitness: number;
-            lernen: number;
-            freunde: number;
+            koerper: number;
+            geist: number;
             finanzen: number;
+            soziales: number;
+            weisheit: number;
           } | null;
           mental_stats: {
             stimmung: number;
@@ -419,12 +419,12 @@ export interface UserProfileWithAttributes extends UserProfile {
 
 export interface UserFactions {
   karriere: number;   // 💼 Karriere/Arbeit
-  familie?: number;   // 👨‍👩‍👧‍👦 Familie (optional - now managed via Contacts)
-  hobbys: number;     // 🎮 Hobbys
-  fitness: number;    // 💪 Fitness/Gesundheit
-  lernen: number;     // 📚 Lernen/Bildung
-  freunde: number;    // 🤝 Freundeskreis
+  hobbys: number;     // 🎮 Hobbys/Freizeit
+  koerper: number;    // 🏃 Koerper/Fitness
+  geist: number;      // 🧠 Geist/Mental
   finanzen: number;   // 💰 Finanzen
+  soziales: number;   // 👥 Soziales (Familie + Freunde)
+  weisheit: number;   // 📚 Weisheit/Bildung
 }
 
 // =============================================
@@ -446,7 +446,7 @@ export interface MentalStats {
 // Phase 1 Implementation
 // =============================================
 
-export type FactionId = 'karriere' | 'familie' | 'hobbys' | 'gesundheit' | 'lernen' | 'freunde' | 'finanzen';
+export type FactionId = 'karriere' | 'hobbys' | 'koerper' | 'geist' | 'finanzen' | 'soziales' | 'weisheit';
 
 export interface Faction {
   id: FactionId;
