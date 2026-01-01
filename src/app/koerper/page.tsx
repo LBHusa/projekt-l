@@ -1,24 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell, Activity, Scale, Flame, Timer, TrendingUp, Plus } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
+import { WorkoutForm, BodyMetricForm } from '@/components/koerper';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
-import type { FactionWithStats, Workout, BodyMetric, WorkoutType } from '@/lib/database.types';
-import { createBrowserClient } from '@/lib/supabase';
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
-const WORKOUT_TYPE_CONFIG: Record<WorkoutType, { label: string; icon: string; color: string }> = {
-  strength: { label: 'Kraft', icon: '💪', color: 'text-red-400' },
-  cardio: { label: 'Cardio', icon: '🏃', color: 'text-blue-400' },
-  flexibility: { label: 'Flexibilitat', icon: '🧘', color: 'text-purple-400' },
-  sports: { label: 'Sport', icon: '⚽', color: 'text-green-400' },
-  hiit: { label: 'HIIT', icon: '🔥', color: 'text-orange-400' },
-  yoga: { label: 'Yoga', icon: '🧘‍♀️', color: 'text-pink-400' },
-  other: { label: 'Andere', icon: '🎯', color: 'text-gray-400' },
-};
+import {
+  getRecentWorkouts,
+  getBodyMetrics,
+  createWorkout,
+  createBodyMetric,
+  WORKOUT_TYPE_CONFIG,
+  type WorkoutFormData,
+  type BodyMetricFormData,
+} from '@/lib/data/koerper';
+import type { FactionWithStats, Workout, BodyMetric } from '@/lib/database.types';
 
 export default function KoerperPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
@@ -26,62 +23,55 @@ export default function KoerperPage() {
   const [metrics, setMetrics] = useState<BodyMetric[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const supabase = createBrowserClient();
+  // Modal states
+  const [showWorkoutForm, setShowWorkoutForm] = useState(false);
+  const [showMetricForm, setShowMetricForm] = useState(false);
 
-        const [factionData, factionStats] = await Promise.all([
-          getFaction('koerper'),
-          getUserFactionStat('koerper'),
-        ]);
+  const loadData = useCallback(async () => {
+    try {
+      const [factionData, factionStats, workoutsData, metricsData] = await Promise.all([
+        getFaction('koerper'),
+        getUserFactionStat('koerper'),
+        getRecentWorkouts(30),
+        getBodyMetrics(10),
+      ]);
 
-        if (factionData) {
-          setFaction({
-            ...factionData,
-            stats: factionStats,
-          });
-        }
-
-        // Load recent workouts (last 30 days)
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-        const { data: workoutsData, error: workoutsError } = await supabase
-          .from('workouts')
-          .select('*')
-          .eq('user_id', TEST_USER_ID)
-          .gte('occurred_at', thirtyDaysAgo.toISOString())
-          .order('occurred_at', { ascending: false });
-
-        if (workoutsError && workoutsError.code !== 'PGRST116') {
-          console.error('Error fetching workouts:', workoutsError);
-        }
-
-        setWorkouts(workoutsData || []);
-
-        // Load latest body metrics
-        const { data: metricsData, error: metricsError } = await supabase
-          .from('body_metrics')
-          .select('*')
-          .eq('user_id', TEST_USER_ID)
-          .order('measured_at', { ascending: false })
-          .limit(10);
-
-        if (metricsError && metricsError.code !== 'PGRST116') {
-          console.error('Error fetching metrics:', metricsError);
-        }
-
-        setMetrics(metricsData || []);
-      } catch (err) {
-        console.error('Error loading koerper data:', err);
-      } finally {
-        setLoading(false);
+      if (factionData) {
+        setFaction({
+          ...factionData,
+          stats: factionStats,
+        });
       }
-    };
 
-    loadData();
+      setWorkouts(workoutsData);
+      setMetrics(metricsData);
+    } catch (err) {
+      console.error('Error loading koerper data:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Form handlers
+  const handleCreateWorkout = async (data: WorkoutFormData) => {
+    const workout = await createWorkout(data);
+    if (workout) {
+      setShowWorkoutForm(false);
+      await loadData(); // Refresh data
+    }
+  };
+
+  const handleCreateMetric = async (data: BodyMetricFormData) => {
+    const metric = await createBodyMetric(data);
+    if (metric) {
+      setShowMetricForm(false);
+      await loadData(); // Refresh data
+    }
+  };
 
   if (loading) {
     return (
@@ -90,7 +80,7 @@ export default function KoerperPage() {
           <div className="w-16 h-16 rounded-full bg-green-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Dumbbell className="w-8 h-8 text-green-400" />
           </div>
-          <p className="text-white/50">Lade Korper-Daten...</p>
+          <p className="text-white/50">Lade Koerper-Daten...</p>
         </div>
       </div>
     );
@@ -100,7 +90,7 @@ export default function KoerperPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-400">
-          Korper-Bereich nicht gefunden
+          Koerper-Bereich nicht gefunden
         </div>
       </div>
     );
@@ -194,7 +184,7 @@ export default function KoerperPage() {
             </div>
             <button
               className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
-              onClick={() => {/* TODO: Open create modal */}}
+              onClick={() => setShowWorkoutForm(true)}
             >
               <Plus className="w-4 h-4" />
               Workout loggen
@@ -270,7 +260,7 @@ export default function KoerperPage() {
             </div>
             <button
               className="flex items-center gap-1 px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm transition-colors"
-              onClick={() => {/* TODO: Open create modal */}}
+              onClick={() => setShowMetricForm(true)}
             >
               <Plus className="w-4 h-4" />
               Wert eintragen
@@ -340,6 +330,21 @@ export default function KoerperPage() {
           />
         </div>
       </main>
+
+      {/* Modals */}
+      {showWorkoutForm && (
+        <WorkoutForm
+          onSubmit={handleCreateWorkout}
+          onCancel={() => setShowWorkoutForm(false)}
+        />
+      )}
+
+      {showMetricForm && (
+        <BodyMetricForm
+          onSubmit={handleCreateMetric}
+          onCancel={() => setShowMetricForm(false)}
+        />
+      )}
     </div>
   );
 }
