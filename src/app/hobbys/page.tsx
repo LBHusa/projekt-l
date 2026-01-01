@@ -1,14 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Gamepad2, Clock, FolderOpen, Plus, Play, Pause, CheckCircle2 } from 'lucide-react';
+import { Gamepad2, Clock, FolderOpen, Plus, Play, Pause, CheckCircle2, Trash2, Edit2 } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
-import type { FactionWithStats, HobbyProject, HobbyProjectStatus } from '@/lib/database.types';
-import { createBrowserClient } from '@/lib/supabase';
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+import {
+  getHobbyProjects,
+  createHobbyProject,
+  updateHobbyProject,
+  deleteHobbyProject,
+  getHobbyStats,
+  logHobbyTime,
+  getRecentTimeLogs,
+  getCategoryInfo,
+} from '@/lib/data/hobbys';
+import { HobbyProjectForm, TimeLogForm } from '@/components/hobbys';
+import type { HobbyProjectFormData } from '@/components/hobbys';
+import type { TimeLogFormData } from '@/components/hobbys';
+import type { FactionWithStats, HobbyProject, HobbyTimeLog, HobbyProjectStatus } from '@/lib/database.types';
 
 const STATUS_CONFIG: Record<HobbyProjectStatus, { label: string; icon: React.ReactNode; color: string }> = {
   active: { label: 'Aktiv', icon: <Play className="w-3 h-3" />, color: 'text-green-400 bg-green-500/20' },
@@ -20,49 +30,113 @@ const STATUS_CONFIG: Record<HobbyProjectStatus, { label: string; icon: React.Rea
 export default function HobbysPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [projects, setProjects] = useState<HobbyProject[]>([]);
-  const [totalHours, setTotalHours] = useState(0);
+  const [recentLogs, setRecentLogs] = useState<(HobbyTimeLog & { project?: HobbyProject })[]>([]);
+  const [stats, setStats] = useState({
+    totalHours: 0,
+    hoursThisWeek: 0,
+    hoursThisMonth: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+  });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const supabase = createBrowserClient();
+  // Modal states
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showTimeLogForm, setShowTimeLogForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<HobbyProject | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
 
-        const [factionData, factionStats] = await Promise.all([
-          getFaction('hobbys'),
-          getUserFactionStat('hobbys'),
-        ]);
+  const loadData = useCallback(async () => {
+    try {
+      const [factionData, factionStats, projectsData, hobbyStats, logs] = await Promise.all([
+        getFaction('hobbys'),
+        getUserFactionStat('hobbys'),
+        getHobbyProjects(),
+        getHobbyStats(),
+        getRecentTimeLogs(undefined, 5),
+      ]);
 
-        if (factionData) {
-          setFaction({
-            ...factionData,
-            stats: factionStats,
-          });
-        }
-
-        // Load hobby projects
-        const { data: projectsData, error } = await supabase
-          .from('hobby_projects')
-          .select('*')
-          .eq('user_id', TEST_USER_ID)
-          .order('updated_at', { ascending: false });
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error fetching projects:', error);
-        }
-
-        const loadedProjects = projectsData || [];
-        setProjects(loadedProjects);
-        setTotalHours(loadedProjects.reduce((sum, p) => sum + (p.total_hours || 0), 0));
-      } catch (err) {
-        console.error('Error loading hobbys data:', err);
-      } finally {
-        setLoading(false);
+      if (factionData) {
+        setFaction({
+          ...factionData,
+          stats: factionStats,
+        });
       }
-    };
 
-    loadData();
+      setProjects(projectsData);
+      setRecentLogs(logs);
+      setStats({
+        totalHours: hobbyStats.totalHoursAllTime,
+        hoursThisWeek: hobbyStats.totalHoursThisWeek,
+        hoursThisMonth: hobbyStats.totalHoursThisMonth,
+        activeProjects: hobbyStats.activeProjects,
+        completedProjects: hobbyStats.completedProjects,
+      });
+    } catch (err) {
+      console.error('Error loading hobbys data:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleCreateProject = async (data: HobbyProjectFormData) => {
+    await createHobbyProject(data);
+    setShowProjectForm(false);
+    await loadData();
+  };
+
+  const handleUpdateProject = async (data: HobbyProjectFormData) => {
+    if (!editingProject) return;
+    await updateHobbyProject(editingProject.id, data);
+    setEditingProject(null);
+    await loadData();
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!confirm('Projekt wirklich löschen? Alle Zeit-Logs werden ebenfalls gelöscht.')) return;
+    await deleteHobbyProject(projectId);
+    await loadData();
+  };
+
+  const handleLogTime = async (data: TimeLogFormData) => {
+    await logHobbyTime(data);
+    setShowTimeLogForm(false);
+    setSelectedProjectId(undefined);
+    await loadData();
+  };
+
+  const openTimeLogForProject = (projectId: string) => {
+    setSelectedProjectId(projectId);
+    setShowTimeLogForm(true);
+  };
+
+  const formatDuration = (minutes: number): string => {
+    if (minutes < 60) return `${minutes} Min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (mins === 0) return `${hours} Std`;
+    return `${hours}h ${mins}m`;
+  };
+
+  const formatTimeAgo = (date: string): string => {
+    const now = new Date();
+    const then = new Date(date);
+    const diffMs = now.getTime() - then.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Gerade eben';
+    if (diffMins < 60) return `vor ${diffMins} Min`;
+    if (diffHours < 24) return `vor ${diffHours} Std`;
+    if (diffDays === 1) return 'Gestern';
+    if (diffDays < 7) return `vor ${diffDays} Tagen`;
+    return then.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+  };
 
   if (loading) {
     return (
@@ -87,9 +161,6 @@ export default function HobbysPage() {
     );
   }
 
-  const activeProjects = projects.filter(p => p.status === 'active').length;
-  const completedProjects = projects.filter(p => p.status === 'completed').length;
-
   const additionalStats = [
     {
       label: 'Projekte',
@@ -99,11 +170,13 @@ export default function HobbysPage() {
     },
     {
       label: 'Investierte Zeit',
-      value: `${Math.round(totalHours)}h`,
+      value: `${Math.round(stats.totalHours)}h`,
       icon: <Clock className="w-4 h-4" />,
       color: 'text-cyan-400',
     },
   ];
+
+  const activeProjects = projects.filter(p => p.status === 'active');
 
   return (
     <div className="min-h-screen">
@@ -127,22 +200,20 @@ export default function HobbysPage() {
           className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4"
         >
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-green-400">{activeProjects}</div>
+            <div className="text-2xl font-bold text-green-400">{stats.activeProjects}</div>
             <div className="text-sm text-white/50">Aktive Projekte</div>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-blue-400">{completedProjects}</div>
+            <div className="text-2xl font-bold text-blue-400">{stats.completedProjects}</div>
             <div className="text-sm text-white/50">Abgeschlossen</div>
           </div>
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">{Math.round(totalHours)}</div>
+            <div className="text-2xl font-bold text-purple-400">{Math.round(stats.totalHours)}</div>
             <div className="text-sm text-white/50">Stunden gesamt</div>
           </div>
           <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-cyan-400">
-              {projects.length > 0 ? Math.round(totalHours / projects.length) : 0}
-            </div>
-            <div className="text-sm text-white/50">h/Projekt</div>
+            <div className="text-2xl font-bold text-cyan-400">{stats.hoursThisWeek}</div>
+            <div className="text-sm text-white/50">Std diese Woche</div>
           </div>
         </motion.div>
 
@@ -160,7 +231,7 @@ export default function HobbysPage() {
             </div>
             <button
               className="flex items-center gap-1 px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg text-sm transition-colors"
-              onClick={() => {/* TODO: Open create modal */}}
+              onClick={() => setShowProjectForm(true)}
             >
               <Plus className="w-4 h-4" />
               Neues Projekt
@@ -171,10 +242,11 @@ export default function HobbysPage() {
             <div className="space-y-3">
               {projects.map((project) => {
                 const statusConfig = STATUS_CONFIG[project.status];
+                const categoryInfo = getCategoryInfo(project.category);
                 return (
                   <div
                     key={project.id}
-                    className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors"
+                    className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors group"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-3">
@@ -182,14 +254,34 @@ export default function HobbysPage() {
                         <div>
                           <h3 className="font-medium">{project.name}</h3>
                           {project.category && (
-                            <span className="text-xs text-white/40">{project.category}</span>
+                            <span className="text-xs text-white/40">
+                              {categoryInfo.icon} {categoryInfo.name}
+                            </span>
                           )}
                         </div>
                       </div>
-                      <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig.color}`}>
-                        {statusConfig.icon}
-                        {statusConfig.label}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig.color}`}>
+                          {statusConfig.icon}
+                          {statusConfig.label}
+                        </span>
+                        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
+                          <button
+                            onClick={() => setEditingProject(project)}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-white/50 hover:text-white"
+                            title="Bearbeiten"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProject(project.id)}
+                            className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/50 hover:text-red-400"
+                            title="Löschen"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
                     {project.description && (
@@ -207,14 +299,25 @@ export default function HobbysPage() {
                         )}
                       </div>
 
-                      {project.progress > 0 && (
-                        <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-purple-500 rounded-full"
-                            style={{ width: `${project.progress}%` }}
-                          />
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {project.progress > 0 && (
+                          <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-purple-500 rounded-full"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                        )}
+                        {project.status === 'active' && (
+                          <button
+                            onClick={() => openTimeLogForProject(project.id)}
+                            className="flex items-center gap-1 px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded text-xs transition-colors"
+                          >
+                            <Clock className="w-3 h-3" />
+                            Zeit loggen
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -229,24 +332,76 @@ export default function HobbysPage() {
           )}
         </motion.div>
 
-        {/* Time Investment Coming Soon */}
+        {/* Time Investment Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5 text-cyan-400" />
-            <h2 className="font-semibold">Zeit-Investment</h2>
-            <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full">
-              Bald verfugbar
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-cyan-400" />
+              <h2 className="font-semibold">Zeit-Investment</h2>
+            </div>
+            <button
+              onClick={() => setShowTimeLogForm(true)}
+              disabled={activeProjects.length === 0}
+              className="flex items-center gap-1 px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              Zeit loggen
+            </button>
           </div>
-          <div className="text-center py-6 text-white/40">
-            <p>Zeit-Tracking pro Hobby kommt bald</p>
-            <p className="text-sm mt-1">Verfolge wie viel Zeit du in deine Hobbys investierst</p>
+
+          {/* Time Stats */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="bg-white/5 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-cyan-400">{stats.hoursThisWeek}h</div>
+              <div className="text-xs text-white/40">Diese Woche</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-purple-400">{stats.hoursThisMonth}h</div>
+              <div className="text-xs text-white/40">Dieser Monat</div>
+            </div>
+            <div className="bg-white/5 rounded-lg p-3 text-center">
+              <div className="text-lg font-bold text-white/80">{Math.round(stats.totalHours)}h</div>
+              <div className="text-xs text-white/40">Gesamt</div>
+            </div>
           </div>
+
+          {/* Recent Time Logs */}
+          {recentLogs.length > 0 ? (
+            <div className="space-y-2">
+              <h3 className="text-sm text-white/50 mb-2">Letzte Einträge</h3>
+              {recentLogs.map((log) => (
+                <div key={log.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{log.project?.icon || '🎯'}</span>
+                    <div>
+                      <div className="text-sm">{log.project?.name || 'Unbekanntes Projekt'}</div>
+                      {log.notes && (
+                        <div className="text-xs text-white/40 line-clamp-1">{log.notes}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium text-cyan-400">
+                      {formatDuration(log.duration_minutes)}
+                    </div>
+                    <div className="text-xs text-white/40">
+                      {formatTimeAgo(log.logged_at)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-4 text-white/40">
+              <p className="text-sm">Noch keine Zeit geloggt</p>
+              <p className="text-xs mt-1">Logge Zeit für deine aktiven Projekte</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Skills Section */}
@@ -257,6 +412,36 @@ export default function HobbysPage() {
           />
         </div>
       </main>
+
+      {/* Project Form Modal */}
+      {showProjectForm && (
+        <HobbyProjectForm
+          onSubmit={handleCreateProject}
+          onCancel={() => setShowProjectForm(false)}
+        />
+      )}
+
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <HobbyProjectForm
+          project={editingProject}
+          onSubmit={handleUpdateProject}
+          onCancel={() => setEditingProject(null)}
+        />
+      )}
+
+      {/* Time Log Form Modal */}
+      {showTimeLogForm && (
+        <TimeLogForm
+          projects={activeProjects}
+          selectedProjectId={selectedProjectId}
+          onSubmit={handleLogTime}
+          onCancel={() => {
+            setShowTimeLogForm(false);
+            setSelectedProjectId(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }
