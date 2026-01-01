@@ -24,7 +24,7 @@ const COURSE_STATUS_CONFIG: Record<CourseStatus, { label: string; color: string 
   abandoned: { label: 'Abgebrochen', color: 'text-red-400' },
 };
 
-export default function LernenPage() {
+export default function WeisheitPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -36,8 +36,8 @@ export default function LernenPage() {
         const supabase = createBrowserClient();
 
         const [factionData, factionStats] = await Promise.all([
-          getFaction('lernen'),
-          getUserFactionStat('lernen'),
+          getFaction('weisheit'),
+          getUserFactionStat('weisheit'),
         ]);
 
         if (factionData) {
@@ -73,7 +73,7 @@ export default function LernenPage() {
 
         setCourses(coursesData || []);
       } catch (err) {
-        console.error('Error loading lernen data:', err);
+        console.error('Error loading weisheit data:', err);
       } finally {
         setLoading(false);
       }
@@ -89,7 +89,7 @@ export default function LernenPage() {
           <div className="w-16 h-16 rounded-full bg-indigo-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-indigo-400" />
           </div>
-          <p className="text-white/50">Lade Lern-Daten...</p>
+          <p className="text-white/50">Lade Weisheit-Daten...</p>
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ export default function LernenPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-400">
-          Lernen-Bereich nicht gefunden
+          Weisheit-Bereich nicht gefunden
         </div>
       </div>
     );
@@ -333,7 +333,7 @@ export default function LernenPage() {
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
           <FactionSkillsSection
-            factionId="lernen"
+            factionId="weisheit"
             factionColor={faction.color}
           />
         </div>
