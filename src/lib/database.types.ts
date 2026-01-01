@@ -1214,3 +1214,46 @@ export interface ActivityLog {
   occurred_at: string;
   created_at: string;
 }
+
+// =============================================
+// GEIST: Mood & Journal (Mental/Mind)
+// =============================================
+
+export type MoodValue = 'great' | 'good' | 'okay' | 'bad' | 'terrible';
+
+export interface MoodLog {
+  id: string;
+  user_id: string;
+  mood: MoodValue;
+  note: string | null;
+  xp_gained: number;
+  created_at: string;
+}
+
+export interface JournalEntry {
+  id: string;
+  user_id: string;
+  content: string;
+  prompt: string | null;
+  word_count: number;
+  xp_gained: number;
+  created_at: string;
+}
+
+export interface MoodStats {
+  total_logs: number;
+  great_count: number;
+  good_count: number;
+  okay_count: number;
+  bad_count: number;
+  terrible_count: number;
+  avg_mood_score: number;
+  streak_days: number;
+}
+
+export interface GeistStats {
+  moodStats: MoodStats | null;
+  journalCount: number;
+  totalWords: number;
+  todaysMood: MoodLog | null;
+}
