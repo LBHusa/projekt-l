@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { FactionId } from '@/lib/database.types';
+import { FACTIONS, FACTION_ORDER, FACTION_COLORS } from '@/lib/ui/constants';
 
 // Die 7 neuen Faction-IDs
 const ALL_FACTION_IDS: FactionId[] = [
@@ -237,5 +238,91 @@ describe('Faction ID Type Safety', () => {
   it('rejects null and undefined', () => {
     expect(isValidFactionId(null as unknown as string)).toBe(false);
     expect(isValidFactionId(undefined as unknown as string)).toBe(false);
+  });
+});
+
+// ============================================
+// EXPORTED CONSTANTS VALIDATION (constants.ts)
+// ============================================
+
+describe('Exported Constants Validation (constants.ts)', () => {
+
+  describe('FACTIONS Array', () => {
+    it('has exactly 7 factions', () => {
+      expect(FACTIONS).toHaveLength(7);
+    });
+
+    it('includes all required faction IDs', () => {
+      const factionIds = FACTIONS.map(f => f.id);
+      ALL_FACTION_IDS.forEach(id => {
+        expect(factionIds).toContain(id);
+      });
+    });
+
+    it('has unique IDs', () => {
+      const ids = FACTIONS.map(f => f.id);
+      const uniqueIds = new Set(ids);
+      expect(uniqueIds.size).toBe(ids.length);
+    });
+
+    it('has name and icon for each faction', () => {
+      FACTIONS.forEach(faction => {
+        expect(faction.name).toBeDefined();
+        expect(faction.name.length).toBeGreaterThan(0);
+        expect(faction.icon).toBeDefined();
+        expect(faction.icon.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe('FACTION_ORDER Array', () => {
+    it('has exactly 7 entries', () => {
+      expect(FACTION_ORDER).toHaveLength(7);
+    });
+
+    it('includes all faction IDs', () => {
+      ALL_FACTION_IDS.forEach(id => {
+        expect(FACTION_ORDER).toContain(id);
+      });
+    });
+
+    it('has unique entries (no duplicates)', () => {
+      const uniqueOrder = new Set(FACTION_ORDER);
+      expect(uniqueOrder.size).toBe(FACTION_ORDER.length);
+    });
+  });
+
+  describe('FACTION_COLORS Record', () => {
+    it('has color for all 7 factions', () => {
+      ALL_FACTION_IDS.forEach(id => {
+        expect(FACTION_COLORS[id]).toBeDefined();
+      });
+    });
+
+    it('all colors are valid hex format', () => {
+      ALL_FACTION_IDS.forEach(id => {
+        expect(FACTION_COLORS[id]).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      });
+    });
+
+    it('all colors are unique', () => {
+      const colors = Object.values(FACTION_COLORS);
+      const uniqueColors = new Set(colors);
+      expect(uniqueColors.size).toBe(colors.length);
+    });
+  });
+
+  describe('Cross-Constant Consistency', () => {
+    it('FACTIONS IDs match FACTION_ORDER', () => {
+      const factionIds = FACTIONS.map(f => f.id).sort();
+      const orderIds = [...FACTION_ORDER].sort();
+      expect(factionIds).toEqual(orderIds);
+    });
+
+    it('FACTIONS IDs match FACTION_COLORS keys', () => {
+      const factionIds = FACTIONS.map(f => f.id).sort();
+      const colorKeys = Object.keys(FACTION_COLORS).sort();
+      expect(factionIds).toEqual(colorKeys);
+    });
   });
 });
