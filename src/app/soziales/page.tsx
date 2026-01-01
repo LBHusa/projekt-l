@@ -3,28 +3,28 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, UserPlus, Calendar, ChevronRight, PartyPopper, MessageCircle } from 'lucide-react';
+import { Users, Heart, Calendar, Gift, ChevronRight, UserPlus } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
-import { getContactsByCategory, getContactsNeedingAttention, getContactsStats } from '@/lib/data/contacts';
+import { getContactsByCategory, getUpcomingBirthdays, getContactsStats } from '@/lib/data/contacts';
 import type { FactionWithStats } from '@/lib/database.types';
 import type { ContactWithStats } from '@/lib/types/contacts';
 
-export default function FreundePage() {
+export default function SozialesPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [contacts, setContacts] = useState<ContactWithStats[]>([]);
-  const [needingAttention, setNeedingAttention] = useState<ContactWithStats[]>([]);
-  const [friendCount, setFriendCount] = useState(0);
+  const [upcomingBirthdays, setUpcomingBirthdays] = useState<ContactWithStats[]>([]);
+  const [familyCount, setFamilyCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [factionData, factionStats, friendContacts, attentionContacts, stats] = await Promise.all([
-          getFaction('freunde'),
-          getUserFactionStat('freunde'),
-          getContactsByCategory('friend'),
-          getContactsNeedingAttention(10),
+        const [factionData, factionStats, familyContacts, birthdays, stats] = await Promise.all([
+          getFaction('soziales'),
+          getUserFactionStat('soziales'),
+          getContactsByCategory('family'),
+          getUpcomingBirthdays(30),
           getContactsStats(),
         ]);
 
@@ -35,14 +35,13 @@ export default function FreundePage() {
           });
         }
 
-        setContacts(friendContacts);
-        // Filter nur Freunde die Aufmerksamkeit brauchen
-        setNeedingAttention(attentionContacts.filter(c =>
-          friendContacts.some(fc => fc.id === c.id)
+        setContacts(familyContacts);
+        setUpcomingBirthdays(birthdays.filter(b =>
+          familyContacts.some(fc => fc.id === b.id)
         ));
-        setFriendCount(stats.byCategory.friend);
+        setFamilyCount(stats.byCategory.family);
       } catch (err) {
-        console.error('Error loading freunde data:', err);
+        console.error('Error loading soziales data:', err);
       } finally {
         setLoading(false);
       }
@@ -55,10 +54,10 @@ export default function FreundePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-cyan-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
-            <Users className="w-8 h-8 text-cyan-400" />
+          <div className="w-16 h-16 rounded-full bg-pink-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
+            <Users className="w-8 h-8 text-pink-400" />
           </div>
-          <p className="text-white/50">Lade Freunde-Daten...</p>
+          <p className="text-white/50">Lade Soziales-Daten...</p>
         </div>
       </div>
     );
@@ -68,7 +67,7 @@ export default function FreundePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center text-red-400">
-          Freunde-Bereich nicht gefunden
+          Soziales-Bereich nicht gefunden
         </div>
       </div>
     );
@@ -76,19 +75,19 @@ export default function FreundePage() {
 
   const additionalStats = [
     {
-      label: 'Freunde',
-      value: friendCount,
+      label: 'Familienmitglieder',
+      value: familyCount,
       icon: <Users className="w-4 h-4" />,
-      color: 'text-cyan-400',
+      color: 'text-pink-400',
     },
   ];
 
-  if (needingAttention.length > 0) {
+  if (upcomingBirthdays.length > 0) {
     additionalStats.push({
-      label: 'Brauchen Aufmerksamkeit',
-      value: needingAttention.length,
-      icon: <MessageCircle className="w-4 h-4" />,
-      color: 'text-orange-400',
+      label: 'Bald Geburtstag',
+      value: upcomingBirthdays.length,
+      icon: <Gift className="w-4 h-4" />,
+      color: 'text-yellow-400',
     });
   }
 
@@ -114,17 +113,17 @@ export default function FreundePage() {
           className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4"
         >
           <Link
-            href="/contacts?category=friend"
-            className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-4 hover:border-cyan-500/50 transition-all group"
+            href="/contacts?category=family"
+            className="bg-gradient-to-r from-pink-500/20 to-rose-500/20 border border-pink-500/30 rounded-xl p-4 hover:border-pink-500/50 transition-all group"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/30 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-cyan-400" />
+                <div className="w-10 h-10 rounded-lg bg-pink-500/30 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-pink-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Alle Freunde</h3>
-                  <p className="text-sm text-white/50">{friendCount} Kontakte</p>
+                  <h3 className="font-semibold">Alle Familienmitglieder</h3>
+                  <p className="text-sm text-white/50">{familyCount} Kontakte</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
@@ -132,8 +131,8 @@ export default function FreundePage() {
           </Link>
 
           <Link
-            href="/contacts?new=true&type=friend"
-            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-cyan-500/50 transition-all group"
+            href="/contacts?new=true&type=family"
+            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-pink-500/50 transition-all group"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -141,7 +140,7 @@ export default function FreundePage() {
                   <UserPlus className="w-5 h-5 text-white/70" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Freund hinzufugen</h3>
+                  <h3 className="font-semibold">Familienmitglied hinzufugen</h3>
                   <p className="text-sm text-white/50">Neuen Kontakt erstellen</p>
                 </div>
               </div>
@@ -150,38 +149,42 @@ export default function FreundePage() {
           </Link>
         </motion.div>
 
-        {/* Needing Attention */}
-        {needingAttention.length > 0 && (
+        {/* Upcoming Birthdays */}
+        {upcomingBirthdays.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-8 bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl p-4"
+            className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
           >
             <div className="flex items-center gap-2 mb-4">
-              <MessageCircle className="w-5 h-5 text-orange-400" />
-              <h2 className="font-semibold">Lange nicht gehort</h2>
-              <span className="text-sm text-white/40">Zeit fur eine Nachricht?</span>
+              <Gift className="w-5 h-5 text-yellow-400" />
+              <h2 className="font-semibold">Bevorstehende Geburtstage</h2>
             </div>
             <div className="space-y-2">
-              {needingAttention.slice(0, 5).map((contact) => (
+              {upcomingBirthdays.slice(0, 5).map((contact) => (
                 <Link
                   key={contact.id}
                   href={`/contacts/${contact.id}`}
                   className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-cyan-500/30 flex items-center justify-center text-sm">
+                    <div className="w-8 h-8 rounded-full bg-pink-500/30 flex items-center justify-center text-sm">
                       {contact.first_name[0]}
                     </div>
                     <span>
                       {contact.first_name} {contact.last_name}
                     </span>
                   </div>
-                  <div className="text-sm text-orange-400">
-                    {contact.days_since_interaction
-                      ? `${contact.days_since_interaction} Tage`
-                      : 'Nie kontaktiert'}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-yellow-400">
+                      {contact.days_until_birthday === 0
+                        ? 'Heute!'
+                        : contact.days_until_birthday === 1
+                        ? 'Morgen'
+                        : `In ${contact.days_until_birthday} Tagen`}
+                    </span>
+                    <Calendar className="w-4 h-4 text-white/30" />
                   </div>
                 </Link>
               ))}
@@ -189,42 +192,21 @@ export default function FreundePage() {
           </motion.div>
         )}
 
-        {/* Social Events Placeholder */}
+        {/* Family Members Preview */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <PartyPopper className="w-5 h-5 text-purple-400" />
-            <h2 className="font-semibold">Soziale Events</h2>
-            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
-              Bald verfugbar
-            </span>
-          </div>
-          <div className="text-center py-8 text-white/40">
-            <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-            <p>Event-Tracking kommt in Phase 3</p>
-            <p className="text-sm mt-1">Treffen, Partys & Aktivitaten tracken</p>
-          </div>
-        </motion.div>
-
-        {/* Friends Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
-        >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-cyan-400" />
-              <h2 className="font-semibold">Deine Freunde</h2>
+              <Heart className="w-5 h-5 text-pink-400" />
+              <h2 className="font-semibold">Familienmitglieder</h2>
             </div>
             <Link
-              href="/contacts?category=friend"
-              className="text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              href="/contacts?category=family"
+              className="text-sm text-pink-400 hover:text-pink-300 flex items-center gap-1"
             >
               Alle anzeigen
               <ChevronRight className="w-4 h-4" />
@@ -239,7 +221,7 @@ export default function FreundePage() {
                   href={`/contacts/${contact.id}`}
                   className="bg-white/5 hover:bg-white/10 rounded-lg p-3 text-center transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500/30 to-blue-500/30 flex items-center justify-center mx-auto mb-2 text-lg">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500/30 to-rose-500/30 flex items-center justify-center mx-auto mb-2 text-lg">
                     {contact.first_name[0]}
                   </div>
                   <p className="text-sm font-medium truncate">
@@ -254,12 +236,12 @@ export default function FreundePage() {
           ) : (
             <div className="text-center py-8 text-white/40">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p>Noch keine Freunde hinzugefugt</p>
+              <p>Noch keine Familienmitglieder hinzugefugt</p>
               <Link
-                href="/contacts?new=true&type=friend"
-                className="inline-block mt-4 px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 rounded-lg text-cyan-400 text-sm transition-colors"
+                href="/contacts?new=true&type=family"
+                className="inline-block mt-4 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 rounded-lg text-pink-400 text-sm transition-colors"
               >
-                Ersten Freund hinzufugen
+                Erstes Familienmitglied hinzufugen
               </Link>
             </div>
           )}
@@ -268,7 +250,7 @@ export default function FreundePage() {
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
           <FactionSkillsSection
-            factionId="freunde"
+            factionId="soziales"
             factionColor={faction.color}
           />
         </div>
