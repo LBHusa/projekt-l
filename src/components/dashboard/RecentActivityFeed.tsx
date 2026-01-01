@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Activity, Zap, Trophy, Dumbbell, BookOpen, Briefcase, Users, Target } from 'lucide-react';
 import { getRecentActivity } from '@/lib/data/activity-log';
 import type { ActivityLog, FactionId } from '@/lib/database.types';
+import { FACTION_COLORS, FACTION_ORDER, ACTIVITY_COLORS } from '@/lib/ui/constants';
 
 const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
   xp_gained: <Zap className="w-4 h-4" />,
@@ -17,29 +18,6 @@ const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
   goal_achieved: <Target className="w-4 h-4" />,
   social_event: <Users className="w-4 h-4" />,
   habit_completed: <Target className="w-4 h-4" />,
-};
-
-const ACTIVITY_COLORS: Record<string, string> = {
-  xp_gained: 'text-yellow-400 bg-yellow-400/20',
-  level_up: 'text-purple-400 bg-purple-400/20',
-  workout_logged: 'text-green-400 bg-green-400/20',
-  book_finished: 'text-blue-400 bg-blue-400/20',
-  course_completed: 'text-cyan-400 bg-cyan-400/20',
-  job_started: 'text-amber-400 bg-amber-400/20',
-  salary_update: 'text-emerald-400 bg-emerald-400/20',
-  goal_achieved: 'text-pink-400 bg-pink-400/20',
-  social_event: 'text-indigo-400 bg-indigo-400/20',
-  habit_completed: 'text-orange-400 bg-orange-400/20',
-};
-
-const FACTION_COLORS: Record<FactionId, string> = {
-  karriere: '#F59E0B',
-  familie: '#EF4444',
-  hobbys: '#8B5CF6',
-  gesundheit: '#10B981',
-  lernen: '#3B82F6',
-  freunde: '#EC4899',
-  finanzen: '#14B8A6',
 };
 
 interface RecentActivityFeedProps {
@@ -133,7 +111,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
           >
             Alle
           </FilterButton>
-          {(['karriere', 'gesundheit', 'lernen', 'finanzen', 'hobbys', 'familie', 'freunde'] as FactionId[]).map((f) => (
+          {FACTION_ORDER.map((f) => (
             <FilterButton
               key={f}
               active={filter === f}

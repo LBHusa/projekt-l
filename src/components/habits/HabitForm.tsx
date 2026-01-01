@@ -3,39 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import type { Habit, HabitType, HabitFrequency, FactionId } from '@/lib/database.types';
-
-const HABIT_ICONS = ['✅', '💪', '📚', '🏃', '🧘', '💧', '🥗', '😴', '📝', '🎯', '💰', '🎨', '🎸', '🧹', '📱'];
-
-const HABIT_COLORS = [
-  '#10B981', // Green
-  '#3B82F6', // Blue
-  '#8B5CF6', // Purple
-  '#F59E0B', // Amber
-  '#EF4444', // Red
-  '#EC4899', // Pink
-  '#14B8A6', // Teal
-  '#F97316', // Orange
-];
-
-const FACTIONS: { id: FactionId; name: string; icon: string }[] = [
-  { id: 'karriere', name: 'Karriere', icon: '💼' },
-  { id: 'familie', name: 'Familie', icon: '❤️' },
-  { id: 'hobbys', name: 'Hobbys', icon: '🎨' },
-  { id: 'gesundheit', name: 'Gesundheit', icon: '💪' },
-  { id: 'lernen', name: 'Lernen', icon: '📚' },
-  { id: 'freunde', name: 'Freunde', icon: '👥' },
-  { id: 'finanzen', name: 'Finanzen', icon: '💰' },
-];
-
-const DAYS = [
-  { key: 'mon', label: 'Mo' },
-  { key: 'tue', label: 'Di' },
-  { key: 'wed', label: 'Mi' },
-  { key: 'thu', label: 'Do' },
-  { key: 'fri', label: 'Fr' },
-  { key: 'sat', label: 'Sa' },
-  { key: 'sun', label: 'So' },
-];
+import { HABIT_ICONS, HABIT_COLORS, FACTIONS, DAYS } from '@/lib/ui/constants';
 
 interface HabitFormProps {
   habit?: Habit | null;

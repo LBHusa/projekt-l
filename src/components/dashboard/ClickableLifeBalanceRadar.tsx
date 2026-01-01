@@ -5,21 +5,11 @@ import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tool
 import { motion } from 'framer-motion';
 import type { FactionWithStats, FactionId } from '@/lib/database.types';
 import { factionLevelProgress } from '@/lib/data/factions';
+import { FACTION_ORDER } from '@/lib/ui/constants';
 
 interface ClickableLifeBalanceRadarProps {
   factions: FactionWithStats[];
 }
-
-// Order for radar display (clockwise from top)
-const FACTION_ORDER: FactionId[] = [
-  'karriere',
-  'hobbys',
-  'gesundheit',
-  'finanzen',
-  'freunde',
-  'lernen',
-  'familie',
-];
 
 export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBalanceRadarProps) {
   const router = useRouter();

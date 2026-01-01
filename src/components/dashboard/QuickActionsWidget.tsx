@@ -1,17 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   Zap,
   UserPlus,
-  Timer,
   Dumbbell,
   BookOpen,
   PiggyBank,
   Target,
-  Plus,
 } from 'lucide-react';
 
 interface QuickAction {
@@ -26,13 +23,11 @@ interface QuickAction {
 interface QuickActionsWidgetProps {
   onLogXp?: () => void;
   onAddContact?: () => void;
-  onStartTimer?: () => void;
 }
 
 export default function QuickActionsWidget({
   onLogXp,
   onAddContact,
-  onStartTimer,
 }: QuickActionsWidgetProps) {
   const router = useRouter();
 
@@ -50,13 +45,6 @@ export default function QuickActionsWidget({
       icon: <UserPlus className="w-5 h-5" />,
       color: '#EC4899',
       onClick: onAddContact || (() => router.push('/contacts?action=new')),
-    },
-    {
-      id: 'timer',
-      label: 'Timer',
-      icon: <Timer className="w-5 h-5" />,
-      color: '#8B5CF6',
-      onClick: onStartTimer,
     },
     {
       id: 'workout',

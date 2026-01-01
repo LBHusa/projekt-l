@@ -425,11 +425,12 @@ export async function getHabitFactions(habitId: string): Promise<HabitFactionDis
     return [];
   }
 
-  return (data || []).map((hf: { faction_id: string; weight: number; factions: { name_de: string; icon: string; color: string } }) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((hf: any) => ({
     faction_id: hf.faction_id as FactionId,
-    faction_name: hf.factions.name_de,
-    faction_icon: hf.factions.icon,
-    faction_color: hf.factions.color,
+    faction_name: hf.factions?.name_de ?? '',
+    faction_icon: hf.factions?.icon ?? '',
+    faction_color: hf.factions?.color ?? '',
     weight: hf.weight,
   }));
 }
