@@ -578,6 +578,35 @@ export interface HabitWithLogs extends Habit {
 }
 
 // =============================================
+// Habit Multi-Faction Support
+// =============================================
+
+export interface HabitFaction {
+  id: string;
+  habit_id: string;
+  faction_id: FactionId;
+  weight: number; // 1-100, percentage of XP going to this faction
+  created_at: string;
+}
+
+export interface HabitFactionDisplay {
+  faction_id: FactionId;
+  faction_name: string;
+  faction_icon: string;
+  faction_color: string;
+  weight: number;
+}
+
+export interface HabitWithFactions extends Habit {
+  factions: HabitFactionDisplay[];
+}
+
+export interface HabitWithFactionsAndLogs extends HabitWithFactions {
+  logs: HabitLog[];
+  completedToday: boolean;
+}
+
+// =============================================
 // Karriere (Career)
 // =============================================
 

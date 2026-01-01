@@ -1,5 +1,15 @@
 import { createBrowserClient } from '@/lib/supabase';
-import type { Habit, HabitLog, HabitWithLogs, HabitType, HabitFrequency, FactionId } from '@/lib/database.types';
+import type {
+  Habit,
+  HabitLog,
+  HabitWithLogs,
+  HabitType,
+  HabitFrequency,
+  FactionId,
+  HabitFaction,
+  HabitFactionDisplay,
+  HabitWithFactions,
+} from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
 
@@ -384,4 +394,179 @@ export async function getHabitCompletionRate(
 
   const completed = data.filter(log => log.completed).length;
   return Math.round((completed / daysBack) * 100);
+}
+
+// ============================================
+// MULTI-FACTION SUPPORT
+// ============================================
+
+/**
+ * Get all faction assignments for a habit
+ */
+export async function getHabitFactions(habitId: string): Promise<HabitFactionDisplay[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_factions')
+    .select(`
+      faction_id,
+      weight,
+      factions (
+        name_de,
+        icon,
+        color
+      )
+    `)
+    .eq('habit_id', habitId)
+    .order('weight', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching habit factions:', error);
+    return [];
+  }
+
+  return (data || []).map((hf: { faction_id: string; weight: number; factions: { name_de: string; icon: string; color: string } }) => ({
+    faction_id: hf.faction_id as FactionId,
+    faction_name: hf.factions.name_de,
+    faction_icon: hf.factions.icon,
+    faction_color: hf.factions.color,
+    weight: hf.weight,
+  }));
+}
+
+/**
+ * Get habit with all its faction assignments
+ */
+export async function getHabitWithFactions(habitId: string): Promise<HabitWithFactions | null> {
+  const habit = await getHabit(habitId);
+  if (!habit) return null;
+
+  const factions = await getHabitFactions(habitId);
+
+  return {
+    ...habit,
+    factions,
+  };
+}
+
+/**
+ * Set faction assignments for a habit (replaces existing)
+ */
+export interface SetHabitFactionsInput {
+  faction_id: FactionId;
+  weight: number;
+}
+
+export async function setHabitFactions(
+  habitId: string,
+  factions: SetHabitFactionsInput[]
+): Promise<void> {
+  const supabase = createBrowserClient();
+
+  // Validate weights sum to 100
+  const totalWeight = factions.reduce((sum, f) => sum + f.weight, 0);
+  if (factions.length > 0 && totalWeight !== 100) {
+    throw new Error(`Faction weights must sum to 100, got ${totalWeight}`);
+  }
+
+  // Delete existing assignments
+  const { error: deleteError } = await supabase
+    .from('habit_factions')
+    .delete()
+    .eq('habit_id', habitId);
+
+  if (deleteError) {
+    console.error('Error deleting habit factions:', deleteError);
+    throw deleteError;
+  }
+
+  // Insert new assignments
+  if (factions.length > 0) {
+    const inserts = factions.map(f => ({
+      habit_id: habitId,
+      faction_id: f.faction_id,
+      weight: f.weight,
+    }));
+
+    const { error: insertError } = await supabase
+      .from('habit_factions')
+      .insert(inserts);
+
+    if (insertError) {
+      console.error('Error inserting habit factions:', insertError);
+      throw insertError;
+    }
+  }
+}
+
+/**
+ * Add a single faction to a habit
+ */
+export async function addHabitFaction(
+  habitId: string,
+  factionId: FactionId,
+  weight: number = 100
+): Promise<HabitFaction> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_factions')
+    .insert({
+      habit_id: habitId,
+      faction_id: factionId,
+      weight,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding habit faction:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * Remove a faction from a habit
+ */
+export async function removeHabitFaction(
+  habitId: string,
+  factionId: FactionId
+): Promise<void> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('habit_factions')
+    .delete()
+    .eq('habit_id', habitId)
+    .eq('faction_id', factionId);
+
+  if (error) {
+    console.error('Error removing habit faction:', error);
+    throw error;
+  }
+}
+
+/**
+ * Distribute XP to all factions based on weights
+ * Called when habit is completed
+ */
+export async function distributeHabitXpToFactions(
+  habitId: string,
+  totalXp: number,
+  userId: string = TEST_USER_ID
+): Promise<void> {
+  const factions = await getHabitFactions(habitId);
+
+  for (const faction of factions) {
+    const factionXp = Math.round((totalXp * faction.weight) / 100);
+    if (factionXp > 0) {
+      try {
+        await updateFactionStats(faction.faction_id, factionXp, userId);
+      } catch (err) {
+        console.error(`Error updating faction ${faction.faction_id}:`, err);
+      }
+    }
+  }
 }
