@@ -20,7 +20,7 @@ export interface HabitFormData {
   frequency: HabitFrequency;
   target_days: string[];
   xp_per_completion: number;
-  faction_id?: FactionId;
+  factions?: { faction_id: FactionId; weight: number }[];
 }
 
 export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
@@ -34,12 +34,23 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
     frequency: habit?.frequency || 'daily',
     target_days: habit?.target_days || [],
     xp_per_completion: habit?.xp_per_completion || 10,
-    faction_id: habit?.faction_id || undefined,
+    factions: habit?.faction_id
+      ? [{ faction_id: habit.faction_id, weight: 100 }]
+      : undefined,
   });
+
+  const [selectedFactions, setSelectedFactions] = useState<Set<FactionId>>(
+    new Set(formData.factions?.map(f => f.faction_id) || [])
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
+
+    if (!isWeightValid()) {
+      alert('Gewichtung muss insgesamt 100% ergeben');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -47,6 +58,83 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const toggleFaction = (factionId: FactionId) => {
+    const newSelected = new Set(selectedFactions);
+
+    if (newSelected.has(factionId)) {
+      newSelected.delete(factionId);
+    } else {
+      newSelected.add(factionId);
+    }
+
+    setSelectedFactions(newSelected);
+
+    if (newSelected.size === 0) {
+      setFormData(prev => ({ ...prev, factions: undefined }));
+    } else {
+      const evenWeight = Math.floor(100 / newSelected.size);
+      const remainder = 100 - (evenWeight * newSelected.size);
+
+      const newFactions = Array.from(newSelected).map((fid, idx) => ({
+        faction_id: fid,
+        weight: evenWeight + (idx === 0 ? remainder : 0),
+      }));
+
+      setFormData(prev => ({ ...prev, factions: newFactions }));
+    }
+  };
+
+  const updateFactionWeight = (factionId: FactionId, newWeight: number) => {
+    if (!formData.factions) return;
+
+    newWeight = Math.max(0, Math.min(100, newWeight));
+
+    const otherFactions = formData.factions.filter(f => f.faction_id !== factionId);
+
+    if (otherFactions.length === 0) {
+      setFormData(prev => ({
+        ...prev,
+        factions: [{ faction_id: factionId, weight: 100 }],
+      }));
+      return;
+    }
+
+    const remainingWeight = 100 - newWeight;
+    const currentOtherTotal = otherFactions.reduce((sum, f) => sum + f.weight, 0);
+
+    const updatedOthers = otherFactions.map(f => {
+      if (currentOtherTotal === 0) {
+        return { ...f, weight: Math.floor(remainingWeight / otherFactions.length) };
+      }
+      return {
+        ...f,
+        weight: Math.round((f.weight / currentOtherTotal) * remainingWeight)
+      };
+    });
+
+    const totalOthers = updatedOthers.reduce((sum, f) => sum + f.weight, 0);
+    if (totalOthers !== remainingWeight && updatedOthers.length > 0) {
+      updatedOthers[updatedOthers.length - 1].weight += (remainingWeight - totalOthers);
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      factions: [
+        { faction_id: factionId, weight: newWeight },
+        ...updatedOthers,
+      ],
+    }));
+  };
+
+  const getTotalWeight = (): number => {
+    return formData.factions?.reduce((sum, f) => sum + f.weight, 0) || 0;
+  };
+
+  const isWeightValid = (): boolean => {
+    if (!formData.factions || formData.factions.length === 0) return true;
+    return getTotalWeight() === 100;
   };
 
   const toggleDay = (day: string) => {
@@ -206,36 +294,81 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
             </div>
           )}
 
-          {/* Faction */}
+          {/* Multi-Faction Selection */}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Lebensbereich</label>
-            <div className="grid grid-cols-4 gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, faction_id: undefined }))}
-                className={`py-2 px-2 rounded-lg text-xs transition-all ${
-                  !formData.faction_id
-                    ? 'bg-white/20 ring-1 ring-white/50'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
-                }`}
-              >
-                Keiner
-              </button>
-              {FACTIONS.map(faction => (
-                <button
-                  key={faction.id}
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, faction_id: faction.id }))}
-                  className={`py-2 px-2 rounded-lg text-xs transition-all ${
-                    formData.faction_id === faction.id
-                      ? 'bg-white/20 ring-1 ring-white/50'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
-                  }`}
-                >
-                  {faction.icon} {faction.name}
-                </button>
-              ))}
+            <label className="block text-sm font-medium mb-1.5">
+              Lebensbereiche {selectedFactions.size > 0 && `(${selectedFactions.size} ausgewählt)`}
+            </label>
+
+            {/* Faction Checkboxes */}
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {FACTIONS.map(faction => {
+                const isSelected = selectedFactions.has(faction.id);
+                return (
+                  <button
+                    key={faction.id}
+                    type="button"
+                    onClick={() => toggleFaction(faction.id)}
+                    className={`py-2 px-2 rounded-lg text-xs transition-all ${
+                      isSelected
+                        ? 'bg-white/20 ring-1 ring-white/50'
+                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    }`}
+                  >
+                    {faction.icon} {faction.name}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Weight Sliders (nur wenn Factions selected) */}
+            {selectedFactions.size > 0 && (
+              <div className="space-y-3 p-3 bg-white/5 rounded-lg border border-white/10">
+                <div className="flex items-center justify-between text-xs text-white/60 mb-2">
+                  <span>Gewichtung pro Bereich</span>
+                  <span className={getTotalWeight() === 100 ? 'text-green-400' : 'text-red-400'}>
+                    Gesamt: {getTotalWeight()}%
+                  </span>
+                </div>
+
+                {formData.factions?.map(faction => {
+                  const factionMeta = FACTIONS.find(f => f.id === faction.faction_id);
+                  return (
+                    <div key={faction.faction_id}>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-sm flex items-center gap-1.5">
+                          <span>{factionMeta?.icon}</span>
+                          <span>{factionMeta?.name}</span>
+                        </label>
+                        <span className="text-sm font-medium">{faction.weight}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={faction.weight}
+                        onChange={e => updateFactionWeight(faction.faction_id, parseInt(e.target.value))}
+                        className="w-full accent-purple-500"
+                      />
+                    </div>
+                  );
+                })}
+
+                {!isWeightValid() && (
+                  <div className="text-xs text-red-400 flex items-center gap-1 mt-2">
+                    <span>⚠️</span>
+                    <span>Gewichtung muss insgesamt 100% ergeben</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p className="text-xs text-white/40 mt-2">
+              {selectedFactions.size === 0
+                ? 'Optional: Ordne den Habit einem oder mehreren Lebensbereichen zu'
+                : 'XP wird nach Gewichtung auf die Bereiche verteilt'}
+            </p>
           </div>
 
           {/* XP per completion (only for positive habits) */}
@@ -271,7 +404,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !formData.name.trim()}
+              disabled={isSubmitting || !formData.name.trim() || !isWeightValid()}
               className="flex-1 py-2.5 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {isSubmitting ? 'Speichern...' : habit ? 'Speichern' : 'Erstellen'}
