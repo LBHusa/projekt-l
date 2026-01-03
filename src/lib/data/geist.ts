@@ -120,10 +120,9 @@ export async function getTodaysMood(
     .gte('created_at', today.toISOString())
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') return null; // No rows
     console.error('Error fetching today\'s mood:', error);
     return null;
   }

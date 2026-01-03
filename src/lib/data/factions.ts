@@ -95,12 +95,9 @@ export async function getUserFactionStat(
     .select('*')
     .eq('user_id', userId)
     .eq('faction_id', factionId)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      return null;
-    }
     console.error('Error fetching user faction stat:', error);
     throw error;
   }
