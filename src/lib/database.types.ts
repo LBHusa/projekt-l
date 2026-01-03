@@ -1292,7 +1292,7 @@ export interface WorkoutSession {
   created_at: string;
 }
 
-export interface WorkoutExercise {
+export interface WorkoutExerciseRecord {
   id: string;
   workout_id: string;
   exercise_id: string;
@@ -1316,7 +1316,7 @@ export interface ExerciseSet {
 }
 
 // Extended types for UI
-export interface WorkoutExerciseWithDetails extends WorkoutExercise {
+export interface WorkoutExerciseWithDetails extends WorkoutExerciseRecord {
   exercise: Exercise;
   sets: ExerciseSet[];
 }

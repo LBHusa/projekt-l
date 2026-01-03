@@ -10,7 +10,7 @@ import type {
   Equipment,
   WorkoutSession,
   WorkoutSessionType,
-  WorkoutExercise,
+  WorkoutExerciseRecord,
   ExerciseSet,
   SetType,
   WorkoutWithDetails,
@@ -351,7 +351,7 @@ export async function addExerciseToWorkout(
   workoutId: string,
   exerciseId: string,
   order?: number
-): Promise<WorkoutExercise> {
+): Promise<WorkoutExerciseRecord> {
   const supabase = createBrowserClient();
 
   // If no order specified, get the next order
@@ -541,7 +541,7 @@ export async function getWorkoutStats(
   // Get all completed workouts
   const { data: workouts, error } = await supabase
     .from('workout_sessions')
-    .select('duration_minutes, xp_earned, started_at')
+    .select('id, duration_minutes, xp_earned, started_at')
     .eq('user_id', userId)
     .not('ended_at', 'is', null);
 
@@ -567,13 +567,14 @@ export async function getWorkoutStats(
   const { data: muscleGroups } = await supabase
     .from('workout_exercises')
     .select('exercise:exercises(muscle_group)')
-    .eq('workout_id', userId);
+    .in('workout_id', allWorkouts.map(w => w.id));
 
   let favoriteMuscleGroup: MuscleGroup | null = null;
   if (muscleGroups && muscleGroups.length > 0) {
     const counts: Record<string, number> = {};
-    muscleGroups.forEach((we: { exercise: { muscle_group: string } | null }) => {
-      const mg = we.exercise?.muscle_group;
+    muscleGroups.forEach((we) => {
+      const exercise = we.exercise as any;
+      const mg = Array.isArray(exercise) ? exercise[0]?.muscle_group : exercise?.muscle_group;
       if (mg) {
         counts[mg] = (counts[mg] || 0) + 1;
       }
