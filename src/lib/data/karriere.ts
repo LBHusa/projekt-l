@@ -226,13 +226,21 @@ export interface CreateSalaryInput {
 }
 
 export async function createSalaryEntry(
-  input: CreateSalaryInput
+  input: CreateSalaryInput,
+  userId: string = TEST_USER_ID
 ): Promise<SalaryEntry> {
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('salary_entries')
-    .insert(input)
+    .insert({
+      ...input,
+      user_id: userId,
+      currency: input.currency || 'EUR',
+      period: input.period || 'monthly',
+      bonus: 0,
+      equity_value: 0,
+    })
     .select()
     .single();
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Target, TrendingUp, Clock } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { JobTimeline, SalaryChart } from '@/components/karriere';
+import { JobTimeline, SalaryChart, JobForm, SalaryForm, type JobFormData, type SalaryFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import { getJobHistory, getSalaryHistory, getKarriereStats, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
 import type { FactionWithStats, JobHistory, SalaryEntry } from '@/lib/database.types';
@@ -15,6 +15,11 @@ export default function KarrierePage() {
   const [salaries, setSalaries] = useState<(SalaryEntry & { job?: JobHistory })[]>([]);
   const [stats, setStats] = useState<KarriereStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Form state
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [editingJob, setEditingJob] = useState<JobHistory | null>(null);
+  const [showSalaryForm, setShowSalaryForm] = useState(false);
 
   const loadData = async () => {
     try {
@@ -47,9 +52,48 @@ export default function KarrierePage() {
     loadData();
   }, []);
 
+  // Job handlers
+  const handleAddJob = () => {
+    setEditingJob(null);
+    setShowJobForm(true);
+  };
+
+  const handleEditJob = (job: JobHistory) => {
+    setEditingJob(job);
+    setShowJobForm(true);
+  };
+
+  const handleJobSubmit = async (data: JobFormData) => {
+    const { createJob, updateJob } = await import('@/lib/data/karriere');
+    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+
+    if (editingJob) {
+      await updateJob(editingJob.id, data);
+    } else {
+      await createJob(data, userId);
+    }
+
+    setShowJobForm(false);
+    setEditingJob(null);
+    await loadData();
+  };
+
   const handleDeleteJob = async (jobId: string) => {
     const { deleteJob } = await import('@/lib/data/karriere');
     await deleteJob(jobId);
+    await loadData();
+  };
+
+  // Salary handlers
+  const handleAddSalary = () => {
+    setShowSalaryForm(true);
+  };
+
+  const handleSalarySubmit = async (data: SalaryFormData) => {
+    const { createSalaryEntry } = await import('@/lib/data/karriere');
+    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+    await createSalaryEntry(data, userId);
+    setShowSalaryForm(false);
     await loadData();
   };
 
@@ -151,6 +195,8 @@ export default function KarrierePage() {
           {/* Job Timeline */}
           <JobTimeline
             jobs={jobs}
+            onAddJob={handleAddJob}
+            onEditJob={handleEditJob}
             onDeleteJob={handleDeleteJob}
           />
 
@@ -158,6 +204,7 @@ export default function KarrierePage() {
           <SalaryChart
             salaries={salaries}
             currentSalary={stats?.currentSalary}
+            onAddSalary={handleAddSalary}
           />
         </div>
 
@@ -169,6 +216,25 @@ export default function KarrierePage() {
           />
         </div>
       </main>
+
+      {/* Forms */}
+      <JobForm
+        job={editingJob}
+        isOpen={showJobForm}
+        onClose={() => {
+          setShowJobForm(false);
+          setEditingJob(null);
+        }}
+        onSubmit={handleJobSubmit}
+      />
+
+      <SalaryForm
+        jobs={jobs}
+        defaultJobId={stats?.currentJob?.id}
+        isOpen={showSalaryForm}
+        onClose={() => setShowSalaryForm(false)}
+        onSubmit={handleSalarySubmit}
+      />
     </div>
   );
 }
