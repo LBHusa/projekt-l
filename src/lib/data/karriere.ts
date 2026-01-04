@@ -39,7 +39,7 @@ export async function getJobWithSalaries(
     .from('job_history')
     .select('*')
     .eq('id', jobId)
-    .single();
+    .maybeSingle();
 
   if (jobError) {
     if (jobError.code === 'PGRST116') return null;
@@ -72,7 +72,7 @@ export async function getCurrentJob(
     .select('*')
     .eq('user_id', userId)
     .eq('is_current', true)
-    .single();
+    .maybeSingle();
 
   if (error) {
     if (error.code === 'PGRST116') return null;
@@ -206,7 +206,7 @@ export async function getCurrentSalary(
     .eq('job_id', currentJob.id)
     .order('effective_date', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error) {
     if (error.code === 'PGRST116') return null;

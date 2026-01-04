@@ -54,6 +54,8 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
 
     setIsSubmitting(true);
     try {
+      console.log('[HabitForm] Submitting with formData.factions:', formData.factions);
+      console.log('[HabitForm] Full formData:', formData);
       await onSubmit(formData);
     } finally {
       setIsSubmitting(false);

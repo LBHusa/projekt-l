@@ -159,10 +159,14 @@ export async function createHabit(
 ): Promise<Habit> {
   const supabase = createBrowserClient();
 
+  console.log('[createHabit] Received input.factions:', input.factions);
+  console.log('[createHabit] Full input:', input);
+
   // Determine primary faction_id for legacy column
   // If multi-faction provided, use the one with highest weight
   let primaryFactionId = input.faction_id || null;
   if (input.factions && input.factions.length > 0) {
+    console.log('[createHabit] Will set multi-faction with', input.factions.length, 'factions');
     const sorted = [...input.factions].sort((a, b) => b.weight - a.weight);
     primaryFactionId = sorted[0].faction_id;
   }
@@ -191,10 +195,14 @@ export async function createHabit(
 
   // Set multi-faction assignments after habit creation
   if (input.factions && input.factions.length > 0) {
+    console.log('[createHabit] Calling setHabitFactions with:', input.factions);
     await setHabitFactions(data.id, input.factions);
   } else if (input.faction_id) {
+    console.log('[createHabit] Using legacy single faction:', input.faction_id);
     // Legacy: single faction with 100% weight
     await setHabitFactions(data.id, [{ faction_id: input.faction_id, weight: 100 }]);
+  } else {
+    console.log('[createHabit] No factions provided');
   }
 
   return data;
@@ -502,9 +510,14 @@ export async function setHabitFactions(
 ): Promise<void> {
   const supabase = createBrowserClient();
 
+  console.log('[setHabitFactions] Called with habitId:', habitId);
+  console.log('[setHabitFactions] Factions received:', factions);
+
   // Validate weights sum to 100
   const totalWeight = factions.reduce((sum, f) => sum + f.weight, 0);
+  console.log('[setHabitFactions] Total weight:', totalWeight);
   if (factions.length > 0 && totalWeight !== 100) {
+    console.error('[setHabitFactions] Weight validation failed!', totalWeight);
     throw new Error(`Faction weights must sum to 100, got ${totalWeight}`);
   }
 
@@ -527,14 +540,16 @@ export async function setHabitFactions(
       weight: f.weight,
     }));
 
+    console.log('[setHabitFactions] Inserting:', inserts);
     const { error: insertError } = await supabase
       .from('habit_factions')
       .insert(inserts);
 
     if (insertError) {
-      console.error('Error inserting habit factions:', insertError);
+      console.error('[setHabitFactions] Insert error:', insertError);
       throw insertError;
     }
+    console.log('[setHabitFactions] Successfully inserted', inserts.length, 'faction assignments');
   }
 }
 

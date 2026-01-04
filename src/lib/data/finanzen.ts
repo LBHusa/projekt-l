@@ -37,7 +37,7 @@ export async function getNetWorth(): Promise<UserNetWorth | null> {
     .from('user_net_worth')
     .select('*')
     .eq('user_id', TEST_USER_ID)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching net worth:', error);
@@ -54,7 +54,7 @@ export async function getNetWorthExtended(): Promise<UserNetWorthExtended | null
     .from('user_net_worth_extended')
     .select('*')
     .eq('user_id', TEST_USER_ID)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching extended net worth:', error);
@@ -128,7 +128,7 @@ export async function getAccountById(id: string): Promise<Account | null> {
     .from('accounts')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching account:', error);
@@ -538,7 +538,7 @@ export async function updateSavingsGoalAmount(id: string, amount: number): Promi
     .from('savings_goals')
     .select('target_amount')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   const isAchieved = goal && amount >= goal.target_amount;
 
@@ -705,7 +705,7 @@ export async function updateStreak(
     .select('*')
     .eq('user_id', TEST_USER_ID)
     .eq('streak_type', streakType)
-    .single();
+    .maybeSingle();
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -955,7 +955,7 @@ export async function getRecurringFlowById(id: string): Promise<RecurringFlow | 
     .from('recurring_flows')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching recurring flow:', error);
@@ -1008,7 +1008,7 @@ export async function updateRecurringFlow(
       .from('recurring_flows')
       .select('start_date')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       const startDate = updates.start_date ? new Date(updates.start_date) : new Date(existing.start_date);
@@ -1183,7 +1183,7 @@ export async function importTransactions(
       .eq('account_id', accountId)
       .eq('occurred_at', tx.date)
       .eq('amount', Math.abs(tx.amount))
-      .single();
+      .maybeSingle();
 
     if (existing) {
       skipped++;
