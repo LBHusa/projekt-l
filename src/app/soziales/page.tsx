@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
   Users, Heart, UserPlus, Calendar, ChevronRight,
-  PartyPopper, MessageCircle, Gift
+  PartyPopper, MessageCircle, Gift, Plus
 } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
+import { EventForm, type EventFormData } from '@/components/soziales';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getContactsByCategory,
@@ -15,10 +16,21 @@ import {
   getContactsNeedingAttention,
   getContactsStats
 } from '@/lib/data/contacts';
-import type { FactionWithStats } from '@/lib/database.types';
+import { getEvents, createEvent, updateEvent, deleteEvent } from '@/lib/data/soziales';
+import type { FactionWithStats, SocialEvent, SocialEventType } from '@/lib/database.types';
 import type { ContactWithStats } from '@/lib/types/contacts';
 
 type TabType = 'alle' | 'familie' | 'freunde';
+
+const EVENT_TYPES: { value: SocialEventType; label: string; icon: string }[] = [
+  { value: 'party', label: 'Party', icon: '🎉' },
+  { value: 'dinner', label: 'Dinner', icon: '🍽️' },
+  { value: 'trip', label: 'Ausflug', icon: '🗺️' },
+  { value: 'activity', label: 'Aktivität', icon: '⚽' },
+  { value: 'meetup', label: 'Treffen', icon: '☕' },
+  { value: 'call', label: 'Telefonat', icon: '📞' },
+  { value: 'other', label: 'Sonstiges', icon: '📌' },
+];
 
 export default function SozialesPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
@@ -30,51 +42,90 @@ export default function SozialesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('alle');
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [
-          factionData,
-          factionStats,
-          familyData,
-          friendData,
-          birthdays,
-          attention,
-          contactStats
-        ] = await Promise.all([
-          getFaction('soziales'),
-          getUserFactionStat('soziales'),
-          getContactsByCategory('family'),
-          getContactsByCategory('friend'),
-          getUpcomingBirthdays(30),
-          getContactsNeedingAttention(10),
-          getContactsStats(),
-        ]);
+  // Event state
+  const [events, setEvents] = useState<SocialEvent[]>([]);
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<SocialEvent | null>(null);
 
-        if (factionData) {
-          setFaction({
-            ...factionData,
-            stats: factionStats,
-          });
-        }
+  const loadData = async () => {
+    try {
+      const [
+        factionData,
+        factionStats,
+        familyData,
+        friendData,
+        birthdays,
+        attention,
+        contactStats,
+        eventsData
+      ] = await Promise.all([
+        getFaction('soziales'),
+        getUserFactionStat('soziales'),
+        getContactsByCategory('family'),
+        getContactsByCategory('friend'),
+        getUpcomingBirthdays(30),
+        getContactsNeedingAttention(10),
+        getContactsStats(),
+        getEvents(),
+      ]);
 
-        setFamilyContacts(familyData);
-        setFriendContacts(friendData);
-        setUpcomingBirthdays(birthdays);
-        setNeedingAttention(attention);
-        setStats({
-          family: contactStats.byCategory.family,
-          friend: contactStats.byCategory.friend,
+      if (factionData) {
+        setFaction({
+          ...factionData,
+          stats: factionStats,
         });
-      } catch (err) {
-        console.error('Error loading soziales data:', err);
-      } finally {
-        setLoading(false);
       }
-    };
 
+      setFamilyContacts(familyData);
+      setFriendContacts(friendData);
+      setUpcomingBirthdays(birthdays);
+      setNeedingAttention(attention);
+      setStats({
+        family: contactStats.byCategory.family,
+        friend: contactStats.byCategory.friend,
+      });
+      setEvents(eventsData);
+    } catch (err) {
+      console.error('Error loading soziales data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
+
+  // Event handlers
+  const handleAddEvent = () => {
+    setEditingEvent(null);
+    setShowEventForm(true);
+  };
+
+  const handleEditEvent = (event: SocialEvent) => {
+    setEditingEvent(event);
+    setShowEventForm(true);
+  };
+
+  const handleEventSubmit = async (data: EventFormData) => {
+    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+
+    if (editingEvent) {
+      await updateEvent(editingEvent.id, data);
+    } else {
+      await createEvent(data, userId);
+    }
+
+    setShowEventForm(false);
+    setEditingEvent(null);
+    await loadData();
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm('Event wirklich löschen?')) return;
+    await deleteEvent(eventId);
+    await loadData();
+  };
 
   if (loading) {
     return (
@@ -429,25 +480,84 @@ export default function SozialesPage() {
           )}
         </motion.div>
 
-        {/* Social Events Placeholder */}
+        {/* Social Events */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
           className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <PartyPopper className="w-5 h-5 text-purple-400" />
-            <h2 className="font-semibold">Soziale Events</h2>
-            <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">
-              Phase 3
-            </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <PartyPopper className="w-5 h-5 text-purple-400" />
+              <h2 className="font-semibold">Soziale Events</h2>
+              <span className="text-xs text-white/40">
+                {events.length} gesamt
+              </span>
+            </div>
+            <button
+              onClick={handleAddEvent}
+              className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg text-purple-400 text-sm transition-colors flex items-center gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              Event hinzufügen
+            </button>
           </div>
-          <div className="text-center py-8 text-white/40">
-            <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
-            <p>Event-Tracking kommt in Phase 3</p>
-            <p className="text-sm mt-1">Treffen, Partys & Aktivitaten tracken</p>
-          </div>
+
+          {events.length > 0 ? (
+            <div className="space-y-2">
+              {events.slice(0, 5).map((event) => (
+                <div
+                  key={event.id}
+                  className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">
+                      {EVENT_TYPES.find(t => t.value === event.event_type)?.icon || '📌'}
+                    </div>
+                    <div>
+                      <div className="font-medium">{event.title}</div>
+                      <div className="text-sm text-white/50">
+                        {new Date(event.occurred_at).toLocaleDateString('de-DE', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                        {event.participant_count > 0 && ` • ${event.participant_count} Teilnehmer`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleEditEvent(event)}
+                      className="px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-xs"
+                    >
+                      Bearbeiten
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="px-2 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs text-red-400"
+                    >
+                      Löschen
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-white/40">
+              <PartyPopper className="w-10 h-10 mx-auto mb-2 opacity-50" />
+              <p>Noch keine Events eingetragen</p>
+              <button
+                onClick={handleAddEvent}
+                className="inline-block mt-4 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 rounded-lg text-purple-400 text-sm transition-colors"
+              >
+                Erstes Event hinzufügen
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Skills Section */}
@@ -458,6 +568,18 @@ export default function SozialesPage() {
           />
         </div>
       </main>
+
+      {/* Event Form Modal */}
+      <EventForm
+        event={editingEvent}
+        contacts={[...familyContacts, ...friendContacts]}
+        isOpen={showEventForm}
+        onClose={() => {
+          setShowEventForm(false);
+          setEditingEvent(null);
+        }}
+        onSubmit={handleEventSubmit}
+      />
     </div>
   );
 }
