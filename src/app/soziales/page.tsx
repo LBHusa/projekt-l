@@ -8,12 +8,11 @@ import {
   PartyPopper, MessageCircle, Gift, Plus
 } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { EventForm, type EventFormData, ContactForm } from '@/components/soziales';
+import { EventForm, type EventFormData, ContactForm, RelationshipScoreCard } from '@/components/soziales';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getContactsByCategory,
   getUpcomingBirthdays,
-  getContactsNeedingAttention,
   getContactsStats,
   createContact,
   updateContact,
@@ -40,7 +39,6 @@ export default function SozialesPage() {
   const [familyContacts, setFamilyContacts] = useState<ContactWithStats[]>([]);
   const [friendContacts, setFriendContacts] = useState<ContactWithStats[]>([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<ContactWithStats[]>([]);
-  const [needingAttention, setNeedingAttention] = useState<ContactWithStats[]>([]);
   const [stats, setStats] = useState({ family: 0, friend: 0 });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('alle');
@@ -63,7 +61,6 @@ export default function SozialesPage() {
         familyData,
         friendData,
         birthdays,
-        attention,
         contactStats,
         eventsData
       ] = await Promise.all([
@@ -72,7 +69,6 @@ export default function SozialesPage() {
         getContactsByCategory('family'),
         getContactsByCategory('friend'),
         getUpcomingBirthdays(30),
-        getContactsNeedingAttention(10),
         getContactsStats(),
         getEvents(),
       ]);
@@ -87,7 +83,6 @@ export default function SozialesPage() {
       setFamilyContacts(familyData);
       setFriendContacts(friendData);
       setUpcomingBirthdays(birthdays);
-      setNeedingAttention(attention);
       setStats({
         family: contactStats.byCategory.family,
         friend: contactStats.byCategory.friend,
@@ -328,50 +323,11 @@ export default function SozialesPage() {
           </button>
         </motion.div>
 
-        {/* Needing Attention */}
-        {needingAttention.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8 bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <MessageCircle className="w-5 h-5 text-orange-400" />
-              <h2 className="font-semibold">Lange nicht gehort</h2>
-              <span className="text-sm text-white/40">Zeit fur eine Nachricht?</span>
-            </div>
-            <div className="space-y-2">
-              {needingAttention.slice(0, 5).map((contact) => {
-                const isFamily = familyContacts.some(fc => fc.id === contact.id);
-                return (
-                  <Link
-                    key={contact.id}
-                    href={`/contacts/${contact.id}`}
-                    className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${isFamily ? 'bg-pink-500/30' : 'bg-cyan-500/30'} flex items-center justify-center text-sm`}>
-                        {contact.first_name[0]}
-                      </div>
-                      <div>
-                        <span>{contact.first_name} {contact.last_name}</span>
-                        <span className={`ml-2 text-xs ${isFamily ? 'text-pink-400' : 'text-cyan-400'}`}>
-                          {isFamily ? 'Familie' : 'Freund'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-sm text-orange-400">
-                      {contact.days_since_interaction
-                        ? `${contact.days_since_interaction} Tage`
-                        : 'Nie kontaktiert'}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
+        {/* Relationship Health Score Card */}
+        <RelationshipScoreCard
+          contacts={[...familyContacts, ...friendContacts]}
+          maxDisplay={5}
+        />
 
         {/* Upcoming Birthdays */}
         {upcomingBirthdays.length > 0 && (
