@@ -3,3 +3,5 @@ export type { HobbyProjectFormData } from './HobbyProjectForm';
 
 export { default as TimeLogForm } from './TimeLogForm';
 export type { TimeLogFormData } from './TimeLogForm';
+
+export { default as ProjectTimeCard } from './ProjectTimeCard';

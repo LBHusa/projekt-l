@@ -15,7 +15,7 @@ import {
   getRecentTimeLogs,
   getCategoryInfo,
 } from '@/lib/data/hobbys';
-import { HobbyProjectForm, TimeLogForm } from '@/components/hobbys';
+import { HobbyProjectForm, TimeLogForm, ProjectTimeCard } from '@/components/hobbys';
 import type { HobbyProjectFormData } from '@/components/hobbys';
 import type { TimeLogFormData } from '@/components/hobbys';
 import type { FactionWithStats, HobbyProject, HobbyTimeLog, HobbyProjectStatus } from '@/lib/database.types';
@@ -240,88 +240,15 @@ export default function HobbysPage() {
 
           {projects.length > 0 ? (
             <div className="space-y-3">
-              {projects.map((project) => {
-                const statusConfig = STATUS_CONFIG[project.status];
-                const categoryInfo = getCategoryInfo(project.category);
-                return (
-                  <div
-                    key={project.id}
-                    className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors group"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{project.icon || '🎯'}</span>
-                        <div>
-                          <h3 className="font-medium">{project.name}</h3>
-                          {project.category && (
-                            <span className="text-xs text-white/40">
-                              {categoryInfo.icon} {categoryInfo.name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig.color}`}>
-                          {statusConfig.icon}
-                          {statusConfig.label}
-                        </span>
-                        <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">
-                          <button
-                            onClick={() => setEditingProject(project)}
-                            className="p-1.5 hover:bg-white/10 rounded-lg text-white/50 hover:text-white"
-                            title="Bearbeiten"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProject(project.id)}
-                            className="p-1.5 hover:bg-red-500/20 rounded-lg text-white/50 hover:text-red-400"
-                            title="Löschen"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {project.description && (
-                      <p className="text-sm text-white/60 mb-3 line-clamp-2">{project.description}</p>
-                    )}
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 text-sm text-white/40">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {project.total_hours || 0}h
-                        </span>
-                        {project.progress > 0 && (
-                          <span>{project.progress}%</span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {project.progress > 0 && (
-                          <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-purple-500 rounded-full"
-                              style={{ width: `${project.progress}%` }}
-                            />
-                          </div>
-                        )}
-                        {project.status === 'active' && (
-                          <button
-                            onClick={() => openTimeLogForProject(project.id)}
-                            className="flex items-center gap-1 px-2 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded text-xs transition-colors"
-                          >
-                            <Clock className="w-3 h-3" />
-                            Zeit loggen
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {projects.map((project) => (
+                <ProjectTimeCard
+                  key={project.id}
+                  project={project}
+                  onEdit={setEditingProject}
+                  onDelete={handleDeleteProject}
+                  onLogTime={openTimeLogForProject}
+                />
+              ))}
             </div>
           ) : (
             <div className="text-center py-8 text-white/40">
