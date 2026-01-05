@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Target, TrendingUp, Clock } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { JobTimeline, SalaryChart, JobForm, SalaryForm, type JobFormData, type SalaryFormData } from '@/components/karriere';
+import { JobTimeline, SalaryChart, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
-import { getJobHistory, getSalaryHistory, getKarriereStats, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
-import type { FactionWithStats, JobHistory, SalaryEntry } from '@/lib/database.types';
+import { getJobHistory, getSalaryHistory, getKarriereStats, getCareerGoals, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
+import type { FactionWithStats, JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
 
 export default function KarrierePage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
@@ -20,15 +20,19 @@ export default function KarrierePage() {
   const [showJobForm, setShowJobForm] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistory | null>(null);
   const [showSalaryForm, setShowSalaryForm] = useState(false);
+  const [showCareerGoalForm, setShowCareerGoalForm] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<CareerGoal | null>(null);
+  const [careerGoals, setCareerGoals] = useState<CareerGoal[]>([]);
 
   const loadData = async () => {
     try {
-      const [factionData, factionStats, jobsData, salariesData, karriereStats] = await Promise.all([
+      const [factionData, factionStats, jobsData, salariesData, karriereStats, goalsData] = await Promise.all([
         getFaction('karriere'),
         getUserFactionStat('karriere'),
         getJobHistory(),
         getSalaryHistory(),
         getKarriereStats(),
+        getCareerGoals(),
       ]);
 
       if (factionData) {
@@ -41,6 +45,7 @@ export default function KarrierePage() {
       setJobs(jobsData);
       setSalaries(salariesData);
       setStats(karriereStats);
+      setCareerGoals(goalsData);
     } catch (err) {
       console.error('Error loading karriere data:', err);
     } finally {
@@ -94,6 +99,38 @@ export default function KarrierePage() {
     const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
     await createSalaryEntry(data, userId);
     setShowSalaryForm(false);
+    await loadData();
+  };
+
+  // Career Goal handlers
+  const handleAddGoal = () => {
+    setEditingGoal(null);
+    setShowCareerGoalForm(true);
+  };
+
+  const handleEditGoal = (goal: CareerGoal) => {
+    setEditingGoal(goal);
+    setShowCareerGoalForm(true);
+  };
+
+  const handleGoalSubmit = async (data: CareerGoalFormData) => {
+    const { createCareerGoal, updateCareerGoal } = await import('@/lib/data/karriere');
+    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+
+    if (editingGoal) {
+      await updateCareerGoal(editingGoal.id, data);
+    } else {
+      await createCareerGoal(data, userId);
+    }
+
+    setShowCareerGoalForm(false);
+    setEditingGoal(null);
+    await loadData();
+  };
+
+  const handleDeleteGoal = async (goalId: string) => {
+    const { deleteCareerGoal } = await import('@/lib/data/karriere');
+    await deleteCareerGoal(goalId);
     await loadData();
   };
 
@@ -190,6 +227,21 @@ export default function KarrierePage() {
           </motion.div>
         )}
 
+        {/* Career Goals Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="mb-8"
+        >
+          <CareerGoalsList
+            goals={careerGoals}
+            onAddGoal={handleAddGoal}
+            onEditGoal={handleEditGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
+        </motion.div>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Job Timeline */}
@@ -234,6 +286,16 @@ export default function KarrierePage() {
         isOpen={showSalaryForm}
         onClose={() => setShowSalaryForm(false)}
         onSubmit={handleSalarySubmit}
+      />
+
+      <CareerGoalForm
+        goal={editingGoal}
+        isOpen={showCareerGoalForm}
+        onClose={() => {
+          setShowCareerGoalForm(false);
+          setEditingGoal(null);
+        }}
+        onSubmit={handleGoalSubmit}
       />
     </div>
   );

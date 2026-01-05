@@ -278,10 +278,8 @@ export async function getCareerGoals(
 export interface CreateCareerGoalInput {
   title: string;
   description?: string | null;
-  goal_type: string;
-  target_value?: number | null;
-  current_value?: number;
   target_date?: string | null;
+  progress?: number; // 0-100
 }
 
 export async function createCareerGoal(
@@ -327,6 +325,22 @@ export async function updateCareerGoal(
   }
 
   return data;
+}
+
+export async function deleteCareerGoal(
+  goalId: string
+): Promise<void> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('career_goals')
+    .delete()
+    .eq('id', goalId);
+
+  if (error) {
+    console.error('Error deleting career goal:', error);
+    throw error;
+  }
 }
 
 // ============================================
