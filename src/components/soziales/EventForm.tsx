@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { PartyPopper, X } from 'lucide-react';
 import type { SocialEvent, SocialEventType } from '@/lib/database.types';
 import type { Contact } from '@/lib/types/contacts';
+import { getDisplayName } from '@/lib/types/contacts';
 
 interface EventFormProps {
   event?: SocialEvent | null;
@@ -137,8 +138,8 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
   if (!isOpen) return null;
 
   // Group contacts by category
-  const familyContacts = contacts.filter(c => c.category === 'family');
-  const friendContacts = contacts.filter(c => c.category === 'friend');
+  const familyContacts = contacts.filter(c => c.relationship_category === 'family');
+  const friendContacts = contacts.filter(c => c.relationship_category === 'friend');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -270,7 +271,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
                           onChange={() => toggleParticipant(contact.id)}
                           className="w-4 h-4 bg-white/10 border-white/20 rounded focus:ring-purple-500"
                         />
-                        <span className="text-sm">{contact.name}</span>
+                        <span className="text-sm">{getDisplayName(contact)}</span>
                       </label>
                     ))}
                   </div>
@@ -292,7 +293,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
                           onChange={() => toggleParticipant(contact.id)}
                           className="w-4 h-4 bg-white/10 border-white/20 rounded focus:ring-purple-500"
                         />
-                        <span className="text-sm">{contact.name}</span>
+                        <span className="text-sm">{getDisplayName(contact)}</span>
                       </label>
                     ))}
                   </div>

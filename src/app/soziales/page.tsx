@@ -8,17 +8,20 @@ import {
   PartyPopper, MessageCircle, Gift, Plus
 } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { EventForm, type EventFormData } from '@/components/soziales';
+import { EventForm, type EventFormData, ContactForm } from '@/components/soziales';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getContactsByCategory,
   getUpcomingBirthdays,
   getContactsNeedingAttention,
-  getContactsStats
+  getContactsStats,
+  createContact,
+  updateContact,
+  deleteContact
 } from '@/lib/data/contacts';
-import { getEvents, createEvent, updateEvent, deleteEvent } from '@/lib/data/soziales';
+import { getEvents, createEvent, updateEvent, deleteEvent as deleteEventData } from '@/lib/data/soziales';
 import type { FactionWithStats, SocialEvent, SocialEventType } from '@/lib/database.types';
-import type { ContactWithStats } from '@/lib/types/contacts';
+import type { ContactWithStats, Contact, ContactFormData } from '@/lib/types/contacts';
 
 type TabType = 'alle' | 'familie' | 'freunde';
 
@@ -46,6 +49,11 @@ export default function SozialesPage() {
   const [events, setEvents] = useState<SocialEvent[]>([]);
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<SocialEvent | null>(null);
+
+  // Contact form state
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactFormCategory, setContactFormCategory] = useState<'family' | 'friend'>('family');
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
   const loadData = async () => {
     try {
@@ -123,7 +131,34 @@ export default function SozialesPage() {
 
   const handleDeleteEvent = async (eventId: string) => {
     if (!confirm('Event wirklich löschen?')) return;
-    await deleteEvent(eventId);
+    await deleteEventData(eventId);
+    await loadData();
+  };
+
+  // Contact handlers
+  const handleAddFamily = () => {
+    setContactFormCategory('family');
+    setEditingContact(null);
+    setShowContactForm(true);
+  };
+
+  const handleAddFriend = () => {
+    setContactFormCategory('friend');
+    setEditingContact(null);
+    setShowContactForm(true);
+  };
+
+  const handleContactSubmit = async (data: ContactFormData) => {
+    const userId = '00000000-0000-0000-0000-000000000001';
+
+    if (editingContact) {
+      await updateContact(editingContact.id, data);
+    } else {
+      await createContact(data);
+    }
+
+    setShowContactForm(false);
+    setEditingContact(null);
     await loadData();
   };
 
@@ -256,9 +291,9 @@ export default function SozialesPage() {
             </div>
           </Link>
 
-          <Link
-            href="/contacts?new=true&type=family"
-            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-pink-500/50 transition-all group"
+          <button
+            onClick={handleAddFamily}
+            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-pink-500/50 transition-all group text-left"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -270,13 +305,13 @@ export default function SozialesPage() {
                   <p className="text-sm text-white/50">Familienmitglied</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              <Plus className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
             </div>
-          </Link>
+          </button>
 
-          <Link
-            href="/contacts?new=true&type=friend"
-            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-cyan-500/50 transition-all group"
+          <button
+            onClick={handleAddFriend}
+            className="bg-[var(--background-secondary)]/80 border border-[var(--orb-border)] rounded-xl p-4 hover:border-cyan-500/50 transition-all group text-left"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -288,9 +323,9 @@ export default function SozialesPage() {
                   <p className="text-sm text-white/50">Neuer Kontakt</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              <Plus className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
             </div>
-          </Link>
+          </button>
         </motion.div>
 
         {/* Needing Attention */}
@@ -579,6 +614,18 @@ export default function SozialesPage() {
           setEditingEvent(null);
         }}
         onSubmit={handleEventSubmit}
+      />
+
+      {/* Contact Form Modal */}
+      <ContactForm
+        contact={editingContact}
+        category={contactFormCategory}
+        isOpen={showContactForm}
+        onClose={() => {
+          setShowContactForm(false);
+          setEditingContact(null);
+        }}
+        onSubmit={handleContactSubmit}
       />
     </div>
   );
