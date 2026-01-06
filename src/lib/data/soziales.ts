@@ -1,5 +1,7 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { SocialEvent, SocialEventType } from '@/lib/database.types';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
 
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -16,6 +18,31 @@ export interface CreateEventInput {
   location?: string | null;
   participants: string[]; // Array of contact UUIDs
   notes?: string | null;
+}
+
+// ============================================
+// XP CALCULATIONS
+// ============================================
+
+function calculateEventXp(event: {
+  participant_count: number;
+  duration_minutes?: number | null;
+  event_type?: string | null;
+}): number {
+  // Base XP for social interaction
+  let xp = 15;
+
+  // Bonus for group size
+  if (event.participant_count >= 10) xp += 25;      // Grosse Gruppe
+  else if (event.participant_count >= 5) xp += 15;  // Mittlere Gruppe
+  else if (event.participant_count >= 2) xp += 5;   // Kleine Gruppe
+
+  // Bonus for longer events
+  const hours = (event.duration_minutes || 0) / 60;
+  if (hours >= 4) xp += 20;       // 4+ Stunden
+  else if (hours >= 2) xp += 10;  // 2+ Stunden
+
+  return xp;
 }
 
 // ============================================
@@ -105,6 +132,7 @@ export async function getEventsByType(
 /**
  * Create a new social event
  * Auto-calculates participant_count from participants array length
+ * Awards XP based on group size and duration
  */
 export async function createEvent(
   input: CreateEventInput,
@@ -115,6 +143,13 @@ export async function createEvent(
   // Auto-calculate participant_count from participants array
   const participant_count = input.participants.length;
 
+  // Calculate XP before insert
+  const xpGained = calculateEventXp({
+    participant_count,
+    duration_minutes: input.duration_minutes,
+    event_type: input.event_type,
+  });
+
   const { data, error } = await supabase
     .from('social_events')
     .insert({
@@ -122,7 +157,7 @@ export async function createEvent(
       user_id: userId,
       participant_count,
       photos_urls: [], // Default empty array
-      xp_gained: 0,    // Default 0, will be calculated by triggers
+      xp_gained: xpGained,
     })
     .select()
     .single();
@@ -130,6 +165,36 @@ export async function createEvent(
   if (error) {
     console.error('Error creating social event:', error);
     throw error;
+  }
+
+  // Update faction stats with XP
+  if (xpGained > 0) {
+    try {
+      await updateFactionStats('soziales', xpGained, userId);
+    } catch (err) {
+      console.error('Error updating faction stats for social event:', err);
+    }
+  }
+
+  // Log activity for feed
+  try {
+    await logActivity({
+      userId,
+      activityType: 'event_logged',
+      factionId: 'soziales',
+      title: `Event: "${data.title}"`,
+      description: `${participant_count} Teilnehmer`,
+      xpAmount: xpGained,
+      relatedEntityType: 'social_event',
+      relatedEntityId: data.id,
+      metadata: {
+        event_type: data.event_type,
+        participant_count,
+        location: data.location,
+      },
+    });
+  } catch (err) {
+    console.error('Error logging social event activity:', err);
   }
 
   return data;

@@ -4,6 +4,8 @@
  */
 
 import { createBrowserClient } from '@/lib/supabase';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
 import type {
   Account,
   Transaction,
@@ -463,6 +465,19 @@ export async function getTransactionCategories(): Promise<TransactionCategory[]>
 // SAVINGS GOALS
 // =============================================
 
+/**
+ * Calculate XP reward for achieving a savings goal
+ * Higher target amounts = more XP
+ */
+function calculateSavingsGoalXp(goal: { target_amount: number }): number {
+  const amount = goal.target_amount;
+  if (amount >= 10000) return 150;
+  if (amount >= 5000) return 100;
+  if (amount >= 1000) return 75;
+  if (amount >= 500) return 50;
+  return 25;
+}
+
 export async function getSavingsGoals(): Promise<SavingsGoal[]> {
   const supabase = createBrowserClient();
 
@@ -534,13 +549,19 @@ export async function createSavingsGoal(
 export async function updateSavingsGoalAmount(id: string, amount: number): Promise<boolean> {
   const supabase = createBrowserClient();
 
-  const { data: goal } = await supabase
+  // Get goal's current state BEFORE updating (to check if this is a new achievement)
+  const { data: previousGoal } = await supabase
     .from('savings_goals')
-    .select('target_amount')
+    .select('name, target_amount, current_amount, is_achieved')
     .eq('id', id)
     .maybeSingle();
 
-  const isAchieved = goal && amount >= goal.target_amount;
+  if (!previousGoal) {
+    console.error('Savings goal not found:', id);
+    return false;
+  }
+
+  const isAchieved = amount >= previousGoal.target_amount;
 
   const { error } = await supabase
     .from('savings_goals')
@@ -555,6 +576,40 @@ export async function updateSavingsGoalAmount(id: string, amount: number): Promi
   if (error) {
     console.error('Error updating savings goal:', error);
     return false;
+  }
+
+  // Check if goal was JUST achieved (current >= target AND was not previously achieved)
+  const justAchieved = isAchieved && !previousGoal.is_achieved;
+
+  if (justAchieved) {
+    const xpGained = calculateSavingsGoalXp({ target_amount: previousGoal.target_amount });
+
+    // Update faction stats with XP
+    try {
+      await updateFactionStats('finanzen', xpGained, TEST_USER_ID);
+    } catch (err) {
+      console.error('Error updating finanzen faction stats:', err);
+    }
+
+    // Log activity for feed
+    try {
+      await logActivity({
+        userId: TEST_USER_ID,
+        activityType: 'goal_achieved',
+        factionId: 'finanzen',
+        title: `Sparziel erreicht: "${previousGoal.name}"`,
+        description: `${previousGoal.target_amount.toLocaleString('de-DE')}€ gespart`,
+        xpAmount: xpGained,
+        relatedEntityType: 'savings_goal',
+        relatedEntityId: id,
+        metadata: {
+          target_amount: previousGoal.target_amount,
+          current_amount: amount,
+        },
+      });
+    } catch (err) {
+      console.error('Error logging savings goal activity:', err);
+    }
   }
 
   return true;
