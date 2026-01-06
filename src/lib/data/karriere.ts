@@ -407,7 +407,7 @@ export async function updateCareerGoal(
     try {
       await logActivity({
         userId,
-        activityType: 'career_goal_achieved',
+        activityType: 'goal_achieved',
         factionId: 'karriere',
         title: `Karriereziel erreicht: "${data.title}"`,
         description: data.description || undefined,
