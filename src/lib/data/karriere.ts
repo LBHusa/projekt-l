@@ -252,6 +252,41 @@ export async function createSalaryEntry(
   return data;
 }
 
+export async function updateSalaryEntry(
+  salaryId: string,
+  input: Partial<CreateSalaryInput>
+): Promise<SalaryEntry> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('salary_entries')
+    .update(input)
+    .eq('id', salaryId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating salary entry:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function deleteSalaryEntry(salaryId: string): Promise<void> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('salary_entries')
+    .delete()
+    .eq('id', salaryId);
+
+  if (error) {
+    console.error('Error deleting salary entry:', error);
+    throw error;
+  }
+}
+
 // ============================================
 // CAREER GOALS
 // ============================================

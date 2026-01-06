@@ -1,5 +1,7 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { HobbyProject, HobbyTimeLog, HobbyProjectStatus } from '@/lib/database.types';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
 
 // ============================================
 // HOBBYS DATA ACCESS
@@ -108,14 +110,29 @@ export async function createHobbyProject(
 
 export async function updateHobbyProject(
   projectId: string,
-  input: Partial<CreateHobbyProjectInput & { completed_at?: string | null }>
+  input: Partial<CreateHobbyProjectInput & { completed_at?: string | null }>,
+  userId: string = TEST_USER_ID
 ): Promise<HobbyProject> {
   const supabase = createBrowserClient();
 
+  // Fetch current project BEFORE updating to detect status change
+  const { data: currentProject } = await supabase
+    .from('hobby_projects')
+    .select('*')
+    .eq('id', projectId)
+    .single();
+
+  // Auto-set completed_at when status becomes "completed"
+  const updateData = { ...input };
+  if (input.status === 'completed' && currentProject?.status !== 'completed') {
+    updateData.completed_at = new Date().toISOString();
+  }
+
+  // Perform the update
   const { data, error } = await supabase
     .from('hobby_projects')
     .update({
-      ...input,
+      ...updateData,
       updated_at: new Date().toISOString(),
     })
     .eq('id', projectId)
@@ -125,6 +142,44 @@ export async function updateHobbyProject(
   if (error) {
     console.error('Error updating hobby project:', error);
     throw error;
+  }
+
+  // XP Integration: Award XP when status transitions to "completed"
+  if (
+    input.status === 'completed' &&
+    currentProject &&
+    currentProject.status !== 'completed'
+  ) {
+    const xpGained = calculateProjectXp(data);
+
+    // Update Faction Stats (adds XP to 'hobbys' faction)
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('hobbys', xpGained, userId);
+      } catch (err) {
+        console.error('Error updating faction stats for hobby project:', err);
+      }
+    }
+
+    // Log Activity to Feed
+    try {
+      await logActivity({
+        userId,
+        activityType: 'project_completed',
+        factionId: 'hobbys',
+        title: `Projekt abgeschlossen: "${data.name}"`,
+        description: `${data.total_hours || 0} Stunden investiert`,
+        xpAmount: xpGained,
+        relatedEntityType: 'hobby_project',
+        relatedEntityId: projectId,
+        metadata: {
+          category: data.category,
+          total_hours: data.total_hours,
+        },
+      });
+    } catch (err) {
+      console.error('Error logging hobby project activity:', err);
+    }
   }
 
   return data;
@@ -149,6 +204,24 @@ export async function deleteHobbyProject(projectId: string): Promise<void> {
     console.error('Error deleting hobby project:', error);
     throw error;
   }
+}
+
+// ============================================
+// XP CALCULATIONS
+// ============================================
+
+function calculateProjectXp(project: HobbyProject): number {
+  // Base XP for completing a hobby project
+  let xp = 50;
+
+  // Bonus based on total hours invested
+  const hours = project.total_hours || 0;
+  if (hours >= 100) xp += 100;      // 100+ hours: +100 XP (total: 150)
+  else if (hours >= 50) xp += 75;   // 50+ hours: +75 XP (total: 125)
+  else if (hours >= 20) xp += 50;   // 20+ hours: +50 XP (total: 100)
+  else if (hours >= 10) xp += 25;   // 10+ hours: +25 XP (total: 75)
+
+  return xp;
 }
 
 // ============================================

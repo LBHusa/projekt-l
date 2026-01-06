@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Target, TrendingUp, Clock } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { JobTimeline, SalaryChart, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
+import { JobTimeline, SalaryChart, SalaryTimeline, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import { getJobHistory, getSalaryHistory, getKarriereStats, getCareerGoals, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
 import type { FactionWithStats, JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
@@ -20,6 +20,7 @@ export default function KarrierePage() {
   const [showJobForm, setShowJobForm] = useState(false);
   const [editingJob, setEditingJob] = useState<JobHistory | null>(null);
   const [showSalaryForm, setShowSalaryForm] = useState(false);
+  const [editingSalary, setEditingSalary] = useState<SalaryEntry | null>(null);
   const [showCareerGoalForm, setShowCareerGoalForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState<CareerGoal | null>(null);
   const [careerGoals, setCareerGoals] = useState<CareerGoal[]>([]);
@@ -94,11 +95,23 @@ export default function KarrierePage() {
     setShowSalaryForm(true);
   };
 
+  const handleEditSalary = (salary: SalaryEntry) => {
+    setEditingSalary(salary);
+    setShowSalaryForm(true);
+  };
+
   const handleSalarySubmit = async (data: SalaryFormData) => {
-    const { createSalaryEntry } = await import('@/lib/data/karriere');
+    const { createSalaryEntry, updateSalaryEntry } = await import('@/lib/data/karriere');
     const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
-    await createSalaryEntry(data, userId);
+
+    if (editingSalary) {
+      await updateSalaryEntry(editingSalary.id, data);
+    } else {
+      await createSalaryEntry(data, userId);
+    }
+
     setShowSalaryForm(false);
+    setEditingSalary(null);
     await loadData();
   };
 
@@ -252,12 +265,22 @@ export default function KarrierePage() {
             onDeleteJob={handleDeleteJob}
           />
 
-          {/* Salary Chart */}
-          <SalaryChart
-            salaries={salaries}
-            currentSalary={stats?.currentSalary}
-            onAddSalary={handleAddSalary}
-          />
+          {/* Salary Components */}
+          <div className="space-y-6">
+            {/* Salary Chart */}
+            <SalaryChart
+              salaries={salaries}
+              currentSalary={stats?.currentSalary}
+              onAddSalary={handleAddSalary}
+            />
+
+            {/* Salary Timeline */}
+            <SalaryTimeline
+              salaries={salaries}
+              onAddSalary={handleAddSalary}
+              onEditSalary={handleEditSalary}
+            />
+          </div>
         </div>
 
         {/* Skills Section */}
@@ -282,9 +305,13 @@ export default function KarrierePage() {
 
       <SalaryForm
         jobs={jobs}
+        salary={editingSalary}
         defaultJobId={stats?.currentJob?.id}
         isOpen={showSalaryForm}
-        onClose={() => setShowSalaryForm(false)}
+        onClose={() => {
+          setShowSalaryForm(false);
+          setEditingSalary(null);
+        }}
         onSubmit={handleSalarySubmit}
       />
 

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, X } from 'lucide-react';
-import type { JobHistory, SalaryPeriod } from '@/lib/database.types';
+import type { JobHistory, SalaryPeriod, SalaryEntry } from '@/lib/database.types';
 
 interface SalaryFormProps {
   jobs: JobHistory[];
+  salary?: SalaryEntry | null;
   defaultJobId?: string;
   isOpen: boolean;
   onClose: () => void;
@@ -35,7 +36,7 @@ const SALARY_PERIODS: { value: SalaryPeriod; label: string }[] = [
   { value: 'hourly', label: 'Stündlich' },
 ];
 
-export default function SalaryForm({ jobs, defaultJobId, isOpen, onClose, onSubmit }: SalaryFormProps) {
+export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose, onSubmit }: SalaryFormProps) {
   const [formData, setFormData] = useState<SalaryFormData>({
     job_id: defaultJobId || '',
     amount: 0,
@@ -48,16 +49,29 @@ export default function SalaryForm({ jobs, defaultJobId, isOpen, onClose, onSubm
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setFormData({
-      job_id: defaultJobId || (jobs[0]?.id || ''),
-      amount: 0,
-      currency: 'EUR',
-      period: 'monthly',
-      effective_date: new Date().toISOString().split('T')[0],
-      notes: null,
-    });
+    if (salary) {
+      // Editing existing salary
+      setFormData({
+        job_id: salary.job_id || defaultJobId || (jobs[0]?.id || ''),
+        amount: salary.amount,
+        currency: salary.currency || 'EUR',
+        period: (salary.period as SalaryPeriod) || 'monthly',
+        effective_date: salary.effective_date,
+        notes: salary.notes,
+      });
+    } else {
+      // Creating new salary
+      setFormData({
+        job_id: defaultJobId || (jobs[0]?.id || ''),
+        amount: 0,
+        currency: 'EUR',
+        period: 'monthly',
+        effective_date: new Date().toISOString().split('T')[0],
+        notes: null,
+      });
+    }
     setError(null);
-  }, [defaultJobId, jobs, isOpen]);
+  }, [salary, defaultJobId, jobs, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +116,7 @@ export default function SalaryForm({ jobs, defaultJobId, isOpen, onClose, onSubm
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-amber-400" />
-            Gehalt eintragen
+            {salary ? 'Gehalt bearbeiten' : 'Gehalt eintragen'}
           </h2>
           <button
             onClick={onClose}
@@ -222,7 +236,7 @@ export default function SalaryForm({ jobs, defaultJobId, isOpen, onClose, onSubm
               disabled={loading || jobs.length === 0}
               className="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 rounded-lg transition-colors"
             >
-              {loading ? 'Speichern...' : 'Hinzufügen'}
+              {loading ? 'Speichern...' : (salary ? 'Speichern' : 'Hinzufügen')}
             </button>
           </div>
         </form>
