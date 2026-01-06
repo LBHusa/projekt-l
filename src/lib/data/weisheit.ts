@@ -1,5 +1,7 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { Book, Course, BookStatus, CourseStatus } from '@/lib/database.types';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
 
 // ============================================
 // WEISHEIT DATA ACCESS
@@ -176,9 +178,42 @@ export async function updateBookProgress(
   if (book.pages && currentPage >= book.pages && book.status !== 'read') {
     updates.status = 'read';
     updates.finished_at = new Date().toISOString();
-    updates.xp_gained = calculateBookXp(book.pages);
+    const xpGained = calculateBookXp(book.pages);
+    updates.xp_gained = xpGained;
+
+    // Update book first
+    const updatedBook = await updateBook(bookId, updates);
+
+    // Award XP to user's Weisheit faction
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('weisheit', xpGained, userId);
+      } catch (err) {
+        console.error('Error updating faction stats for book completion:', err);
+      }
+    }
+
+    // Log activity for feed visibility
+    try {
+      await logActivity({
+        userId,
+        activityType: 'book_finished',
+        factionId: 'weisheit',
+        title: `"${book.title}" fertig gelesen`,
+        description: book.rating ? `Bewertung: ${'⭐'.repeat(book.rating)}` : undefined,
+        xpAmount: xpGained,
+        relatedEntityType: 'book',
+        relatedEntityId: bookId,
+        metadata: { rating: book.rating },
+      });
+    } catch (err) {
+      console.error('Error logging book completion activity:', err);
+    }
+
+    return updatedBook;
   }
 
+  // Normal path - book not yet completed
   return updateBook(bookId, updates);
 }
 

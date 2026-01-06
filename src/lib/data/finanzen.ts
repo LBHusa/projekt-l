@@ -926,6 +926,68 @@ export async function getBudgetProgress(
   });
 }
 
+export async function createBudget(input: {
+  category: string;
+  amount: number;
+  period: 'weekly' | 'monthly' | 'yearly';
+}): Promise<Budget | null> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .insert({
+      ...input,
+      user_id: TEST_USER_ID,
+      is_active: true,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating budget:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateBudget(
+  id: string,
+  input: Partial<{ category: string; amount: number; period: 'weekly' | 'monthly' | 'yearly'; is_active: boolean }>
+): Promise<Budget | null> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('budgets')
+    .update({ ...input, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating budget:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function deleteBudget(id: string): Promise<boolean> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('budgets')
+    .update({ is_active: false })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting budget:', error);
+    return false;
+  }
+
+  return true;
+}
+
 // =============================================
 // RECURRING FLOWS (Daueraufträge)
 // =============================================

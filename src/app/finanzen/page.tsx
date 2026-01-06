@@ -19,8 +19,11 @@ import {
   SavingsGoalForm,
   TransactionForm,
   RecurringFlowForm,
+  BudgetCard,
+  BudgetsList,
+  BudgetForm,
 } from '@/components/finanzen';
-import type { AccountFormData, SavingsGoalFormData, TransactionFormData, RecurringFlowFormData } from '@/components/finanzen';
+import type { AccountFormData, SavingsGoalFormData, TransactionFormData, RecurringFlowFormData, BudgetFormData } from '@/components/finanzen';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getNetWorthExtended,
@@ -37,6 +40,9 @@ import {
   createTransaction,
   getRecurringFlows,
   createRecurringFlow,
+  getBudgetProgress,
+  createBudget,
+  updateBudget,
 } from '@/lib/data/finanzen';
 import type {
   FactionWithStats,
@@ -49,6 +55,7 @@ import type {
   FinanceSmartTip,
   UserNetWorthExtended,
   RecurringFlow,
+  Budget,
 } from '@/lib/database.types';
 
 export default function FinanzenPage() {
@@ -69,6 +76,10 @@ export default function FinanzenPage() {
   const [showSavingsGoalForm, setShowSavingsGoalForm] = useState(false);
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [showRecurringFlowForm, setShowRecurringFlowForm] = useState(false);
+  const [budgets, setBudgets] = useState<{ category: string; budget: number; spent: number; remaining: number }[]>([]);
+  const [showBudgetForm, setShowBudgetForm] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [budgetPeriod, setBudgetPeriod] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
 
   const loadData = async () => {
     try {
@@ -88,6 +99,7 @@ export default function FinanzenPage() {
         achievementsData,
         streaksData,
         tipsData,
+        budgetData,
       ] = await Promise.all([
         getFaction('finanzen'),
         getUserFactionStat('finanzen'),
@@ -100,6 +112,7 @@ export default function FinanzenPage() {
         getFinanceAchievements(),
         getFinanceStreaks(),
         getSmartTips(),
+        getBudgetProgress(currentYear, currentMonth),
       ]);
 
       if (factionData) {
@@ -118,6 +131,7 @@ export default function FinanzenPage() {
       setAchievements(achievementsData);
       setStreaks(streaksData);
       setTips(tipsData);
+      setBudgets(budgetData);
     } catch (err) {
       console.error('Error loading finanzen data:', err);
     } finally {
@@ -212,6 +226,25 @@ export default function FinanzenPage() {
       end_date: data.end_date || null,
     });
     setShowRecurringFlowForm(false);
+    await loadData();
+  };
+
+  const handleBudgetSubmit = async (data: BudgetFormData) => {
+    if (editingBudget) {
+      await updateBudget(editingBudget.id, {
+        category: data.category,
+        amount: data.amount,
+        period: data.period,
+      });
+      setEditingBudget(null);
+    } else {
+      await createBudget({
+        category: data.category,
+        amount: data.amount,
+        period: data.period,
+      });
+      setShowBudgetForm(false);
+    }
     await loadData();
   };
 
@@ -431,6 +464,25 @@ export default function FinanzenPage() {
           </motion.div>
         </div>
 
+        {/* Budgets Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85 }}
+          className="mb-6"
+        >
+          <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
+            <BudgetsList
+              budgets={budgets.filter(b => b.budget > 0)}
+              period={budgetPeriod}
+              onCreateBudget={() => setShowBudgetForm(true)}
+              onBudgetClick={(budget) => {
+                console.log('Budget clicked:', budget);
+              }}
+            />
+          </div>
+        </motion.div>
+
         {/* Smart Tips & Achievements */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Smart Tips */}
@@ -512,6 +564,23 @@ export default function FinanzenPage() {
           savingsGoals={savingsGoals}
           onSubmit={handleRecurringFlowSubmit}
           onCancel={() => setShowRecurringFlowForm(false)}
+        />
+      )}
+
+      {/* Budget Form Modal */}
+      {showBudgetForm && (
+        <BudgetForm
+          onSubmit={handleBudgetSubmit}
+          onCancel={() => setShowBudgetForm(false)}
+        />
+      )}
+
+      {/* Edit Budget Modal */}
+      {editingBudget && (
+        <BudgetForm
+          budget={editingBudget}
+          onSubmit={handleBudgetSubmit}
+          onCancel={() => setEditingBudget(null)}
         />
       )}
     </div>

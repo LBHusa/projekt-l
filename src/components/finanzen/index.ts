@@ -11,6 +11,7 @@ export { FinanceAchievements } from './FinanceAchievements';
 export { SavingsStreak } from './SavingsStreak';
 export { SmartTips } from './SmartTips';
 export { CSVImport } from './CSVImport';
+export { default as BudgetCard, BudgetsList } from './BudgetCard';
 
 // Form Components
 export { AccountForm } from './forms/AccountForm';
@@ -21,3 +22,5 @@ export { TransactionForm } from './forms/TransactionForm';
 export type { TransactionFormData } from './forms/TransactionForm';
 export { RecurringFlowForm } from './forms/RecurringFlowForm';
 export type { RecurringFlowFormData } from './forms/RecurringFlowForm';
+export { default as BudgetForm } from './forms/BudgetForm';
+export type { BudgetFormData } from './forms/BudgetForm';
