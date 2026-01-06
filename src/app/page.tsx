@@ -10,6 +10,7 @@ import {
   HabitTrackerWidget,
   RecentActivityFeed,
   QuickActionsWidget,
+  FactionStatsWidget,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -188,6 +189,11 @@ export default function Dashboard() {
             <AttributesPanel attributes={userProfile.attributes} />
             <ClickableLifeBalanceRadar factions={factions} />
             <MentalStatsPanel stats={userProfile.mentalStats} />
+          </div>
+
+          {/* Faction Stats Widget - Full Width */}
+          <div className="mb-8">
+            <FactionStatsWidget factions={factions} />
           </div>
 
           {/* Quick Actions + Habit Tracker Row */}
