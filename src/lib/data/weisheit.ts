@@ -372,7 +372,8 @@ export async function deleteCourse(courseId: string): Promise<void> {
 export async function updateCourseProgress(
   courseId: string,
   progress: number,
-  completedHours?: number
+  completedHours?: number,
+  userId: string = TEST_USER_ID
 ): Promise<Course> {
   const course = await getCourse(courseId);
   if (!course) {
@@ -397,7 +398,37 @@ export async function updateCourseProgress(
   if (progress >= 100 && course.status !== 'completed') {
     updates.status = 'completed';
     updates.finished_at = new Date().toISOString();
-    updates.xp_gained = calculateCourseXp(course.total_hours);
+    const xpGained = calculateCourseXp(course.total_hours);
+    updates.xp_gained = xpGained;
+
+    // Award XP to user's Weisheit faction
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('weisheit', xpGained, userId);
+      } catch (err) {
+        console.error('Error updating faction stats for course:', err);
+      }
+
+      // Log activity for feed visibility
+      try {
+        await logActivity({
+          userId,
+          activityType: 'course_completed',
+          factionId: 'weisheit',
+          title: `Kurs abgeschlossen: "${course.title}"`,
+          description: course.platform ? `auf ${course.platform}` : undefined,
+          xpAmount: xpGained,
+          relatedEntityType: 'course',
+          relatedEntityId: courseId,
+          metadata: {
+            total_hours: course.total_hours,
+            platform: course.platform,
+          },
+        });
+      } catch (err) {
+        console.error('Error logging course activity:', err);
+      }
+    }
   }
 
   return updateCourse(courseId, updates);
