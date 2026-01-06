@@ -1,5 +1,7 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
+import { logActivity } from './activity-log';
+import { updateFactionStats } from './factions';
 
 // ============================================
 // KARRIERE DATA ACCESS
@@ -341,11 +343,36 @@ export async function createCareerGoal(
   return data;
 }
 
+// Calculate XP based on goal complexity and duration
+function calculateCareerGoalXp(goal: CareerGoal): number {
+  let xp = 75; // Base XP for completing a career goal
+
+  // Bonus for long-term goals
+  if (goal.target_date && goal.created_at) {
+    const monthsDuration = Math.floor(
+      (new Date(goal.target_date).getTime() - new Date(goal.created_at).getTime())
+      / (1000 * 60 * 60 * 24 * 30)
+    );
+    if (monthsDuration >= 12) xp += 50;      // 1+ Jahr: +50 XP (125 total)
+    else if (monthsDuration >= 6) xp += 25;  // 6+ Monate: +25 XP (100 total)
+  }
+
+  return xp;
+}
+
 export async function updateCareerGoal(
   goalId: string,
-  input: Partial<CreateCareerGoalInput & { status: string }>
+  input: Partial<CreateCareerGoalInput & { status: string }>,
+  userId: string = TEST_USER_ID
 ): Promise<CareerGoal> {
   const supabase = createBrowserClient();
+
+  // Fetch current goal state BEFORE updating
+  const { data: currentGoal } = await supabase
+    .from('career_goals')
+    .select('*')
+    .eq('id', goalId)
+    .single();
 
   const { data, error } = await supabase
     .from('career_goals')
@@ -357,6 +384,44 @@ export async function updateCareerGoal(
   if (error) {
     console.error('Error updating career goal:', error);
     throw error;
+  }
+
+  // XP Integration: Award XP when status changes to "achieved"
+  if (
+    input.status === 'achieved' &&
+    currentGoal &&
+    currentGoal.status !== 'achieved'
+  ) {
+    const xpGained = calculateCareerGoalXp(data);
+
+    // Update Faction Stats
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('karriere', xpGained, userId);
+      } catch (err) {
+        console.error('Error updating faction stats for career goal:', err);
+      }
+    }
+
+    // Log Activity for Feed
+    try {
+      await logActivity({
+        userId,
+        activityType: 'career_goal_achieved',
+        factionId: 'karriere',
+        title: `Karriereziel erreicht: "${data.title}"`,
+        description: data.description || undefined,
+        xpAmount: xpGained,
+        relatedEntityType: 'career_goal',
+        relatedEntityId: goalId,
+        metadata: {
+          progress: data.progress,
+          target_date: data.target_date
+        },
+      });
+    } catch (err) {
+      console.error('Error logging career goal activity:', err);
+    }
   }
 
   return data;
