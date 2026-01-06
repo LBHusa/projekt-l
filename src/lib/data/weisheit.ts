@@ -108,6 +108,55 @@ export async function createBook(
     throw error;
   }
 
+  // ============================================
+  // XP INTEGRATION FOR BOOKS CREATED AS 'READ'
+  // ============================================
+  if (input.status === 'read' && data) {
+    const xpGained = calculateBookXp(data.pages);
+
+    // Award XP to Weisheit faction
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('weisheit', xpGained, userId);
+      } catch (err) {
+        console.error('Error updating faction stats for book creation:', err);
+      }
+    }
+
+    // Log activity to feed
+    try {
+      await logActivity({
+        userId,
+        activityType: 'book_finished',
+        factionId: 'weisheit',
+        title: `Buch gelesen: "${data.title}"`,
+        description: data.author ? `von ${data.author}` : undefined,
+        xpAmount: xpGained,
+        relatedEntityType: 'book',
+        relatedEntityId: data.id,
+        metadata: {
+          pages: data.pages,
+          genre: data.genre,
+        },
+      });
+    } catch (err) {
+      console.error('Error logging book creation activity:', err);
+    }
+
+    // Update book with XP and finished timestamp
+    try {
+      await supabase
+        .from('books')
+        .update({
+          xp_gained: xpGained,
+          finished_at: new Date().toISOString(),
+        })
+        .eq('id', data.id);
+    } catch (err) {
+      console.error('Error updating book XP:', err);
+    }
+  }
+
   return data;
 }
 
@@ -397,7 +446,41 @@ export async function updateCourseProgress(
   if (progress >= 100 && course.status !== 'completed') {
     updates.status = 'completed';
     updates.finished_at = new Date().toISOString();
-    updates.xp_gained = calculateCourseXp(course.total_hours);
+    const xpGained = calculateCourseXp(course.total_hours);
+    updates.xp_gained = xpGained;
+
+    // ============================================
+    // XP INTEGRATION FOR COURSE COMPLETION
+    // ============================================
+
+    // Award XP to Weisheit faction
+    if (xpGained > 0) {
+      try {
+        await updateFactionStats('weisheit', xpGained, TEST_USER_ID);
+      } catch (err) {
+        console.error('Error updating faction stats for course completion:', err);
+      }
+    }
+
+    // Log activity to feed
+    try {
+      await logActivity({
+        userId: TEST_USER_ID,
+        activityType: 'course_completed',
+        factionId: 'weisheit',
+        title: `Kurs abgeschlossen: "${course.title}"`,
+        description: course.platform ? `auf ${course.platform}` : undefined,
+        xpAmount: xpGained,
+        relatedEntityType: 'course',
+        relatedEntityId: courseId,
+        metadata: {
+          total_hours: course.total_hours,
+          platform: course.platform,
+        },
+      });
+    } catch (err) {
+      console.error('Error logging course completion activity:', err);
+    }
   }
 
   return updateCourse(courseId, updates);
