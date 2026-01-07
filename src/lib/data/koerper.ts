@@ -605,6 +605,28 @@ async function logMetricActivity(metric: BodyMetric): Promise<void> {
     related_entity_type: 'body_metric',
     related_entity_id: metric.id,
   });
+
+  // Update faction stats
+  const XP_FOR_METRIC = 5;
+
+  const { data: currentStats } = await supabase
+    .from('user_faction_stats')
+    .select('total_xp')
+    .eq('user_id', TEST_USER_ID)
+    .eq('faction_id', FACTION_ID)
+    .single();
+
+  if (currentStats) {
+    const newXP = (currentStats.total_xp || 0) + XP_FOR_METRIC;
+    await supabase
+      .from('user_faction_stats')
+      .update({
+        total_xp: newXP,
+        level: Math.floor(newXP / 100) + 1,
+      })
+      .eq('user_id', TEST_USER_ID)
+      .eq('faction_id', FACTION_ID);
+  }
 }
 
 // =============================================
