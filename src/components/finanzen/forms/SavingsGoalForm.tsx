@@ -337,7 +337,8 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
               Abbrechen
             </button>
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={isSubmitting || !formData.name.trim() || formData.target_amount <= 0}
               className="flex-1 py-2.5 rounded-lg bg-blue-500 hover:bg-blue-500/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
