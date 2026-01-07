@@ -196,7 +196,7 @@ export async function initUserFactionStats(
  */
 export function calculateFactionLevel(totalXp: number): number {
   if (totalXp <= 0) return 1;
-  return Math.max(1, Math.floor(Math.sqrt(totalXp / 100)));
+  return Math.max(1, Math.floor(Math.sqrt(totalXp / 100)) + 1);
 }
 
 /**
