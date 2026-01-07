@@ -126,8 +126,15 @@ export default function WeisheitPage() {
   };
 
   const handleCourseProgressUpdate = async (courseId: string, progress: number) => {
-    await updateCourseProgress(courseId, progress);
-    await loadData();
+    try {
+      console.log('Updating course progress:', { courseId, progress });
+      await updateCourseProgress(courseId, progress);
+      console.log('Course progress updated successfully');
+      await loadData();
+    } catch (error) {
+      console.error('Error updating course progress:', error);
+      alert('Fehler beim Speichern des Fortschritts. Bitte erneut versuchen.');
+    }
   };
 
   if (loading) {

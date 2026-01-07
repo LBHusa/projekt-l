@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { GraduationCap, Plus, Edit2, Trash2, ChevronRight, ExternalLink, Award, Clock } from 'lucide-react';
 import type { Course, CourseStatus } from '@/lib/database.types';
@@ -36,6 +36,8 @@ export default function CourseList({
 }: CourseListProps) {
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<CourseStatus | 'all'>('all');
+  // Local state for slider to avoid race conditions during drag
+  const [pendingProgress, setPendingProgress] = useState<{ courseId: string; value: number } | null>(null);
 
   const filteredCourses = filterStatus === 'all'
     ? courses
@@ -204,22 +206,41 @@ export default function CourseList({
                   {/* Progress slider for in_progress courses */}
                   {course.status === 'in_progress' && onUpdateProgress && (
                     <div className="mb-4">
-                      <label className="text-xs text-white/40 block mb-2">Fortschritt aktualisieren</label>
+                      <label className="text-xs text-white/40 block mb-2">Fortschritt aktualisieren (Slider loslassen zum Speichern)</label>
                       <input
                         type="range"
                         min={0}
                         max={100}
-                        value={course.progress}
+                        value={pendingProgress?.courseId === course.id ? pendingProgress.value : course.progress}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
+                          // Only update local state during drag - don't save to DB yet
                           const progress = parseInt(e.target.value);
-                          onUpdateProgress(course.id, progress);
+                          setPendingProgress({ courseId: course.id, value: progress });
+                        }}
+                        onPointerUp={(e) => {
+                          // Save to DB when user releases the slider
+                          e.stopPropagation();
+                          if (pendingProgress?.courseId === course.id) {
+                            onUpdateProgress(course.id, pendingProgress.value);
+                            setPendingProgress(null);
+                          }
+                        }}
+                        onMouseUp={(e) => {
+                          // Fallback for non-pointer devices
+                          e.stopPropagation();
+                          if (pendingProgress?.courseId === course.id) {
+                            onUpdateProgress(course.id, pendingProgress.value);
+                            setPendingProgress(null);
+                          }
                         }}
                         className="w-full accent-indigo-500"
                       />
                       <div className="flex justify-between text-xs text-white/30 mt-1">
                         <span>0%</span>
-                        <span>{course.progress}%</span>
+                        <span className="text-amber-400 font-medium">
+                          {pendingProgress?.courseId === course.id ? pendingProgress.value : course.progress}%
+                        </span>
                         <span>100%</span>
                       </div>
                     </div>
