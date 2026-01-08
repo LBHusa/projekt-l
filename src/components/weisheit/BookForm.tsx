@@ -16,6 +16,7 @@ export interface BookFormData {
   title: string;
   author: string | null;
   isbn: string | null;
+  cover_url: string | null;
   genre: string | null;
   pages: number | null;
   status: BookStatus;
@@ -43,6 +44,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
     title: '',
     author: null,
     isbn: null,
+    cover_url: null,
     genre: null,
     pages: null,
     status: 'to_read',
@@ -51,6 +53,8 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isbnInput, setIsbnInput] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
 
   useEffect(() => {
     if (book) {
@@ -58,6 +62,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
         title: book.title,
         author: book.author,
         isbn: book.isbn,
+        cover_url: book.cover_url,
         genre: book.genre,
         pages: book.pages,
         status: book.status,
@@ -69,6 +74,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
         title: '',
         author: null,
         isbn: null,
+        cover_url: null,
         genre: null,
         pages: null,
         status: 'to_read',
@@ -107,6 +113,32 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
     }));
   };
 
+  const handleISBNLookup = async () => {
+    if (!isbnInput.trim()) return;
+    setIsLookingUp(true);
+    try {
+      const response = await fetch(`/api/books/lookup?isbn=${isbnInput}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          title: data.title || prev.title,
+          author: data.author || prev.author,
+          pages: data.pages || prev.pages,
+          cover_url: data.cover_url || prev.cover_url,
+          isbn: data.isbn || prev.isbn,
+        }));
+      } else {
+        alert('Buch nicht gefunden');
+      }
+    } catch (err) {
+      console.error('Lookup error:', err);
+      alert('Fehler beim Abrufen der Buchdaten');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -138,6 +170,31 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
               {error}
             </div>
           )}
+
+          {/* ISBN Lookup */}
+          <div>
+            <label className="block text-sm text-white/60 mb-1">ISBN-Suche</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={isbnInput}
+                onChange={(e) => setIsbnInput(e.target.value)}
+                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg focus:border-indigo-500 focus:outline-none"
+                placeholder="978-3-..."
+              />
+              <button
+                type="button"
+                onClick={handleISBNLookup}
+                disabled={isLookingUp || !isbnInput.trim()}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg transition-colors"
+              >
+                {isLookingUp ? 'Suche...' : 'Suchen'}
+              </button>
+            </div>
+            <p className="text-xs text-white/40 mt-1">
+              ISBN eingeben und auf Suchen klicken, um Buchdaten automatisch zu laden
+            </p>
+          </div>
 
           {/* Title */}
           <div>

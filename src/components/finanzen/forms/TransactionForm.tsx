@@ -48,6 +48,8 @@ export interface TransactionFormData {
   to_account_id?: string;
   is_recurring: boolean;
   recurring_frequency?: string;
+  next_occurrence?: string;
+  recurrence_end_date?: string;
 }
 
 export function TransactionForm({ accounts, onSubmit, onCancel, defaultAccountId }: TransactionFormProps) {
@@ -62,13 +64,36 @@ export function TransactionForm({ accounts, onSubmit, onCancel, defaultAccountId
     is_recurring: false,
   });
 
+  // Calculate next occurrence for recurring transactions
+  const calculateNextOccurrence = (startDate: string, frequency: string): string => {
+    const date = new Date(startDate);
+    switch (frequency) {
+      case 'daily': date.setDate(date.getDate() + 1); break;
+      case 'weekly': date.setDate(date.getDate() + 7); break;
+      case 'biweekly': date.setDate(date.getDate() + 14); break;
+      case 'monthly': date.setMonth(date.getMonth() + 1); break;
+      case 'quarterly': date.setMonth(date.getMonth() + 3); break;
+      case 'yearly': date.setFullYear(date.getFullYear() + 1); break;
+      default: date.setMonth(date.getMonth() + 1);
+    }
+    return date.toISOString().split('T')[0];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.account_id || formData.amount <= 0 || !formData.category) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      // If recurring, calculate next_occurrence
+      const submitData = { ...formData };
+      if (submitData.is_recurring && submitData.recurring_frequency) {
+        submitData.next_occurrence = calculateNextOccurrence(
+          submitData.occurred_at,
+          submitData.recurring_frequency
+        );
+      }
+      await onSubmit(submitData);
     } finally {
       setIsSubmitting(false);
     }

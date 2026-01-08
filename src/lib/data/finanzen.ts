@@ -300,6 +300,132 @@ export async function createTransaction(
 }
 
 // =============================================
+// RECURRING TRANSACTIONS
+// =============================================
+
+/**
+ * Calculate the next occurrence date based on frequency
+ */
+function calculateNextDate(current: string, frequency: string): string {
+  const date = new Date(current);
+  switch (frequency) {
+    case 'daily':
+      date.setDate(date.getDate() + 1);
+      break;
+    case 'weekly':
+      date.setDate(date.getDate() + 7);
+      break;
+    case 'biweekly':
+      date.setDate(date.getDate() + 14);
+      break;
+    case 'monthly':
+      date.setMonth(date.getMonth() + 1);
+      break;
+    case 'quarterly':
+      date.setMonth(date.getMonth() + 3);
+      break;
+    case 'yearly':
+      date.setFullYear(date.getFullYear() + 1);
+      break;
+    default:
+      date.setMonth(date.getMonth() + 1);
+  }
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Process all due recurring transactions
+ * Creates new transaction instances and updates next_occurrence
+ */
+export async function processRecurringTransactions(
+  userId: string = TEST_USER_ID
+): Promise<Transaction[]> {
+  const supabase = createBrowserClient();
+  const today = new Date().toISOString().split('T')[0];
+
+  // Get all due recurring transactions
+  const { data: dueTransactions, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_recurring', true)
+    .lte('next_occurrence', today)
+    .or('recurrence_end_date.is.null,recurrence_end_date.gte.' + today);
+
+  if (error) {
+    console.error('Error fetching due recurring transactions:', error);
+    return [];
+  }
+
+  if (!dueTransactions?.length) {
+    return [];
+  }
+
+  const createdTransactions: Transaction[] = [];
+
+  for (const tx of dueTransactions) {
+    // Create new transaction instance (non-recurring copy)
+    const newTx = await createTransaction({
+      account_id: tx.account_id,
+      transaction_type: tx.transaction_type,
+      category: tx.category,
+      amount: tx.amount,
+      description: tx.description,
+      occurred_at: tx.next_occurrence,
+      to_account_id: tx.to_account_id,
+      tags: tx.tags || [],
+      is_recurring: false, // The copy is NOT recurring
+      recurring_frequency: null,
+      next_occurrence: null,
+      recurrence_end_date: null,
+    });
+
+    if (newTx) {
+      createdTransactions.push(newTx);
+    }
+
+    // Update next_occurrence on the original recurring transaction
+    const nextDate = calculateNextDate(tx.next_occurrence, tx.recurring_frequency);
+
+    // Check if we've passed the end date
+    const shouldDeactivate = tx.recurrence_end_date && nextDate > tx.recurrence_end_date;
+
+    await supabase
+      .from('transactions')
+      .update({
+        next_occurrence: shouldDeactivate ? null : nextDate,
+        is_recurring: !shouldDeactivate,
+      })
+      .eq('id', tx.id);
+  }
+
+  return createdTransactions;
+}
+
+/**
+ * Get all recurring transactions (templates)
+ */
+export async function getRecurringTransactions(
+  userId: string = TEST_USER_ID
+): Promise<Transaction[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_recurring', true)
+    .order('next_occurrence', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching recurring transactions:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// =============================================
 // CASHFLOW
 // =============================================
 

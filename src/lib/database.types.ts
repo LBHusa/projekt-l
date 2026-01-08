@@ -881,6 +881,8 @@ export interface Transaction {
   tags: string[];
   is_recurring: boolean;
   recurring_frequency: string | null;
+  next_occurrence: string | null;
+  recurrence_end_date: string | null;
   created_at: string;
 }
 
