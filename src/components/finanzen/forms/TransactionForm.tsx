@@ -295,7 +295,11 @@ export function TransactionForm({ accounts, onSubmit, onCancel, defaultAccountId
               type="checkbox"
               id="is-recurring"
               checked={formData.is_recurring}
-              onChange={e => setFormData(prev => ({ ...prev, is_recurring: e.target.checked }))}
+              onChange={e => setFormData(prev => ({
+                ...prev,
+                is_recurring: e.target.checked,
+                recurring_frequency: e.target.checked ? (prev.recurring_frequency || 'monthly') : prev.recurring_frequency,
+              }))}
               className="w-4 h-4 rounded accent-emerald-500"
             />
             <label htmlFor="is-recurring" className="text-sm text-white/70">

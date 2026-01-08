@@ -445,7 +445,8 @@ export async function getMentalStatsHistory(
   }, {} as Record<string, { mood: number[]; energy: number[]; stress: number[]; focus: number[] }>);
 
   // Calculate averages and return sorted by date
-  return Object.entries(grouped)
+  type GroupedStats = { mood: number[]; energy: number[]; stress: number[]; focus: number[] };
+  return (Object.entries(grouped) as [string, GroupedStats][])
     .map(([date, stats]) => ({
       date,
       mood: Math.round(avg(stats.mood)),
