@@ -14,7 +14,8 @@ import {
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, Heart, AlertCircle, Settings, Flame } from 'lucide-react';
+import { Users, Heart, AlertCircle, Settings, Flame, Download } from 'lucide-react';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { getAllDomains } from '@/lib/data/domains';
 import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/user-skills';
 import { getFactionsWithStats } from '@/lib/data/factions';
@@ -171,13 +172,16 @@ export default function Dashboard() {
             totalLevel={userProfile.totalLevel}
             totalXp={userProfile.totalXp}
           />
-          <Link
-            href="/settings/notifications"
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-            title="Einstellungen"
-          >
-            <Settings className="w-5 h-5 text-white/60" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/settings/notifications"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+              title="Einstellungen"
+            >
+              <Settings className="w-5 h-5 text-white/60" />
+            </Link>
+          </div>
         </div>
       </header>
 
