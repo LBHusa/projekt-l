@@ -272,6 +272,17 @@ export async function deleteHabit(habitId: string): Promise<void> {
 // HABIT LOGGING
 // ============================================
 
+/**
+ * Calculate streak bonus XP
+ * @param streak Current streak days
+ * @returns Bonus XP amount
+ */
+function calculateStreakBonus(streak: number): number {
+  if (streak >= 30) return 200;  // 30-day milestone
+  if (streak >= 7) return 50;     // 7-day milestone
+  return 0;                        // No bonus yet
+}
+
 export interface LogHabitResult {
   log: HabitLog;
   habit: Habit;
@@ -317,10 +328,14 @@ export async function logHabitCompletion(
     throw new Error('Failed to get updated habit');
   }
 
-  // Calculate XP (only for completed positive habits or avoided negative habits)
+  // Calculate XP with streak bonus (only for completed positive habits or avoided negative habits)
   let xpGained = 0;
+  let streakBonus = 0;
+
   if (completed && habit.habit_type === 'positive') {
-    xpGained = habit.xp_per_completion;
+    const baseXp = habit.xp_per_completion;
+    streakBonus = calculateStreakBonus(updatedHabit.current_streak);
+    xpGained = baseXp + streakBonus;
   } else if (!completed && habit.habit_type === 'negative') {
     // For negative habits, not doing them is good (but we track differently)
     xpGained = 0; // Could add XP for avoiding bad habits
@@ -342,13 +357,21 @@ export async function logHabitCompletion(
         userId,
         activityType: 'habit_completed',
         factionId: habit.faction_id,
-        title: `${habit.icon} ${habit.name} abgeschlossen`,
-        description: updatedHabit.current_streak > 1
+        title: streakBonus > 0
+          ? `${habit.icon} ${habit.name} abgeschlossen (${updatedHabit.current_streak} Tage Streak! +${streakBonus} Bonus XP)`
+          : `${habit.icon} ${habit.name} abgeschlossen`,
+        description: updatedHabit.current_streak > 1 && streakBonus === 0
           ? `${updatedHabit.current_streak} Tage Streak!`
           : undefined,
         xpAmount: xpGained,
         relatedEntityType: 'habit',
         relatedEntityId: habitId,
+        metadata: {
+          streak: updatedHabit.current_streak,
+          streakBonus: streakBonus,
+          baseXp: habit.xp_per_completion,
+          totalXp: xpGained,
+        },
       });
     } catch (err) {
       console.error('Error logging activity:', err);
