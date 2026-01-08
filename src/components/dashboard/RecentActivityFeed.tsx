@@ -2,23 +2,89 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Activity, Zap, Trophy, Dumbbell, BookOpen, Briefcase, Users, Target } from 'lucide-react';
+import {
+  Activity,
+  Zap,
+  Trophy,
+  Dumbbell,
+  BookOpen,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
+  Target,
+  Users,
+  CheckCircle,
+  Smile,
+  DollarSign,
+  ChevronDown,
+} from 'lucide-react';
 import { getRecentActivity } from '@/lib/data/activity-log';
 import type { ActivityLog, FactionId } from '@/lib/database.types';
 import { FACTION_COLORS, FACTION_ORDER, ACTIVITY_COLORS } from '@/lib/ui/constants';
 
-const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
+const ACTIVITY_TYPE_ICONS: Record<string, React.ReactNode> = {
   xp_gained: <Zap className="w-4 h-4" />,
   level_up: <Trophy className="w-4 h-4" />,
   workout_logged: <Dumbbell className="w-4 h-4" />,
   book_finished: <BookOpen className="w-4 h-4" />,
-  course_completed: <BookOpen className="w-4 h-4" />,
+  course_completed: <GraduationCap className="w-4 h-4" />,
   job_started: <Briefcase className="w-4 h-4" />,
-  salary_update: <Briefcase className="w-4 h-4" />,
+  salary_updated: <TrendingUp className="w-4 h-4" />,
+  salary_update: <TrendingUp className="w-4 h-4" />,
   goal_achieved: <Target className="w-4 h-4" />,
+  event_logged: <Users className="w-4 h-4" />,
   social_event: <Users className="w-4 h-4" />,
-  habit_completed: <Target className="w-4 h-4" />,
+  habit_completed: <CheckCircle className="w-4 h-4" />,
+  mood_logged: <Smile className="w-4 h-4" />,
+  transaction_added: <DollarSign className="w-4 h-4" />,
 };
+
+interface GroupedActivities {
+  date: string;
+  label: string;
+  activities: ActivityLog[];
+  isToday: boolean;
+}
+
+function groupActivitiesByDay(activities: ActivityLog[]): GroupedActivities[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const groups: Record<string, ActivityLog[]> = {};
+
+  activities.forEach((activity) => {
+    const date = new Date(activity.occurred_at);
+    date.setHours(0, 0, 0, 0);
+    const dateKey = date.toISOString().split('T')[0];
+
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+    groups[dateKey].push(activity);
+  });
+
+  const sorted = Object.entries(groups)
+    .map(([dateKey, acts]) => {
+      const date = new Date(dateKey);
+      const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+      let label: string;
+      if (diffDays === 0) label = 'Heute';
+      else if (diffDays === 1) label = 'Gestern';
+      else if (diffDays <= 7) label = `Vor ${diffDays} Tagen`;
+      else label = date.toLocaleDateString('de-DE', { day: '2-digit', month: 'short' });
+
+      return {
+        date: dateKey,
+        label,
+        activities: acts,
+        isToday: diffDays === 0,
+      };
+    })
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  return sorted;
+}
 
 interface RecentActivityFeedProps {
   limit?: number;
@@ -29,6 +95,21 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FactionId | 'all'>('all');
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(
+    new Set(['today', 'yesterday'])
+  );
+
+  const toggleDay = (dateKey: string) => {
+    setExpandedDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateKey)) {
+        next.delete(dateKey);
+      } else {
+        next.add(dateKey);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const loadActivities = async () => {
@@ -131,55 +212,105 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
           <p className="text-white/40 text-sm">Noch keine Aktivitäten</p>
         </div>
       ) : (
-        <div className="space-y-1">
-          {filteredActivities.map((activity, index) => (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
-            >
-              {/* Icon */}
+        <div className="space-y-4">
+          {groupActivitiesByDay(filteredActivities).map((group) => {
+            const dayKey =
+              group.label === 'Heute'
+                ? 'today'
+                : group.label === 'Gestern'
+                ? 'yesterday'
+                : group.date;
+            const isExpanded = expandedDays.has(dayKey);
+
+            return (
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  ACTIVITY_COLORS[activity.activity_type] || 'text-white/60 bg-white/10'
-                }`}
+                key={group.date}
+                className="border-b border-[var(--orb-border)] last:border-0 pb-3"
               >
-                {ACTIVITY_ICONS[activity.activity_type] || <Activity className="w-4 h-4" />}
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-white/90 line-clamp-1">
-                  {activity.title}
-                </p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-white/40">
-                    {formatTimeAgo(activity.occurred_at)}
-                  </span>
-                  {activity.faction_id && (
-                    <span
-                      className="text-xs px-1.5 py-0.5 rounded"
-                      style={{
-                        backgroundColor: `${FACTION_COLORS[activity.faction_id]}20`,
-                        color: FACTION_COLORS[activity.faction_id],
-                      }}
-                    >
-                      {activity.faction_id}
+                {/* Day Header */}
+                <button
+                  onClick={() => toggleDay(dayKey)}
+                  className="flex items-center justify-between w-full mb-2 hover:opacity-80 transition"
+                >
+                  <h3 className="text-sm font-semibold text-white/80">
+                    {group.label}
+                    <span className="ml-2 text-xs text-white/40">
+                      ({group.activities.length})
                     </span>
-                  )}
-                </div>
-              </div>
+                  </h3>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      isExpanded ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-              {/* XP Badge */}
-              {activity.xp_amount > 0 && (
-                <span className="text-xs text-yellow-400 font-medium flex-shrink-0">
-                  +{activity.xp_amount} XP
-                </span>
-              )}
-            </motion.div>
-          ))}
+                {/* Activities (collapsible) */}
+                {isExpanded && (
+                  <div className="space-y-2">
+                    {group.activities.map((activity, index) => (
+                      <motion.div
+                        key={activity.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                      >
+                        {/* Activity Type Icon (primary) */}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            ACTIVITY_COLORS[activity.activity_type] ||
+                            'text-white/60 bg-white/10'
+                          }`}
+                        >
+                          {ACTIVITY_TYPE_ICONS[activity.activity_type] || (
+                            <Activity className="w-4 h-4" />
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white/90 line-clamp-1">
+                            {activity.title}
+                          </p>
+
+                          <div className="flex items-center gap-2 mt-1">
+                            {/* Faction Badge (secondary) */}
+                            {activity.faction_id && (
+                              <span
+                                className="text-xs px-2 py-0.5 rounded-full"
+                                style={{
+                                  backgroundColor: `${FACTION_COLORS[activity.faction_id]}20`,
+                                  color: FACTION_COLORS[activity.faction_id],
+                                }}
+                              >
+                                {activity.faction_id}
+                              </span>
+                            )}
+
+                            {/* XP Badge */}
+                            {activity.xp_amount > 0 && (
+                              <span className="text-xs text-green-400">
+                                +{activity.xp_amount} XP
+                              </span>
+                            )}
+
+                            {/* Timestamp */}
+                            <span className="text-xs text-white/30">
+                              {new Date(activity.occurred_at).toLocaleTimeString('de-DE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </motion.div>

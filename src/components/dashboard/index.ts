@@ -4,3 +4,7 @@ export { default as FactionStatsWidget } from './FactionStatsWidget';
 export { default as HabitTrackerWidget } from './HabitTrackerWidget';
 export { default as RecentActivityFeed } from './RecentActivityFeed';
 export { default as QuickActionsWidget } from './QuickActionsWidget';
+export { default as StreakHighlightWidget } from './StreakHighlightWidget';
+export { default as HabitCompletionModal } from './modals/HabitCompletionModal';
+export { default as MoodLogModal } from './modals/MoodLogModal';
+export { default as QuickTransactionModal } from './modals/QuickTransactionModal';

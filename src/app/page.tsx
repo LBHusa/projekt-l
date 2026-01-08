@@ -12,6 +12,10 @@ import {
   RecentActivityFeed,
   QuickActionsWidget,
   FactionStatsWidget,
+  StreakHighlightWidget,
+  HabitCompletionModal,
+  MoodLogModal,
+  QuickTransactionModal,
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -22,8 +26,12 @@ import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/u
 import { getFactionsWithStats } from '@/lib/data/factions';
 import { getContactsStats, getUpcomingBirthdays, getContactsNeedingAttention } from '@/lib/data/contacts';
 import { UpcomingBirthdays, NeedingAttention } from '@/components/contacts';
-import type { SkillDomain, UserAttributes, MentalStats, FactionWithStats } from '@/lib/database.types';
+import { logHabitCompletion } from '@/lib/data/habits';
+import { saveMoodLog } from '@/lib/data/geist';
+import { createTransaction, getAccounts } from '@/lib/data/finanzen';
+import type { SkillDomain, UserAttributes, MentalStats, FactionWithStats, Account, MoodValue } from '@/lib/database.types';
 import type { ContactWithStats } from '@/lib/types/contacts';
+import type { QuickTransactionData } from '@/components/dashboard/modals/QuickTransactionModal';
 
 // Familie-Domain ID - wird aus der Anzeige gefiltert
 const FAMILIE_DOMAIN_ID = '77777777-7777-7777-7777-777777777777';
@@ -84,64 +92,108 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Load all data in parallel
-        const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData] = await Promise.all([
-          getAllDomains(),
-          getUserProfile(),
-          getTotalSkillCount(),
-          getContactsStats(),
-          getUpcomingBirthdays(14),
-          getContactsNeedingAttention(5),
-          getFactionsWithStats(),
-        ]);
+  // Modal states
+  const [habitModalOpen, setHabitModalOpen] = useState(false);
+  const [moodModalOpen, setMoodModalOpen] = useState(false);
+  const [transactionModalOpen, setTransactionModalOpen] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
-        // Filter out Familie domain (now replaced by Contacts button)
-        const filteredDomains = domainsData.filter(
-          (domain) => domain.id !== FAMILIE_DOMAIN_ID
-        );
+  // Load data function
+  const loadData = async () => {
+    try {
+      // Load all data in parallel
+      const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData] = await Promise.all([
+        getAllDomains(),
+        getUserProfile(),
+        getTotalSkillCount(),
+        getContactsStats(),
+        getUpcomingBirthdays(14),
+        getContactsNeedingAttention(5),
+        getFactionsWithStats(),
+        getAccounts(),
+      ]);
 
-        // Load user levels for each domain
-        const domainsWithLevels = await Promise.all(
-          filteredDomains.map(async (domain) => {
-            const stats = await getDomainStats(domain.id);
-            return {
-              ...domain,
-              level: stats.averageLevel || 1,
-            };
-          })
-        );
+      // Filter out Familie domain (now replaced by Contacts button)
+      const filteredDomains = domainsData.filter(
+        (domain) => domain.id !== FAMILIE_DOMAIN_ID
+      );
 
-        setDomains(domainsWithLevels);
-        setFactions(factionsData);
-        setContactsStats(contactStats);
-        setTotalSkillCount(skillCount);
-        setUpcomingBirthdays(birthdays);
-        setAttentionContacts(attention);
+      // Load user levels for each domain
+      const domainsWithLevels = await Promise.all(
+        filteredDomains.map(async (domain) => {
+          const stats = await getDomainStats(domain.id);
+          return {
+            ...domain,
+            level: stats.averageLevel || 1,
+          };
+        })
+      );
 
-        // Set user profile with attributes and mental stats
-        if (profile) {
-          setUserProfile({
-            username: profile.username,
-            avatarUrl: profile.avatar_url,
-            totalLevel: profile.total_level,
-            totalXp: profile.total_xp,
-            attributes: profile.attributes || DEFAULT_ATTRIBUTES,
-            mentalStats: profile.mental_stats || DEFAULT_MENTAL_STATS,
-          });
-        }
-      } catch (err) {
-        console.error('Error loading dashboard:', err);
-        setError('Fehler beim Laden der Daten');
-      } finally {
-        setLoading(false);
+      setDomains(domainsWithLevels);
+      setFactions(factionsData);
+      setContactsStats(contactStats);
+      setTotalSkillCount(skillCount);
+      setUpcomingBirthdays(birthdays);
+      setAttentionContacts(attention);
+      setAccounts(accountsData);
+
+      // Set user profile with attributes and mental stats
+      if (profile) {
+        setUserProfile({
+          username: profile.username,
+          avatarUrl: profile.avatar_url,
+          totalLevel: profile.total_level,
+          totalXp: profile.total_xp,
+          attributes: profile.attributes || DEFAULT_ATTRIBUTES,
+          mentalStats: profile.mental_stats || DEFAULT_MENTAL_STATS,
+        });
       }
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+      setError('Fehler beim Laden der Daten');
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadData();
   }, []);
+
+  // Modal handlers
+  const handleHabitsComplete = async (habitIds: string[]) => {
+    try {
+      const results = await Promise.all(
+        habitIds.map((id) => logHabitCompletion(id, true))
+      );
+      const totalXP = results.reduce((sum, r) => sum + (r?.xpGained || 0), 0);
+
+      setHabitModalOpen(false);
+      await loadData(); // Refresh dashboard
+    } catch (error) {
+      console.error('Error completing habits:', error);
+    }
+  };
+
+  const handleMoodLog = async (mood: MoodValue, note?: string) => {
+    try {
+      await saveMoodLog(mood, note);
+      setMoodModalOpen(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error logging mood:', error);
+    }
+  };
+
+  const handleTransactionCreate = async (data: QuickTransactionData) => {
+    try {
+      await createTransaction(data);
+      setTransactionModalOpen(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -239,14 +291,19 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Quick Actions Row */}
-          <div className="mb-8">
-            <QuickActionsWidget />
+          {/* Quick Actions + Habits + Streak Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <QuickActionsWidget
+              onOpenHabitModal={() => setHabitModalOpen(true)}
+              onOpenMoodModal={() => setMoodModalOpen(true)}
+              onOpenTransactionModal={() => setTransactionModalOpen(true)}
+            />
+            <HabitTrackerWidget />
+            <StreakHighlightWidget />
           </div>
 
-          {/* Habits + Achievements Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <HabitTrackerWidget />
+          {/* Achievements Row */}
+          <div className="mb-8">
             <AchievementBadgeWidget />
           </div>
 
@@ -408,6 +465,26 @@ export default function Dashboard() {
           Projekt L - Life Gamification System
         </div>
       </footer>
+
+      {/* Quick Actions Modals */}
+      <HabitCompletionModal
+        isOpen={habitModalOpen}
+        onClose={() => setHabitModalOpen(false)}
+        onComplete={handleHabitsComplete}
+      />
+
+      <MoodLogModal
+        isOpen={moodModalOpen}
+        onClose={() => setMoodModalOpen(false)}
+        onSubmit={handleMoodLog}
+      />
+
+      <QuickTransactionModal
+        isOpen={transactionModalOpen}
+        onClose={() => setTransactionModalOpen(false)}
+        onSubmit={handleTransactionCreate}
+        accounts={accounts}
+      />
     </div>
   );
 }

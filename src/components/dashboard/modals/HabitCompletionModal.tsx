@@ -94,7 +94,7 @@ export default function HabitCompletionModal({
 
       // Calculate total XP gained (including streak bonuses)
       const totalXP = results.reduce((sum, result) => {
-        return sum + (result?.xp_gained || 0);
+        return sum + (result?.xpGained || 0);
       }, 0);
 
       setTotalXpGained(totalXP);

@@ -1,81 +1,50 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-  Zap,
-  UserPlus,
-  Dumbbell,
-  BookOpen,
-  PiggyBank,
-  Target,
-} from 'lucide-react';
+import { Check, Smile, DollarSign, Target } from 'lucide-react';
 
 interface QuickAction {
   id: string;
   label: string;
   icon: React.ReactNode;
   color: string;
-  href?: string;
-  onClick?: () => void;
+  onClick: () => void;
 }
 
 interface QuickActionsWidgetProps {
-  onLogXp?: () => void;
-  onAddContact?: () => void;
+  onOpenHabitModal: () => void;
+  onOpenMoodModal: () => void;
+  onOpenTransactionModal: () => void;
 }
 
 export default function QuickActionsWidget({
-  onLogXp,
-  onAddContact,
+  onOpenHabitModal,
+  onOpenMoodModal,
+  onOpenTransactionModal,
 }: QuickActionsWidgetProps) {
-  const router = useRouter();
-
   const quickActions: QuickAction[] = [
     {
-      id: 'log-xp',
-      label: 'XP loggen',
-      icon: <Zap className="w-5 h-5" />,
-      color: '#F59E0B',
-      onClick: onLogXp,
+      id: 'habit',
+      label: 'Habit erledigen',
+      icon: <Check className="w-6 h-6" />,
+      color: '#10B981', // green
+      onClick: onOpenHabitModal,
     },
     {
-      id: 'add-contact',
-      label: 'Kontakt',
-      icon: <UserPlus className="w-5 h-5" />,
-      color: '#EC4899',
-      onClick: onAddContact || (() => router.push('/contacts?action=new')),
+      id: 'mood',
+      label: 'Stimmung loggen',
+      icon: <Smile className="w-6 h-6" />,
+      color: '#F59E0B', // amber
+      onClick: onOpenMoodModal,
     },
     {
-      id: 'workout',
-      label: 'Workout',
-      icon: <Dumbbell className="w-5 h-5" />,
-      color: '#10B981',
-      href: '/gesundheit',
-    },
-    {
-      id: 'book',
-      label: 'Buch',
-      icon: <BookOpen className="w-5 h-5" />,
-      color: '#3B82F6',
-      href: '/lernen',
-    },
-    {
-      id: 'finance',
-      label: 'Finanzen',
-      icon: <PiggyBank className="w-5 h-5" />,
-      color: '#14B8A6',
-      href: '/finanzen',
+      id: 'transaction',
+      label: 'Transaktion',
+      icon: <DollarSign className="w-6 h-6" />,
+      color: '#14B8A6', // teal
+      onClick: onOpenTransactionModal,
     },
   ];
-
-  const handleClick = (action: QuickAction) => {
-    if (action.onClick) {
-      action.onClick();
-    } else if (action.href) {
-      router.push(action.href);
-    }
-  };
 
   return (
     <motion.div
@@ -93,25 +62,27 @@ export default function QuickActionsWidget({
       </div>
 
       {/* Actions Grid */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {quickActions.map((action, index) => (
           <motion.button
             key={action.id}
-            onClick={() => handleClick(action)}
-            className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+            onClick={action.onClick}
+            className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 + index * 0.05 }}
+            transition={{ delay: 0.3 + index * 0.1 }}
           >
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+              className="w-12 h-12 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
               style={{ backgroundColor: `${action.color}20`, color: action.color }}
             >
               {action.icon}
             </div>
-            <span className="text-xs text-white/70 font-medium">{action.label}</span>
+            <span className="text-sm text-white font-medium flex-1 text-left">
+              {action.label}
+            </span>
           </motion.button>
         ))}
       </div>
