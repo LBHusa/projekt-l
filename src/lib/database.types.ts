@@ -1200,7 +1200,8 @@ export type ActivityType =
   | 'project_completed'
   | 'event_logged'
   | 'transaction_added'
-  | 'investment_made';
+  | 'investment_made'
+  | 'achievement_unlocked';
 
 export interface ActivityLog {
   id: string;
@@ -1366,4 +1367,51 @@ export interface WorkoutStats {
   total_xp_earned: number;
   workouts_this_week: number;
   favorite_muscle_group: MuscleGroup | null;
+}
+
+// =============================================
+// Achievements
+// =============================================
+
+export type AchievementRequirementType =
+  | 'habit_streak'
+  | 'habit_count'
+  | 'book_count'
+  | 'course_count'
+  | 'savings_goal'
+  | 'faction_xp'
+  | 'total_xp'
+  | 'level'
+  | 'custom';
+
+export type AchievementCategory = 'habit' | 'learning' | 'finance' | 'social' | 'general';
+export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+export interface Achievement {
+  id: string;
+  achievement_key: string;
+  name: string;
+  description: string;
+  icon: string;
+  requirement_type: AchievementRequirementType;
+  requirement_value: number;
+  xp_reward: number;
+  faction_id: string | null;
+  category: AchievementCategory;
+  rarity: AchievementRarity;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserAchievement {
+  id: string;
+  user_id: string;
+  achievement_id: string;
+  current_progress: number;
+  is_unlocked: boolean;
+  unlocked_at: string | null;
+  created_at: string;
+  updated_at: string;
 }

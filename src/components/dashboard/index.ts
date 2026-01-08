@@ -1,3 +1,4 @@
+export { default as AchievementBadgeWidget } from './AchievementBadge';
 export { default as ClickableLifeBalanceRadar } from './ClickableLifeBalanceRadar';
 export { default as FactionStatsWidget } from './FactionStatsWidget';
 export { default as HabitTrackerWidget } from './HabitTrackerWidget';

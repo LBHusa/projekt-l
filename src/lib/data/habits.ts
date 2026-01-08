@@ -12,6 +12,7 @@ import type {
 } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { checkHabitAchievements } from './achievements';
 
 // ============================================
 // HABITS DATA ACCESS
@@ -375,6 +376,24 @@ export async function logHabitCompletion(
       });
     } catch (err) {
       console.error('Error logging activity:', err);
+    }
+  }
+
+  // Check and award achievements
+  if (completed && habit.habit_type === 'positive') {
+    try {
+      // Get total completed habits count for user
+      const supabase = createBrowserClient();
+      const { count } = await supabase
+        .from('habit_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('completed', true);
+
+      const totalCompleted = count || 0;
+      await checkHabitAchievements(userId, totalCompleted, updatedHabit.current_streak);
+    } catch (err) {
+      console.error('Error checking habit achievements:', err);
     }
   }
 

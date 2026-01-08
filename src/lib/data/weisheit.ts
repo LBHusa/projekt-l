@@ -2,6 +2,7 @@ import { createBrowserClient } from '@/lib/supabase';
 import type { Book, Course, BookStatus, CourseStatus } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { checkBookAchievements, checkCourseAchievements } from './achievements';
 
 // ============================================
 // WEISHEIT DATA ACCESS
@@ -143,6 +144,20 @@ export async function createBook(
       console.error('Error logging book creation activity:', err);
     }
 
+    // Check and award book achievements
+    try {
+      const { count } = await supabase
+        .from('books')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'read');
+
+      const totalRead = count || 0;
+      await checkBookAchievements(userId, totalRead);
+    } catch (err) {
+      console.error('Error checking book achievements:', err);
+    }
+
     // Update book with XP and finished timestamp
     try {
       await supabase
@@ -257,6 +272,21 @@ export async function updateBookProgress(
       });
     } catch (err) {
       console.error('Error logging book completion activity:', err);
+    }
+
+    // Check and award book achievements
+    try {
+      const supabase = createBrowserClient();
+      const { count } = await supabase
+        .from('books')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'read');
+
+      const totalRead = count || 0;
+      await checkBookAchievements(userId, totalRead);
+    } catch (err) {
+      console.error('Error checking book achievements:', err);
     }
 
     return updatedBook;
@@ -480,6 +510,21 @@ export async function updateCourseProgress(
       });
     } catch (err) {
       console.error('Error logging course completion activity:', err);
+    }
+
+    // Check and award course achievements
+    try {
+      const supabase = createBrowserClient();
+      const { count } = await supabase
+        .from('courses')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'completed');
+
+      const totalCompleted = count || 0;
+      await checkCourseAchievements(userId, totalCompleted);
+    } catch (err) {
+      console.error('Error checking course achievements:', err);
     }
 
     return updatedCourse;

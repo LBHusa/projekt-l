@@ -6,6 +6,7 @@ import CharacterHeader from '@/components/CharacterHeader';
 import AttributesPanel from '@/components/AttributesPanel';
 import MentalStatsPanel from '@/components/MentalStatsPanel';
 import {
+  AchievementBadgeWidget,
   ClickableLifeBalanceRadar,
   HabitTrackerWidget,
   RecentActivityFeed,
@@ -238,10 +239,15 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Quick Actions + Habit Tracker Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Quick Actions Row */}
+          <div className="mb-8">
             <QuickActionsWidget />
+          </div>
+
+          {/* Habits + Achievements Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <HabitTrackerWidget />
+            <AchievementBadgeWidget />
           </div>
 
           {/* Recent Activity + Contacts Row */}
