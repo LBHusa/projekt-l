@@ -200,6 +200,44 @@ export default function Dashboard() {
             <FactionStatsWidget factions={factions} />
           </div>
 
+          {/* Data Export Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center">
+                    <Download className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-lg">Daten exportieren</h3>
+                    <p className="text-sm text-white/60">Exportiere alle deine Projekt L Daten</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => window.location.href = '/api/export?format=json'}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-medium flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  JSON Export
+                </button>
+                <button
+                  onClick={() => window.location.href = '/api/export?format=csv'}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition-colors font-medium flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  CSV Export
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Quick Actions + Habit Tracker Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <QuickActionsWidget />
