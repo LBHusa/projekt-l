@@ -11,19 +11,22 @@ import {
   getMoodHistory,
   getJournalEntries,
   getGeistStats,
+  getMentalStatsHistory,
   getMoodEmoji,
   getMoodLabel,
   getMoodColor,
   getRandomPrompt,
   JOURNAL_PROMPTS,
 } from '@/lib/data/geist';
-import type { FactionWithStats, MoodValue, MoodLog, JournalEntry, GeistStats } from '@/lib/database.types';
+import type { FactionWithStats, MoodValue, MoodLog, JournalEntry, GeistStats, MentalStatsChartData } from '@/lib/database.types';
+import MentalStatsChart from '@/components/geist/MentalStatsChart';
 
 export default function GeistPage() {
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [stats, setStats] = useState<GeistStats | null>(null);
   const [moodHistory, setMoodHistory] = useState<MoodLog[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [mentalStatsHistory, setMentalStatsHistory] = useState<MentalStatsChartData[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Mood input state
@@ -58,15 +61,17 @@ export default function GeistPage() {
         });
       }
 
-      const [geistStats, moods, journals] = await Promise.all([
+      const [geistStats, moods, journals, mentalStats] = await Promise.all([
         getGeistStats(),
         getMoodHistory(7, 7),
         getJournalEntries(5),
+        getMentalStatsHistory(90),
       ]);
 
       setStats(geistStats);
       setMoodHistory(moods);
       setJournalEntries(journals);
+      setMentalStatsHistory(mentalStats);
 
       // Set initial mood if already logged today
       if (geistStats.todaysMood) {
@@ -263,6 +268,9 @@ export default function GeistPage() {
             </div>
           )}
         </motion.div>
+
+        {/* Mental Stats History Chart */}
+        <MentalStatsChart data={mentalStatsHistory} />
 
         {/* Journal */}
         <motion.div

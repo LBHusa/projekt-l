@@ -205,6 +205,8 @@ export default function FinanzenPage() {
       tags: [],
       is_recurring: data.is_recurring,
       recurring_frequency: data.recurring_frequency || null,
+      next_occurrence: data.next_occurrence || null,
+      recurrence_end_date: data.recurrence_end_date || null,
     });
     setShowTransactionForm(false);
     await loadData();

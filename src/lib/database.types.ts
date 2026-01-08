@@ -1260,6 +1260,27 @@ export interface GeistStats {
   todaysMood: MoodLog | null;
 }
 
+// Mental Stats Logs (for history chart tracking)
+export interface MentalStatsLog {
+  id: string;
+  user_id: string;
+  mood: number;      // 1-5
+  energy: number;    // 1-5
+  stress: number;    // 1-5
+  focus: number;     // 1-5
+  note: string | null;
+  xp_gained: number;
+  created_at: string;
+}
+
+export interface MentalStatsChartData {
+  date: string;  // YYYY-MM-DD
+  mood: number;
+  energy: number;
+  stress: number;
+  focus: number;
+}
+
 // =============================================
 // KOERPER: Training / Workout System
 // =============================================

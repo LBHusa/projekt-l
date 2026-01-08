@@ -397,3 +397,69 @@ export const JOURNAL_PROMPTS = [
 export function getRandomPrompt(): string {
   return JOURNAL_PROMPTS[Math.floor(Math.random() * JOURNAL_PROMPTS.length)];
 }
+
+// ============================================
+// MENTAL STATS HISTORY (for chart)
+// ============================================
+
+/**
+ * Get mental stats history for chart visualization
+ * Returns daily aggregated data (if multiple entries per day, averages them)
+ */
+export async function getMentalStatsHistory(
+  daysBack: number = 30,
+  userId: string = TEST_USER_ID
+): Promise<import('@/lib/database.types').MentalStatsChartData[]> {
+  const supabase = createBrowserClient();
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysBack);
+
+  const { data, error } = await supabase
+    .from('mental_stats_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('created_at', startDate.toISOString())
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching mental stats history:', error);
+    return [];
+  }
+
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // Aggregate by day (average if multiple entries per day)
+  const grouped = data.reduce((acc, log) => {
+    const date = log.created_at.split('T')[0];
+    if (!acc[date]) {
+      acc[date] = { mood: [], energy: [], stress: [], focus: [] };
+    }
+    acc[date].mood.push(log.mood);
+    acc[date].energy.push(log.energy);
+    acc[date].stress.push(log.stress);
+    acc[date].focus.push(log.focus);
+    return acc;
+  }, {} as Record<string, { mood: number[]; energy: number[]; stress: number[]; focus: number[] }>);
+
+  // Calculate averages and return sorted by date
+  return Object.entries(grouped)
+    .map(([date, stats]) => ({
+      date,
+      mood: Math.round(avg(stats.mood)),
+      energy: Math.round(avg(stats.energy)),
+      stress: Math.round(avg(stats.stress)),
+      focus: Math.round(avg(stats.focus)),
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
+ * Helper: Calculate average of number array
+ */
+function avg(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
