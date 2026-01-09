@@ -9,12 +9,18 @@ import webpush from 'web-push';
 // Test-User ID (TODO: Replace with auth)
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
-// Configure web-push with VAPID keys
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:lukas@projekt-l.de',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Configure web-push lazily (only when needed)
+let vapidConfigured = false;
+function ensureVapidConfigured() {
+  if (!vapidConfigured && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:lukas@projekt-l.de',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+    vapidConfigured = true;
+  }
+}
 
 // Create Supabase client with service role for server-side operations
 const supabase = createClient(
@@ -60,6 +66,7 @@ export async function POST() {
 
     // Send push notification
     try {
+      ensureVapidConfigured();
       await webpush.sendNotification(settings.push_subscription, payload);
 
       // Log successful notification

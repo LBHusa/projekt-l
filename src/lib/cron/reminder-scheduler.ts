@@ -7,12 +7,18 @@ import cron from 'node-cron';
 import { createClient } from '@supabase/supabase-js';
 import webpush from 'web-push';
 
-// Configure web-push
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:lukas@projekt-l.de',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Configure web-push lazily (only when needed)
+let vapidConfigured = false;
+function ensureVapidConfigured() {
+  if (!vapidConfigured && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:lukas@projekt-l.de',
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+    vapidConfigured = true;
+  }
+}
 
 // Supabase client with service role
 const supabase = createClient(
@@ -228,6 +234,7 @@ async function sendReminderPush(
   });
 
   try {
+    ensureVapidConfigured();
     await webpush.sendNotification(subscription, payload);
 
     // Log successful delivery
