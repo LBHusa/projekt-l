@@ -37,10 +37,10 @@ export default function CharacterHeader({
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex items-center justify-between gap-6 p-4 bg-[var(--background-secondary)]/60 backdrop-blur-sm rounded-xl border border-[var(--orb-border)]"
+      className="flex items-center justify-between gap-3 md:gap-6 p-4 bg-[var(--background-secondary)]/60 backdrop-blur-sm rounded-xl border border-[var(--orb-border)]"
     >
       {/* Left: Avatar + Name */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {/* Avatar */}
         <div className="relative">
           {avatarUrl ? (

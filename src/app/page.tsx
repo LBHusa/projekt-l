@@ -219,7 +219,7 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col">
       {/* Header with Character Info */}
       <header className="border-b border-[var(--orb-border)] bg-[var(--background-secondary)]/30 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <CharacterHeader
             username={userProfile.username}
             avatarUrl={userProfile.avatarUrl}
