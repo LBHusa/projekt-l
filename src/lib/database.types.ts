@@ -557,6 +557,10 @@ export interface Habit {
   total_completions: number;
   xp_per_completion: number;
   faction_id: FactionId | null;
+  activity_category_id: string | null;
+  affects_mental_stats: boolean;
+  mental_stress_impact: number;
+  mental_focus_impact: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -569,6 +573,9 @@ export interface HabitLog {
   logged_at: string;
   completed: boolean;
   notes: string | null;
+  duration_minutes: number | null;
+  trigger: string | null;
+  context: string | null;
   created_at: string;
 }
 
@@ -604,6 +611,43 @@ export interface HabitWithFactions extends Habit {
 export interface HabitWithFactionsAndLogs extends HabitWithFactions {
   logs: HabitLog[];
   completedToday: boolean;
+}
+
+// =============================================
+// Habit Time Tracking & Activity Categories
+// =============================================
+
+export interface ActivityCategory {
+  id: string;
+  name_de: string;
+  name_en: string;
+  icon: string;
+  color: string;
+  is_productive: boolean;
+  is_negative: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface DailyTimeStats {
+  user_id: string;
+  log_date: string;
+  category_id: string;
+  category_name: string;
+  category_icon: string;
+  category_color: string;
+  is_productive: boolean;
+  is_negative: boolean;
+  habit_count: number;
+  total_minutes: number;
+  total_hours: number;
+}
+
+export interface WeeklyTimeStats extends Omit<DailyTimeStats, 'log_date' | 'habit_count'> {
+  week_start: string;
+  active_days: number;
+  habit_count: number;
+  avg_hours_per_day: number;
 }
 
 // =============================================

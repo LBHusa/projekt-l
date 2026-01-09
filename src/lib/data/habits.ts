@@ -666,3 +666,128 @@ export async function distributeHabitXpToFactions(
     }
   }
 }
+
+// ============================================
+// TIME TRACKING
+// ============================================
+
+export async function logHabitWithTime(
+  habitId: string,
+  durationMinutes: number,
+  notes?: string,
+  trigger?: string,
+  context?: string,
+  userId: string = TEST_USER_ID
+): Promise<void> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('habit_logs')
+    .insert({
+      habit_id: habitId,
+      user_id: userId,
+      completed: true,
+      duration_minutes: durationMinutes,
+      notes,
+      trigger,
+      context,
+      logged_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    console.error('Error logging habit with time:', error);
+    throw error;
+  }
+
+  // Award XP for positive habits
+  const habit = await getHabit(habitId);
+  if (habit && habit.habit_type === 'positive' && habit.xp_per_completion > 0) {
+    await distributeHabitXpToFactions(habitId, habit.xp_per_completion, userId);
+  }
+
+  // Check achievements
+  await checkHabitAchievements(habitId, userId);
+
+  // Log activity
+  await logActivity({
+    user_id: userId,
+    activity_type: 'habit_completed',
+    title: `${habit?.name || 'Habit'} geloggt`,
+    description: `${durationMinutes} Minuten`,
+    xp_amount: habit?.xp_per_completion || 0,
+    related_entity_type: 'habit',
+    related_entity_id: habitId,
+  });
+}
+
+export async function getTodayTimeStats(
+  userId: string = TEST_USER_ID
+): Promise<any[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .rpc('get_today_time_summary', { p_user_id: userId });
+
+  if (error) {
+    console.error('Error fetching today time stats:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getDailyTimeStats(
+  date: Date,
+  userId: string = TEST_USER_ID
+): Promise<any[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('daily_time_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('log_date', date.toISOString().split('T')[0]);
+
+  if (error) {
+    console.error('Error fetching daily time stats:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getWeeklyTimeStats(
+  weekStart: Date,
+  userId: string = TEST_USER_ID
+): Promise<any[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('weekly_time_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('week_start', weekStart.toISOString());
+
+  if (error) {
+    console.error('Error fetching weekly time stats:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getActivityCategories(): Promise<any[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('activity_categories')
+    .select('*')
+    .order('sort_order');
+
+  if (error) {
+    console.error('Error fetching activity categories:', error);
+    throw error;
+  }
+
+  return data || [];
+}
