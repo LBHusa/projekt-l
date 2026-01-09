@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import type { Habit, HabitType, HabitFrequency, FactionId } from '@/lib/database.types';
 import { HABIT_ICONS, HABIT_COLORS, FACTIONS, DAYS } from '@/lib/ui/constants';
+import HabitTemplateSelector from './HabitTemplateSelector';
+import type { HabitTemplate } from '@/lib/data/habit-templates';
 
 interface HabitFormProps {
   habit?: Habit | null;
@@ -42,6 +44,8 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
   const [selectedFactions, setSelectedFactions] = useState<Set<FactionId>>(
     new Set(formData.factions?.map(f => f.faction_id) || [])
   );
+
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +152,28 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
     }));
   };
 
+  const applyTemplate = (template: HabitTemplate) => {
+    // Update form data
+    setFormData({
+      name: template.name,
+      description: template.description,
+      icon: template.icon,
+      color: template.color,
+      habit_type: template.habit_type,
+      frequency: template.frequency,
+      target_days: template.target_days,
+      xp_per_completion: template.xp_per_completion,
+      factions: template.factions,
+    });
+
+    // CRITICAL: Update selectedFactions Set for multi-faction UI sync
+    setSelectedFactions(
+      new Set(template.factions?.map(f => f.faction_id) || [])
+    );
+
+    setShowTemplateSelector(false);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -166,6 +192,18 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {/* Template Button - Only show in CREATE mode */}
+          {!habit && (
+            <button
+              type="button"
+              onClick={() => setShowTemplateSelector(true)}
+              className="w-full py-2.5 mb-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center gap-2 text-white/70"
+            >
+              <Sparkles className="w-4 h-4" />
+              Aus Vorlage erstellen
+            </button>
+          )}
+
           {/* Name */}
           <div>
             <label className="block text-sm font-medium mb-1.5">Name *</label>
@@ -413,6 +451,13 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
             </button>
           </div>
         </form>
+
+        {/* Template Selector Modal */}
+        <HabitTemplateSelector
+          isOpen={showTemplateSelector}
+          onClose={() => setShowTemplateSelector(false)}
+          onSelect={applyTemplate}
+        />
       </div>
     </div>
   );
