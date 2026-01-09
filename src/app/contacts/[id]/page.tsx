@@ -184,7 +184,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
           href="/contacts"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+          <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
         </Link>
 
         <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
             className={`p-2 rounded-lg transition-colors ${
               contact.is_favorite
                 ? 'bg-red-500/20 text-red-500'
-                : 'bg-white/5 text-white/40 hover:text-red-500'
+                : 'bg-white/5 text-adaptive-dim hover:text-red-500'
             }`}
             title={contact.is_favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
           >
@@ -204,7 +204,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
             className={`p-2 rounded-lg transition-colors ${
               contact.suppress_attention_reminder
                 ? 'bg-amber-500/20 text-amber-500'
-                : 'bg-white/5 text-white/40 hover:text-amber-500'
+                : 'bg-white/5 text-adaptive-dim hover:text-amber-500'
             }`}
             title={contact.suppress_attention_reminder ? 'Erinnerungen aktivieren' : 'Erinnerungen deaktivieren'}
           >
@@ -216,13 +216,13 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
           </button>
           <button
             onClick={() => setShowEditForm(true)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 transition-colors"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-adaptive-muted transition-colors"
           >
             <Edit className="w-5 h-5" />
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-500 transition-colors"
+            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-adaptive-dim hover:text-red-500 transition-colors"
           >
             <Trash2 className="w-5 h-5" />
           </button>
@@ -251,14 +251,14 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Info */}
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-white">{displayName}</h1>
-            <p className="text-white/60">{typeMeta.labelDe}</p>
+            <h1 className="text-2xl font-bold text-adaptive">{displayName}</h1>
+            <p className="text-adaptive-muted">{typeMeta.labelDe}</p>
 
             {/* Level & XP */}
             <div className="mt-3">
               <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-white/60">Level {contact.relationship_level}</span>
-                <span className="text-white/40">
+                <span className="text-adaptive-muted">Level {contact.relationship_level}</span>
+                <span className="text-adaptive-dim">
                   {contact.current_xp} / {xpForNext} XP
                 </span>
               </div>
@@ -277,18 +277,18 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4 mt-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-white">{contact.interaction_count}</p>
-            <p className="text-xs text-white/40">Interaktionen</p>
+            <p className="text-2xl font-bold text-adaptive">{contact.interaction_count}</p>
+            <p className="text-xs text-adaptive-dim">Interaktionen</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-white">{contact.trust_level}</p>
-            <p className="text-xs text-white/40">Vertrauen</p>
+            <p className="text-2xl font-bold text-adaptive">{contact.trust_level}</p>
+            <p className="text-xs text-adaptive-dim">Vertrauen</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-bold text-adaptive">
               {stats?.last30Days || 0}
             </p>
-            <p className="text-xs text-white/40">Letzte 30 Tage</p>
+            <p className="text-xs text-adaptive-dim">Letzte 30 Tage</p>
           </div>
         </div>
       </motion.div>
@@ -302,27 +302,27 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
           transition={{ delay: 0.1 }}
           className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4"
         >
-          <h3 className="text-sm font-medium text-white/60 mb-3 flex items-center gap-2">
+          <h3 className="text-sm font-medium text-adaptive-muted mb-3 flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             Wichtige Daten
           </h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-white/40">Geburtstag</span>
-              <span className="text-white">{formatDate(contact.birthday)}</span>
+              <span className="text-adaptive-dim">Geburtstag</span>
+              <span className="text-adaptive">{formatDate(contact.birthday)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/40">Jahrestag</span>
-              <span className="text-white">{formatDate(contact.anniversary)}</span>
+              <span className="text-adaptive-dim">Jahrestag</span>
+              <span className="text-adaptive">{formatDate(contact.anniversary)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/40">Kennengelernt</span>
-              <span className="text-white">{formatDate(contact.met_date)}</span>
+              <span className="text-adaptive-dim">Kennengelernt</span>
+              <span className="text-adaptive">{formatDate(contact.met_date)}</span>
             </div>
             {contact.met_context && (
               <div className="flex justify-between">
-                <span className="text-white/40">Kontext</span>
-                <span className="text-white">{contact.met_context}</span>
+                <span className="text-adaptive-dim">Kontext</span>
+                <span className="text-adaptive">{contact.met_context}</span>
               </div>
             )}
           </div>
@@ -335,7 +335,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
           transition={{ delay: 0.2 }}
           className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4"
         >
-          <h3 className="text-sm font-medium text-white/60 mb-3">Gemeinsame Interessen</h3>
+          <h3 className="text-sm font-medium text-adaptive-muted mb-3">Gemeinsame Interessen</h3>
           {contact.shared_interests.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {contact.shared_interests.map((interest, i) => (
@@ -348,13 +348,13 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
               ))}
             </div>
           ) : (
-            <p className="text-white/40 text-sm">Keine Interessen hinterlegt</p>
+            <p className="text-adaptive-dim text-sm">Keine Interessen hinterlegt</p>
           )}
 
           {contact.notes && (
             <div className="mt-4 pt-3 border-t border-white/10">
-              <p className="text-xs text-white/40 mb-1">Notizen</p>
-              <p className="text-sm text-white/80">{contact.notes}</p>
+              <p className="text-xs text-adaptive-dim mb-1">Notizen</p>
+              <p className="text-sm text-adaptive">{contact.notes}</p>
             </div>
           )}
         </motion.div>
@@ -368,7 +368,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
         className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4"
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-white/60 flex items-center gap-2">
+          <h3 className="text-sm font-medium text-adaptive-muted flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Interaktions-Historie
           </h3>
@@ -395,7 +395,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
                   <span className="text-xl">{interactionMeta.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">
+                      <span className="text-adaptive font-medium">
                         {interaction.title || interactionMeta.labelDe}
                       </span>
                       <span
@@ -409,9 +409,9 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
                       </span>
                     </div>
                     {interaction.description && (
-                      <p className="text-sm text-white/60 truncate">{interaction.description}</p>
+                      <p className="text-sm text-adaptive-muted truncate">{interaction.description}</p>
                     )}
-                    <div className="flex items-center gap-3 text-xs text-white/40 mt-1">
+                    <div className="flex items-center gap-3 text-xs text-adaptive-dim mt-1">
                       <span>{formatTimeAgo(interaction.occurred_at)}</span>
                       {interaction.duration_minutes && (
                         <span>{interaction.duration_minutes} Min</span>
@@ -424,7 +424,7 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
             })}
           </div>
         ) : (
-          <p className="text-white/40 text-sm text-center py-4">
+          <p className="text-adaptive-dim text-sm text-center py-4">
             Noch keine Interaktionen
           </p>
         )}
@@ -476,14 +476,14 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
               className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-6 max-w-sm w-full"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold text-white mb-2">Kontakt löschen?</h3>
-              <p className="text-white/60 text-sm mb-4">
+              <h3 className="text-lg font-semibold text-adaptive mb-2">Kontakt löschen?</h3>
+              <p className="text-adaptive-muted text-sm mb-4">
                 {displayName} und alle Interaktionen werden unwiderruflich gelöscht.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
+                  className="flex-1 py-2 rounded-lg bg-white/5 text-adaptive-muted hover:bg-white/10 transition-colors"
                 >
                   Abbrechen
                 </button>

@@ -225,11 +225,11 @@ export default function ContactImportPage() {
           href="/contacts"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+          <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-white">Kontakte importieren</h1>
-          <p className="text-sm text-white/40">
+          <h1 className="text-xl font-bold text-adaptive">Kontakte importieren</h1>
+          <p className="text-sm text-adaptive-dim">
             CSV, vCard oder Google Contacts importieren
           </p>
         </div>
@@ -255,7 +255,7 @@ export default function ContactImportPage() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   format === f.key
                     ? 'bg-purple-500 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
               >
                 <span>{f.icon}</span>
@@ -281,11 +281,11 @@ export default function ContactImportPage() {
                 if (file) handleFileSelect(file);
               }}
             />
-            <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
-            <p className="text-white/60 mb-2">
+            <Upload className="w-12 h-12 text-adaptive-dim mx-auto mb-4" />
+            <p className="text-adaptive-muted mb-2">
               Datei hierher ziehen oder klicken zum Auswählen
             </p>
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-adaptive-dim">
               {format === 'google' && 'Google Contacts CSV Export'}
               {format === 'vcard' && 'Apple vCard (.vcf)'}
               {format === 'csv' && 'CSV mit beliebigen Spalten'}
@@ -294,8 +294,8 @@ export default function ContactImportPage() {
 
           {/* Format Help */}
           <div className="bg-white/5 rounded-xl p-4">
-            <h3 className="font-medium text-white mb-2">So exportierst du deine Kontakte:</h3>
-            <div className="text-sm text-white/60 space-y-2">
+            <h3 className="font-medium text-adaptive mb-2">So exportierst du deine Kontakte:</h3>
+            <div className="text-sm text-adaptive-muted space-y-2">
               {format === 'google' && (
                 <>
                   <p>1. Gehe zu contacts.google.com</p>
@@ -330,8 +330,8 @@ export default function ContactImportPage() {
           className="space-y-6"
         >
           <div className="bg-white/5 rounded-xl p-5">
-            <h3 className="font-medium text-white mb-4">Spalten zuordnen</h3>
-            <p className="text-sm text-white/60 mb-4">
+            <h3 className="font-medium text-adaptive mb-4">Spalten zuordnen</h3>
+            <p className="text-sm text-adaptive-muted mb-4">
               Ordne die Spalten deiner CSV-Datei den Kontaktfeldern zu.
             </p>
 
@@ -345,7 +345,7 @@ export default function ContactImportPage() {
                 { key: 'address', label: 'Adresse' },
               ].map((field) => (
                 <div key={field.key}>
-                  <label className="text-sm text-white/60 block mb-1">{field.label}</label>
+                  <label className="text-sm text-adaptive-muted block mb-1">{field.label}</label>
                   <select
                     value={columnMapping[field.key as keyof ColumnMapping] || ''}
                     onChange={(e) =>
@@ -354,7 +354,7 @@ export default function ContactImportPage() {
                         [field.key]: e.target.value || undefined,
                       }))
                     }
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-adaptive text-sm focus:outline-none focus:border-purple-500"
                   >
                     <option value="">-- Nicht zuordnen --</option>
                     {csvHeaders.map((header) => (
@@ -370,7 +370,7 @@ export default function ContactImportPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setStep('upload')}
-                className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
+                className="px-4 py-2 rounded-lg bg-white/5 text-adaptive-muted hover:bg-white/10 transition-colors"
               >
                 Zurück
               </button>
@@ -397,8 +397,8 @@ export default function ContactImportPage() {
           <div className="flex items-center justify-between bg-white/5 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-purple-400" />
-              <span className="text-white">{fileName}</span>
-              <span className="text-white/40 text-sm">
+              <span className="text-adaptive">{fileName}</span>
+              <span className="text-adaptive-dim text-sm">
                 ({contacts.length} Kontakte gefunden)
               </span>
             </div>
@@ -408,7 +408,7 @@ export default function ContactImportPage() {
                 setContacts([]);
                 setFileContent('');
               }}
-              className="text-sm text-white/60 hover:text-white"
+              className="text-sm text-adaptive-muted hover:text-adaptive"
             >
               Andere Datei
             </button>
@@ -452,7 +452,7 @@ export default function ContactImportPage() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={toggleAll}
-                  className="flex items-center gap-2 text-sm text-white/60 hover:text-white"
+                  className="flex items-center gap-2 text-sm text-adaptive-muted hover:text-adaptive"
                 >
                   <div
                     className={`w-4 h-4 rounded border ${
@@ -467,7 +467,7 @@ export default function ContactImportPage() {
                   </div>
                   Alle auswählen
                 </button>
-                <span className="text-sm text-white/40">
+                <span className="text-sm text-adaptive-dim">
                   {selectedCount} von {contacts.length} ausgewählt
                 </span>
               </div>
@@ -475,7 +475,7 @@ export default function ContactImportPage() {
               <div className="bg-white/5 rounded-xl overflow-hidden max-h-96 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-white/5 sticky top-0">
-                    <tr className="text-left text-sm text-white/60">
+                    <tr className="text-left text-sm text-adaptive-muted">
                       <th className="p-3 w-10"></th>
                       <th className="p-3">Name</th>
                       <th className="p-3">E-Mail / Telefon</th>
@@ -504,17 +504,17 @@ export default function ContactImportPage() {
                           </button>
                         </td>
                         <td className="p-3">
-                          <div className="text-white">
+                          <div className="text-adaptive">
                             {contact.firstName} {contact.lastName}
                           </div>
                           {contact.nickname && (
-                            <div className="text-sm text-white/40">"{contact.nickname}"</div>
+                            <div className="text-sm text-adaptive-dim">"{contact.nickname}"</div>
                           )}
                         </td>
-                        <td className="p-3 text-sm text-white/60">
+                        <td className="p-3 text-sm text-adaptive-muted">
                           {contact.email || contact.phone || '-'}
                         </td>
-                        <td className="p-3 text-sm text-white/60">
+                        <td className="p-3 text-sm text-adaptive-muted">
                           {contact.birthday || '-'}
                         </td>
                         <td className="p-3">
@@ -523,7 +523,7 @@ export default function ContactImportPage() {
                             onChange={(e) =>
                               updateContactType(index, e.target.value as RelationshipType)
                             }
-                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-purple-500"
+                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-sm text-adaptive focus:outline-none focus:border-purple-500"
                           >
                             {Object.entries(RELATIONSHIP_TYPE_META).map(([key, meta]) => (
                               <option key={key} value={key}>
@@ -541,7 +541,7 @@ export default function ContactImportPage() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setStep('upload')}
-                  className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-white/5 text-adaptive-muted hover:bg-white/10 transition-colors"
                 >
                   Zurück
                 </button>
@@ -567,7 +567,7 @@ export default function ContactImportPage() {
           className="flex flex-col items-center justify-center py-20"
         >
           <Loader2 className="w-12 h-12 text-purple-500 animate-spin mb-4" />
-          <p className="text-white mb-4">Importiere Kontakte...</p>
+          <p className="text-adaptive mb-4">Importiere Kontakte...</p>
           <div className="w-64 h-2 bg-white/10 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-purple-500"
@@ -575,7 +575,7 @@ export default function ContactImportPage() {
               animate={{ width: `${importProgress}%` }}
             />
           </div>
-          <p className="text-sm text-white/40 mt-2">{importProgress}%</p>
+          <p className="text-sm text-adaptive-dim mt-2">{importProgress}%</p>
         </motion.div>
       )}
 
@@ -593,17 +593,17 @@ export default function ContactImportPage() {
               <AlertCircle className="w-16 h-16 text-amber-400 mx-auto mb-4" />
             )}
 
-            <h2 className="text-2xl font-bold text-white mb-2">Import abgeschlossen</h2>
+            <h2 className="text-2xl font-bold text-adaptive mb-2">Import abgeschlossen</h2>
 
             <div className="flex items-center justify-center gap-8 my-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400">{importResult.imported}</div>
-                <div className="text-sm text-white/60">Importiert</div>
+                <div className="text-sm text-adaptive-muted">Importiert</div>
               </div>
               {importResult.skipped > 0 && (
                 <div className="text-center">
                   <div className="text-3xl font-bold text-amber-400">{importResult.skipped}</div>
-                  <div className="text-sm text-white/60">Übersprungen (Duplikate)</div>
+                  <div className="text-sm text-adaptive-muted">Übersprungen (Duplikate)</div>
                 </div>
               )}
               {importResult.errors.length > 0 && (
@@ -611,7 +611,7 @@ export default function ContactImportPage() {
                   <div className="text-3xl font-bold text-red-400">
                     {importResult.errors.length}
                   </div>
-                  <div className="text-sm text-white/60">Fehler</div>
+                  <div className="text-sm text-adaptive-muted">Fehler</div>
                 </div>
               )}
             </div>
@@ -644,7 +644,7 @@ export default function ContactImportPage() {
                   setFileContent('');
                   setImportResult(null);
                 }}
-                className="px-4 py-3 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
+                className="px-4 py-3 rounded-lg bg-white/5 text-adaptive-muted hover:bg-white/10 transition-colors"
               >
                 Weitere importieren
               </button>

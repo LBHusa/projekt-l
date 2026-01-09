@@ -266,7 +266,7 @@ export default function FinanzenPage() {
           <div className="w-16 h-16 rounded-full bg-emerald-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Wallet className="w-8 h-8 text-emerald-400" />
           </div>
-          <p className="text-white/50">Lade Finanzen-Daten...</p>
+          <p className="text-adaptive-muted">Lade Finanzen-Daten...</p>
         </div>
       </div>
     );

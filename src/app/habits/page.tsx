@@ -118,14 +118,14 @@ export default function HabitsPage() {
                 href="/"
                 className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
               >
-                <ArrowLeft className="w-5 h-5 text-white/60" />
+                <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
               </Link>
               <div>
                 <h1 className="text-xl font-bold flex items-center gap-2">
                   <Flame className="w-6 h-6 text-orange-400" />
                   Habits
                 </h1>
-                <p className="text-sm text-white/50">
+                <p className="text-sm text-adaptive/50">
                   {todayCompleted}/{todayTotal} heute erledigt
                 </p>
               </div>
@@ -151,39 +151,39 @@ export default function HabitsPage() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/50 mb-1">
+              <div className="flex items-center gap-2 text-adaptive-muted mb-1">
                 <Target className="w-4 h-4" />
                 <span className="text-sm">Heute</span>
               </div>
               <div className="text-2xl font-bold">{completionRate}%</div>
-              <div className="text-xs text-white/40">{todayCompleted} von {todayTotal}</div>
+              <div className="text-xs text-adaptive-dim">{todayCompleted} von {todayTotal}</div>
             </div>
 
             <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/50 mb-1">
+              <div className="flex items-center gap-2 text-adaptive-muted mb-1">
                 <Flame className="w-4 h-4 text-orange-400" />
                 <span className="text-sm">Streaks</span>
               </div>
               <div className="text-2xl font-bold">{stats.totalStreaks}</div>
-              <div className="text-xs text-white/40">Aktive Tage</div>
+              <div className="text-xs text-adaptive-dim">Aktive Tage</div>
             </div>
 
             <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/50 mb-1">
+              <div className="flex items-center gap-2 text-adaptive-muted mb-1">
                 <TrendingUp className="w-4 h-4 text-green-400" />
                 <span className="text-sm">Rekord</span>
               </div>
               <div className="text-2xl font-bold">{stats.longestStreak}</div>
-              <div className="text-xs text-white/40">Längster Streak</div>
+              <div className="text-xs text-adaptive-dim">Längster Streak</div>
             </div>
 
             <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-xl p-4">
-              <div className="flex items-center gap-2 text-white/50 mb-1">
+              <div className="flex items-center gap-2 text-adaptive-muted mb-1">
                 <Calendar className="w-4 h-4" />
                 <span className="text-sm">Gesamt</span>
               </div>
               <div className="text-2xl font-bold">{stats.totalCompletions}</div>
-              <div className="text-xs text-white/40">Abgeschlossen</div>
+              <div className="text-xs text-adaptive-dim">Abgeschlossen</div>
             </div>
           </motion.div>
         )}
@@ -196,8 +196,8 @@ export default function HabitsPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === f
-                  ? 'bg-white/20 text-white'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+                  ? 'bg-white/20 text-adaptive'
+                  : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
               }`}
             >
               {f === 'all' && 'Alle'}
@@ -218,7 +218,7 @@ export default function HabitsPage() {
               <Flame className="w-10 h-10 text-white/20" />
             </div>
             <h3 className="text-lg font-medium mb-2">Noch keine Habits</h3>
-            <p className="text-white/50 mb-6">
+            <p className="text-adaptive-muted mb-6">
               Erstelle deinen ersten Habit und baue positive Gewohnheiten auf!
             </p>
             <button
@@ -236,7 +236,7 @@ export default function HabitsPage() {
               <div>
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <span className="text-green-400">Aufbauen</span>
-                  <span className="text-sm font-normal text-white/40">
+                  <span className="text-sm font-normal text-adaptive-dim">
                     ({positiveHabits.filter(h => h.completedToday).length}/{positiveHabits.length})
                   </span>
                 </h2>
@@ -265,7 +265,7 @@ export default function HabitsPage() {
               <div>
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <span className="text-red-400">Vermeiden</span>
-                  <span className="text-sm font-normal text-white/40">
+                  <span className="text-sm font-normal text-adaptive-dim">
                     ({negativeHabits.length} Habits)
                   </span>
                 </h2>
