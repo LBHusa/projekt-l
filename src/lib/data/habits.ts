@@ -706,23 +706,15 @@ export async function logHabitWithTime(
   }
 
   // Check achievements
-  if (habit && habit.habit_type === 'positive') {
-    const supabase = createBrowserClient();
-    const { count } = await supabase
-      .from('habit_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('completed', true);
-
-    const totalCompleted = count || 0;
-    const currentStreak = habit.current_streak || 0;
-    await checkHabitAchievements(userId, totalCompleted, currentStreak);
-  }
+  const totalHabits = await getHabits(userId);
+  const habitStats = await getHabitStats(userId);
+  await checkHabitAchievements(userId, totalHabits.length, habitStats.longestStreak);
 
   // Log activity
   await logActivity({
     userId,
     activityType: 'habit_completed',
+    factionId: 'geist', // Default to Geist for habit tracking
     title: `${habit?.name || 'Habit'} geloggt`,
     description: `${durationMinutes} Minuten`,
     xpAmount: habit?.xp_per_completion || 0,
