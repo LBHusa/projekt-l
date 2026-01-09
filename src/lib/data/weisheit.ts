@@ -401,7 +401,50 @@ export async function createCourse(
     throw error;
   }
 
-  return data;
+  const course = data;
+
+  // Check if created as completed → award XP
+  if (input.status === 'completed' && course) {
+    const xpGained = calculateCourseXp(data.total_hours);
+
+    // Update faction stats
+    await updateFactionStats('weisheit', xpGained, userId);
+
+    // Log activity
+    await logActivity({
+      userId,
+      activityType: 'course_completed',
+      factionId: 'weisheit',
+      title: `Kurs abgeschlossen: '${data.title}'`,
+      description: data.platform ? `Platform: ${data.platform}` : undefined,
+      xpAmount: xpGained,
+      relatedEntityType: 'course',
+      relatedEntityId: course.id,
+      metadata: {
+        total_hours: data.total_hours,
+        platform: data.platform,
+      },
+    });
+
+    // Check achievements
+    const { count: totalCompleted } = await supabase
+      .from('courses')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'completed');
+
+    await checkCourseAchievements(userId, totalCompleted || 0);
+
+    // Update course with XP
+    await supabase
+      .from('courses')
+      .update({ xp_gained: xpGained })
+      .eq('id', course.id);
+
+    course.xp_gained = xpGained;
+  }
+
+  return course;
 }
 
 export async function updateCourse(
