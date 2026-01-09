@@ -706,17 +706,28 @@ export async function logHabitWithTime(
   }
 
   // Check achievements
-  await checkHabitAchievements(habitId, userId);
+  if (habit && habit.habit_type === 'positive') {
+    const supabase = createBrowserClient();
+    const { count } = await supabase
+      .from('habit_logs')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('completed', true);
+
+    const totalCompleted = count || 0;
+    const currentStreak = habit.current_streak || 0;
+    await checkHabitAchievements(userId, totalCompleted, currentStreak);
+  }
 
   // Log activity
   await logActivity({
-    user_id: userId,
-    activity_type: 'habit_completed',
+    userId,
+    activityType: 'habit_completed',
     title: `${habit?.name || 'Habit'} geloggt`,
     description: `${durationMinutes} Minuten`,
-    xp_amount: habit?.xp_per_completion || 0,
-    related_entity_type: 'habit',
-    related_entity_id: habitId,
+    xpAmount: habit?.xp_per_completion || 0,
+    relatedEntityType: 'habit',
+    relatedEntityId: habitId,
   });
 }
 
