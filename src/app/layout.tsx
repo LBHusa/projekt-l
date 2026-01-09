@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Projekt L - Life Gamification",
   description: "Dein Leben als RPG - Skill Trees, Level, XP und mehr",
+  manifest: '/manifest.json',
+  themeColor: '#8b5cf6',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Projekt L',
+  },
 };
 
 export default function RootLayout({
