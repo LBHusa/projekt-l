@@ -159,13 +159,16 @@ export async function unlockAchievement(
   // Unlock achievement
   const { data: userAch, error: unlockError } = await supabase
     .from('user_achievements')
-    .upsert({
-      user_id: userId,
-      achievement_id: achievement.id,
-      current_progress: achievement.requirement_value,
-      is_unlocked: true,
-      unlocked_at: new Date().toISOString(),
-    })
+    .upsert(
+      {
+        user_id: userId,
+        achievement_id: achievement.id,
+        current_progress: achievement.requirement_value,
+        is_unlocked: true,
+        unlocked_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,achievement_id' }
+    )
     .select()
     .single();
 
@@ -235,12 +238,15 @@ export async function updateAchievementProgress(
   // Update or create progress
   const { error } = await supabase
     .from('user_achievements')
-    .upsert({
-      user_id: userId,
-      achievement_id: achievement.id,
-      current_progress: newProgress,
-      is_unlocked: false,
-    });
+    .upsert(
+      {
+        user_id: userId,
+        achievement_id: achievement.id,
+        current_progress: newProgress,
+        is_unlocked: false,
+      },
+      { onConflict: 'user_id,achievement_id' }
+    );
 
   if (error) {
     console.error('Error updating achievement progress:', error);
