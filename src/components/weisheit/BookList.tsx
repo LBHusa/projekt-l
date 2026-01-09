@@ -78,7 +78,7 @@ export default function BookList({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as BookStatus | 'all')}
-            className="px-2 py-1 text-sm bg-white/10 border border-white/20 rounded-lg text-white/70"
+            className="px-2 py-1 text-sm bg-white/10 border border-white/20 rounded-lg text-adaptive-muted"
           >
             <option value="all">Alle</option>
             <option value="reading">Lese gerade</option>
@@ -99,7 +99,7 @@ export default function BookList({
 
       {/* Book List */}
       {filteredBooks.length === 0 ? (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Keine Bücher gefunden</p>
           {onAddBook && filterStatus === 'all' && (
@@ -131,7 +131,7 @@ export default function BookList({
                     </span>
                   </div>
                   {book.author && (
-                    <p className="text-sm text-white/60 truncate">{book.author}</p>
+                    <p className="text-sm text-adaptive-muted truncate">{book.author}</p>
                   )}
                   {book.status === 'read' && book.rating && (
                     <div className="mt-1">
@@ -143,7 +143,7 @@ export default function BookList({
                 {/* Progress for reading books */}
                 {book.status === 'reading' && book.pages && (
                   <div className="text-right ml-4">
-                    <div className="text-sm text-white/50">
+                    <div className="text-sm text-adaptive-muted">
                       {book.current_page} / {book.pages} S.
                     </div>
                     <div className="w-20 h-1.5 bg-white/10 rounded-full mt-1">
@@ -165,31 +165,31 @@ export default function BookList({
                 >
                   <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                     {book.genre && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Genre:</span> {book.genre}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Genre:</span> {book.genre}
                       </div>
                     )}
                     {book.pages && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Seiten:</span> {book.pages}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Seiten:</span> {book.pages}
                       </div>
                     )}
                     {book.started_at && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Begonnen:</span>{' '}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Begonnen:</span>{' '}
                         {new Date(book.started_at).toLocaleDateString('de-DE')}
                       </div>
                     )}
                     {book.finished_at && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Beendet:</span>{' '}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Beendet:</span>{' '}
                         {new Date(book.finished_at).toLocaleDateString('de-DE')}
                       </div>
                     )}
                   </div>
 
                   {book.notes && (
-                    <p className="text-sm text-white/60 mb-3">{book.notes}</p>
+                    <p className="text-sm text-adaptive-muted mb-3">{book.notes}</p>
                   )}
 
                   {book.xp_gained > 0 && (
@@ -201,7 +201,7 @@ export default function BookList({
                   {/* Progress Update for reading books */}
                   {book.status === 'reading' && onUpdateProgress && (
                     <div className="flex items-center gap-2 mb-4">
-                      <BookMarked className="w-4 h-4 text-white/40" />
+                      <BookMarked className="w-4 h-4 text-adaptive-dim" />
                       <input
                         type="number"
                         min={0}
@@ -214,7 +214,7 @@ export default function BookList({
                         }}
                         className="w-20 px-2 py-1 text-sm bg-white/10 border border-white/20 rounded"
                       />
-                      <span className="text-sm text-white/40">/ {book.pages || '?'} Seiten</span>
+                      <span className="text-sm text-adaptive-dim">/ {book.pages || '?'} Seiten</span>
                     </div>
                   )}
 
@@ -253,7 +253,7 @@ export default function BookList({
               )}
 
               <ChevronRight
-                className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 transition-transform ${
+                className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim transition-transform ${
                   expandedBook === book.id ? 'rotate-90' : ''
                 }`}
               />

@@ -169,14 +169,14 @@ export default function GraphViewManager({
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--orb-border)] bg-[var(--background-secondary)] hover:bg-[var(--background)] transition-colors"
         >
-          <FolderOpen className="w-4 h-4 text-white/60" />
-          <span className="text-sm text-white/80">
+          <FolderOpen className="w-4 h-4 text-adaptive-muted" />
+          <span className="text-sm text-adaptive">
             {activeView?.name || 'Ansichten'}
           </span>
           {hasUnsavedChanges() && (
             <span className="w-2 h-2 rounded-full bg-amber-500" title="Ungespeicherte Änderungen" />
           )}
-          <ChevronDown className={`w-4 h-4 text-white/40 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-adaptive-dim transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isDropdownOpen && (
@@ -198,7 +198,7 @@ export default function GraphViewManager({
                   setIsSaveDialogOpen(true);
                   setIsDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-white/80 hover:bg-white/5 transition-colors border-b border-[var(--orb-border)]"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-adaptive hover:bg-white/5 transition-colors border-b border-[var(--orb-border)]"
               >
                 <Plus className="w-4 h-4 text-green-400" />
                 <span>Neue Ansicht erstellen</span>
@@ -225,7 +225,7 @@ export default function GraphViewManager({
                         {view.is_default && (
                           <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         )}
-                        <span className="text-sm text-white/80 truncate">{view.name}</span>
+                        <span className="text-sm text-adaptive truncate">{view.name}</span>
                       </button>
 
                       {isManaging && (
@@ -258,7 +258,7 @@ export default function GraphViewManager({
                   ))}
                 </div>
               ) : (
-                <div className="px-3 py-4 text-center text-sm text-white/40">
+                <div className="px-3 py-4 text-center text-sm text-adaptive-dim">
                   Keine gespeicherten Ansichten
                 </div>
               )}
@@ -267,7 +267,7 @@ export default function GraphViewManager({
               {savedViews.length > 0 && (
                 <button
                   onClick={() => setIsManaging(!isManaging)}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-white/50 hover:text-white/70 hover:bg-white/5 transition-colors border-t border-[var(--orb-border)]"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-adaptive-muted hover:text-adaptive hover:bg-white/5 transition-colors border-t border-[var(--orb-border)]"
                 >
                   {isManaging ? 'Fertig' : 'Verwalten...'}
                 </button>
@@ -284,7 +284,7 @@ export default function GraphViewManager({
         className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
           hasUnsavedChanges()
             ? 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400'
-            : 'border-[var(--orb-border)] bg-[var(--background-secondary)] hover:bg-[var(--background)] text-white/60'
+            : 'border-[var(--orb-border)] bg-[var(--background-secondary)] hover:bg-[var(--background)] text-adaptive-muted'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
         title={activeView ? 'Änderungen speichern' : 'Als neue Ansicht speichern'}
       >
@@ -304,36 +304,36 @@ export default function GraphViewManager({
           {/* Dialog */}
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-xl border border-[var(--orb-border)] bg-[var(--background-secondary)] shadow-2xl z-50 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Ansicht speichern</h3>
+              <h3 className="text-lg font-semibold text-adaptive">Ansicht speichern</h3>
               <button
                 onClick={() => setIsSaveDialogOpen(false)}
                 className="p-1 rounded hover:bg-white/10 transition-colors"
               >
-                <X className="w-5 h-5 text-white/60" />
+                <X className="w-5 h-5 text-adaptive-muted" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Name *</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Name *</label>
                 <input
                   type="text"
                   value={saveName}
                   onChange={(e) => setSaveName(e.target.value)}
                   placeholder="z.B. Fokus: Frontend Skills"
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--orb-border)] bg-[var(--background)] text-white placeholder:text-white/30 focus:outline-none focus:border-white/40"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--orb-border)] bg-[var(--background)] text-adaptive placeholder:text-adaptive-dim focus:outline-none focus:border-white/40"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Beschreibung (optional)</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Beschreibung (optional)</label>
                 <textarea
                   value={saveDescription}
                   onChange={(e) => setSaveDescription(e.target.value)}
                   placeholder="Kurze Beschreibung dieser Ansicht..."
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-[var(--orb-border)] bg-[var(--background)] text-white placeholder:text-white/30 focus:outline-none focus:border-white/40 resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-[var(--orb-border)] bg-[var(--background)] text-adaptive placeholder:text-adaptive-dim focus:outline-none focus:border-white/40 resize-none"
                 />
               </div>
             </div>
@@ -341,14 +341,14 @@ export default function GraphViewManager({
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setIsSaveDialogOpen(false)}
-                className="px-4 py-2 rounded-lg border border-[var(--orb-border)] text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                className="px-4 py-2 rounded-lg border border-[var(--orb-border)] text-adaptive-muted hover:text-adaptive hover:bg-white/5 transition-colors"
               >
                 Abbrechen
               </button>
               <button
                 onClick={handleCreateView}
                 disabled={!saveName.trim() || isSaving}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-adaptive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="w-4 h-4" />
                 <span>Erstellen</span>
