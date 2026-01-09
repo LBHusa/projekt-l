@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Flame, Target, TrendingUp, Calendar } from 'lucide-react';
-import { HabitCard, HabitForm, HabitStreak } from '@/components/habits';
+import { HabitCard, HabitForm, HabitStreak, HabitReminderSettings } from '@/components/habits';
 import type { HabitFormData } from '@/components/habits';
+import Modal from '@/components/Modal';
 import {
   getHabitsWithLogs,
   createHabit,
@@ -23,6 +24,7 @@ export default function HabitsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingHabit, setEditingHabit] = useState<HabitWithLogs | null>(null);
+  const [reminderHabitId, setReminderHabitId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'positive' | 'negative'>('all');
 
   const loadData = async () => {
@@ -253,6 +255,7 @@ export default function HabitsPage() {
                         onComplete={handleComplete}
                         onEdit={setEditingHabit}
                         onDelete={handleDelete}
+                        onShowReminders={setReminderHabitId}
                       />
                     </motion.div>
                   ))}
@@ -282,6 +285,7 @@ export default function HabitsPage() {
                         onComplete={handleComplete}
                         onEdit={setEditingHabit}
                         onDelete={handleDelete}
+                        onShowReminders={setReminderHabitId}
                       />
                     </motion.div>
                   ))}
@@ -307,6 +311,17 @@ export default function HabitsPage() {
           onSubmit={handleUpdate}
           onCancel={() => setEditingHabit(null)}
         />
+      )}
+
+      {/* Reminder Settings Modal */}
+      {reminderHabitId && (
+        <Modal
+          isOpen={true}
+          onClose={() => setReminderHabitId(null)}
+          title="Erinnerungen verwalten"
+        >
+          <HabitReminderSettings habitId={reminderHabitId} />
+        </Modal>
       )}
     </div>
   );

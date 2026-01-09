@@ -130,7 +130,7 @@ export default function GeistPage() {
           <div className="w-16 h-16 rounded-full bg-purple-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Brain className="w-8 h-8 text-purple-400" />
           </div>
-          <p className="text-white/50">Lade Geist-Daten...</p>
+          <p className="text-adaptive-muted">Lade Geist-Daten...</p>
         </div>
       </div>
     );
@@ -222,7 +222,7 @@ export default function GeistPage() {
                 } ${savingMood ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <span className="text-3xl mb-1">{getMoodEmoji(mood)}</span>
-                <span className="text-xs text-white/60">{getMoodLabel(mood)}</span>
+                <span className="text-xs text-adaptive-muted">{getMoodLabel(mood)}</span>
               </button>
             ))}
           </div>
@@ -241,7 +241,7 @@ export default function GeistPage() {
           {/* Mood History */}
           {moodHistory.length > 0 && (
             <div className="mt-4 pt-4 border-t border-white/10">
-              <h3 className="text-sm text-white/50 mb-2">Letzte 7 Tage</h3>
+              <h3 className="text-sm text-adaptive-muted mb-2">Letzte 7 Tage</h3>
               <div className="flex gap-1">
                 {Array.from({ length: 7 }).map((_, i) => {
                   const date = new Date();
@@ -255,7 +255,7 @@ export default function GeistPage() {
                       className="flex-1 text-center p-2 rounded-lg bg-white/5"
                       title={dateStr}
                     >
-                      <div className="text-xs text-white/40 mb-1">
+                      <div className="text-xs text-adaptive-dim mb-1">
                         {date.toLocaleDateString('de-DE', { weekday: 'short' })}
                       </div>
                       <div className="text-lg">
@@ -310,7 +310,7 @@ export default function GeistPage() {
           />
 
           <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-adaptive-dim">
               {journalContent.trim().split(/\s+/).filter(Boolean).length} Woerter
             </span>
             <button
@@ -319,7 +319,7 @@ export default function GeistPage() {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 journalContent.trim()
                   ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                  : 'bg-white/10 text-white/30 cursor-not-allowed'
+                  : 'bg-white/10 text-adaptive-dim cursor-not-allowed'
               }`}
             >
               {savingJournal ? 'Speichern...' : 'Speichern'}
@@ -347,7 +347,7 @@ export default function GeistPage() {
                   className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs text-white/40">
+                    <span className="text-xs text-adaptive-dim">
                       {new Date(entry.created_at).toLocaleDateString('de-DE', {
                         day: '2-digit',
                         month: '2-digit',
@@ -359,20 +359,20 @@ export default function GeistPage() {
                     <span className="text-xs text-blue-400">+{entry.xp_gained} XP</span>
                   </div>
                   {entry.prompt && (
-                    <p className="text-xs text-white/50 italic mb-1">{entry.prompt}</p>
+                    <p className="text-xs text-adaptive-muted italic mb-1">{entry.prompt}</p>
                   )}
-                  <p className="text-sm text-white/80 line-clamp-3">
+                  <p className="text-sm text-adaptive line-clamp-3">
                     {entry.content}
                   </p>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-white/30">{entry.word_count} Woerter</span>
-                    <ChevronRight className="w-4 h-4 text-white/20" />
+                    <span className="text-xs text-adaptive-dim">{entry.word_count} Woerter</span>
+                    <ChevronRight className="w-4 h-4 text-adaptive-dim" />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Noch keine Tagebucheintraege</p>
               <p className="text-sm mt-1">Schreibe deinen ersten Eintrag!</p>
@@ -392,28 +392,28 @@ export default function GeistPage() {
             <div className="text-2xl font-bold text-purple-400">
               {stats?.moodStats?.streak_days || 0}
             </div>
-            <div className="text-sm text-white/50">Tage Streak</div>
+            <div className="text-sm text-adaptive-muted">Tage Streak</div>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
             <BookOpen className="w-6 h-6 text-blue-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-blue-400">
               {stats?.journalCount || 0}
             </div>
-            <div className="text-sm text-white/50">Eintraege</div>
+            <div className="text-sm text-adaptive-muted">Eintraege</div>
           </div>
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
             <TrendingUp className="w-6 h-6 text-green-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-green-400">
               {stats?.moodStats?.avg_mood_score?.toFixed(1) || '-'}
             </div>
-            <div className="text-sm text-white/50">Durchschnitt</div>
+            <div className="text-sm text-adaptive-muted">Durchschnitt</div>
           </div>
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-center">
             <Sparkles className="w-6 h-6 text-amber-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-amber-400">
               {stats?.totalWords || 0}
             </div>
-            <div className="text-sm text-white/50">Woerter</div>
+            <div className="text-sm text-adaptive-muted">Woerter</div>
           </div>
         </motion.div>
 

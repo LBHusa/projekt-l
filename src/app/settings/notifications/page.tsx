@@ -232,8 +232,8 @@ export default function NotificationSettingsPage() {
           <ArrowLeft className="w-5 h-5 text-white/60" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-white">Benachrichtigungen</h1>
-          <p className="text-sm text-white/40">Erinnerungen & Kanäle konfigurieren</p>
+          <h1 className="text-xl font-bold text-adaptive">Benachrichtigungen</h1>
+          <p className="text-sm text-adaptive-dim">Erinnerungen & Kanäle konfigurieren</p>
         </div>
       </header>
 
@@ -250,8 +250,8 @@ export default function NotificationSettingsPage() {
                 <Bell className="w-5 h-5 text-purple-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Browser Push</h3>
-                <p className="text-sm text-white/40">
+                <h3 className="font-semibold text-adaptive">Browser Push</h3>
+                <p className="text-sm text-adaptive-dim">
                   Benachrichtigungen direkt im Browser
                 </p>
               </div>
@@ -303,8 +303,8 @@ export default function NotificationSettingsPage() {
                 <MessageCircle className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Telegram Bot</h3>
-                <p className="text-sm text-white/40">
+                <h3 className="font-semibold text-adaptive">Telegram Bot</h3>
+                <p className="text-sm text-adaptive-dim">
                   Benachrichtigungen über @ProjektL_Bot
                 </p>
               </div>
@@ -337,7 +337,7 @@ export default function NotificationSettingsPage() {
           )}
 
           {!telegramEnabled && (
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-adaptive-dim">
               Klicke auf &quot;Verbinden&quot; und starte den Bot in Telegram, um
               Benachrichtigungen zu erhalten.
             </p>
@@ -356,8 +356,8 @@ export default function NotificationSettingsPage() {
               <Cake className="w-5 h-5 text-pink-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Geburtstags-Erinnerungen</h3>
-              <p className="text-sm text-white/40">Wann möchtest du erinnert werden?</p>
+              <h3 className="font-semibold text-adaptive">Geburtstags-Erinnerungen</h3>
+              <p className="text-sm text-adaptive-dim">Wann möchtest du erinnert werden?</p>
             </div>
           </div>
 
@@ -390,8 +390,8 @@ export default function NotificationSettingsPage() {
               <AlertCircle className="w-5 h-5 text-amber-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-white">Aufmerksamkeits-Schwelle</h3>
-              <p className="text-sm text-white/40">
+              <h3 className="font-semibold text-adaptive">Aufmerksamkeits-Schwelle</h3>
+              <p className="text-sm text-adaptive-dim">
                 Ab wann braucht ein Kontakt Aufmerksamkeit?
               </p>
             </div>
@@ -431,8 +431,8 @@ export default function NotificationSettingsPage() {
                 )}
               </div>
               <div>
-                <h3 className="font-semibold text-white">Ruhezeiten</h3>
-                <p className="text-sm text-white/40">Keine Benachrichtigungen nachts</p>
+                <h3 className="font-semibold text-adaptive">Ruhezeiten</h3>
+                <p className="text-sm text-adaptive-dim">Keine Benachrichtigungen nachts</p>
               </div>
             </div>
             <button

@@ -125,13 +125,13 @@ export function RecurringFlowForm({
             <div className="p-2 rounded-lg bg-blue-500/20">
               <Repeat className="w-5 h-5 text-blue-400" />
             </div>
-            <h2 className="text-lg font-bold">
+            <h2 className="text-lg font-bold text-adaptive">
               {initialData ? 'Dauerauftrag bearbeiten' : 'Neuer Dauerauftrag'}
             </h2>
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -159,7 +159,7 @@ export function RecurringFlowForm({
                 className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                   formData.source_type === 'income'
                     ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 <TrendingUp className="w-4 h-4" />
@@ -176,7 +176,7 @@ export function RecurringFlowForm({
                 className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                   formData.source_type === 'account'
                     ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 <Wallet className="w-4 h-4" />
@@ -187,7 +187,7 @@ export function RecurringFlowForm({
             {/* Source Details */}
             {formData.source_type === 'income' ? (
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Einnahmequelle</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Einnahmequelle</label>
                 <div className="grid grid-cols-3 gap-2">
                   {INCOME_CATEGORIES.map(cat => (
                     <button
@@ -197,7 +197,7 @@ export function RecurringFlowForm({
                       className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                         formData.source_category === cat.value
                           ? 'bg-green-500/20 border-green-500/50'
-                          : 'border-white/10 text-white/60 hover:bg-white/5'
+                          : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                       }`}
                     >
                       <span>{cat.icon}</span>
@@ -208,7 +208,7 @@ export function RecurringFlowForm({
               </div>
             ) : (
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Konto auswahlen</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Konto auswählen</label>
                 <select
                   value={formData.source_id || ''}
                   onChange={e => setFormData(prev => ({ ...prev, source_id: e.target.value || null }))}
@@ -228,7 +228,7 @@ export function RecurringFlowForm({
           {/* Arrow */}
           <div className="flex justify-center">
             <div className="p-2 rounded-full bg-white/10">
-              <ArrowRight className="w-5 h-5 text-white/60" />
+              <ArrowRight className="w-5 h-5 text-adaptive-muted" />
             </div>
           </div>
 
@@ -252,7 +252,7 @@ export function RecurringFlowForm({
                 className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                   formData.target_type === 'account'
                     ? 'bg-blue-500/20 border-blue-500/50 text-blue-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 <Wallet className="w-4 h-4" />
@@ -269,7 +269,7 @@ export function RecurringFlowForm({
                 className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                   formData.target_type === 'expense'
                     ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 <TrendingDown className="w-4 h-4" />
@@ -286,7 +286,7 @@ export function RecurringFlowForm({
                 className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                   formData.target_type === 'savings'
                     ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 <PiggyBank className="w-4 h-4" />
@@ -297,7 +297,7 @@ export function RecurringFlowForm({
             {/* Target Details */}
             {formData.target_type === 'account' && (
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Zielkonto</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Zielkonto</label>
                 <select
                   value={formData.target_id || ''}
                   onChange={e => setFormData(prev => ({ ...prev, target_id: e.target.value || null }))}
@@ -315,7 +315,7 @@ export function RecurringFlowForm({
 
             {formData.target_type === 'expense' && (
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Ausgabenkategorie</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Ausgabenkategorie</label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {EXPENSE_CATEGORIES.map(cat => (
                     <button
@@ -325,7 +325,7 @@ export function RecurringFlowForm({
                       className={`flex items-center gap-1 py-2 px-2 rounded-lg border text-xs transition-all ${
                         formData.target_category === cat.value
                           ? 'bg-red-500/20 border-red-500/50'
-                          : 'border-white/10 text-white/60 hover:bg-white/5'
+                          : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                       }`}
                     >
                       <span>{cat.icon}</span>
@@ -338,7 +338,7 @@ export function RecurringFlowForm({
 
             {formData.target_type === 'savings' && (
               <div>
-                <label className="block text-sm text-white/60 mb-1.5">Sparziel</label>
+                <label className="block text-sm text-adaptive-muted mb-1.5">Sparziel</label>
                 {savingsGoals.length > 0 ? (
                   <select
                     value={formData.target_id || ''}
@@ -353,7 +353,7 @@ export function RecurringFlowForm({
                     ))}
                   </select>
                 ) : (
-                  <p className="text-sm text-white/40 italic">
+                  <p className="text-sm text-adaptive-dim italic">
                     Noch keine Sparziele vorhanden. Erstelle zuerst ein Sparziel.
                   </p>
                 )}
@@ -376,7 +376,7 @@ export function RecurringFlowForm({
                   className="w-full px-3 py-2 pr-10 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40">EUR</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-adaptive-dim">EUR</span>
               </div>
             </div>
             <div>
@@ -453,7 +453,7 @@ export function RecurringFlowForm({
                 onChange={e => setFormData(prev => ({ ...prev, end_date: e.target.value || null }))}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-xs text-white/40 mt-1">Leer = unbefristet</p>
+              <p className="text-xs text-adaptive-dim mt-1">Leer = unbefristet</p>
             </div>
           </div>
 

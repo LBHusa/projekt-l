@@ -24,7 +24,7 @@ export default function FactionPageHeader({ faction }: FactionPageHeaderProps) {
             href="/"
             className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-white/60" />
+            <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
           </Link>
 
           {/* Faction Icon & Title */}
@@ -52,7 +52,7 @@ export default function FactionPageHeader({ faction }: FactionPageHeaderProps) {
 
               {/* XP Progress Bar */}
               <div className="mt-2 max-w-md">
-                <div className="flex justify-between text-xs text-white/50 mb-1">
+                <div className="flex justify-between text-xs text-adaptive-muted mb-1">
                   <span>{totalXp.toLocaleString()} XP</span>
                   <span>{progress}% zum nächsten Level</span>
                 </div>

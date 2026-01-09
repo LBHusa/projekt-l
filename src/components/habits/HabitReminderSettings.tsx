@@ -99,7 +99,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
   }
 
   if (loading) {
-    return <div className="text-gray-500">Lade Erinnerungen...</div>;
+    return <div className="text-[var(--foreground-muted)]">Lade Erinnerungen...</div>;
   }
 
   return (
@@ -111,7 +111,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
         </h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/80 rounded-lg text-sm font-medium transition-colors"
         >
           <Plus className="w-4 h-4" />
           Hinzufügen
@@ -126,8 +126,8 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
               key={reminder.id}
               className={`p-4 rounded-lg border transition-all ${
                 reminder.enabled
-                  ? 'bg-violet-500/10 border-violet-500/30'
-                  : 'bg-gray-800/30 border-gray-700/30 opacity-60'
+                  ? 'bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/30'
+                  : 'bg-white/5 border-[var(--orb-border)] opacity-60'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -137,7 +137,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
                       {reminder.reminder_time.substring(0, 5)}
                     </span>
                     {reminder.label && (
-                      <span className="text-sm text-gray-400">{reminder.label}</span>
+                      <span className="text-sm text-[var(--foreground-muted)]">{reminder.label}</span>
                     )}
                   </div>
                   <div className="flex gap-1.5">
@@ -146,8 +146,8 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
                         key={day.value}
                         className={`px-2 py-1 rounded text-xs font-medium ${
                           reminder.days_of_week.includes(day.value)
-                            ? 'bg-violet-600 text-white'
-                            : 'bg-gray-700/50 text-gray-500'
+                            ? 'bg-[var(--accent-primary)] text-white'
+                            : 'bg-white/5 text-[var(--foreground-muted)]'
                         }`}
                       >
                         {day.label}
@@ -162,9 +162,9 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
                     title={reminder.enabled ? 'Deaktivieren' : 'Aktivieren'}
                   >
                     {reminder.enabled ? (
-                      <Bell className="w-5 h-5 text-violet-400" />
+                      <Bell className="w-5 h-5 text-[var(--accent-primary)]" />
                     ) : (
-                      <BellOff className="w-5 h-5 text-gray-500" />
+                      <BellOff className="w-5 h-5 text-[var(--foreground-muted)]" />
                     )}
                   </button>
                   <button
@@ -180,7 +180,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-[var(--foreground-muted)]">
           <Bell className="w-12 h-12 mx-auto mb-2 opacity-30" />
           <p>Noch keine Erinnerungen eingerichtet</p>
         </div>
@@ -188,7 +188,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
 
       {/* Add Reminder Form */}
       {showAddForm && (
-        <div className="p-4 bg-gray-800/50 border border-violet-500/30 rounded-lg space-y-4">
+        <div className="p-4 bg-white/5 border border-[var(--accent-primary)]/30 rounded-lg space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Uhrzeit</label>
             <input
@@ -197,7 +197,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
               onChange={(e) =>
                 setNewReminder((prev) => ({ ...prev, reminder_time: e.target.value }))
               }
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:border-violet-500"
+              className="w-full px-3 py-2 bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg focus:outline-none focus:border-[var(--accent-primary)]"
             />
           </div>
 
@@ -210,8 +210,8 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
                   onClick={() => toggleDay(day.value)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     newReminder.days_of_week.includes(day.value)
-                      ? 'bg-violet-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-[var(--accent-primary)] text-white'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
                   }`}
                 >
                   {day.label}
@@ -227,7 +227,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
               value={newReminder.label}
               onChange={(e) => setNewReminder((prev) => ({ ...prev, label: e.target.value }))}
               placeholder="z.B. Morgens, Abends"
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:border-violet-500"
+              className="w-full px-3 py-2 bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg focus:outline-none focus:border-[var(--accent-primary)]"
             />
           </div>
 
@@ -235,13 +235,13 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
             <button
               onClick={handleAddReminder}
               disabled={newReminder.days_of_week.length === 0}
-              className="flex-1 px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg font-medium transition-colors"
+              className="flex-1 px-4 py-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/80 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg font-medium transition-colors"
             >
               Speichern
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-medium transition-colors"
             >
               Abbrechen
             </button>

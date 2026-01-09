@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, MoreVertical, Trash2, Edit2 } from 'lucide-react';
+import { Check, X, MoreVertical, Trash2, Edit2, Bell } from 'lucide-react';
 import type { HabitWithLogs } from '@/lib/database.types';
 import HabitStreak from './HabitStreak';
 
@@ -11,6 +11,7 @@ interface HabitCardProps {
   onComplete: (habitId: string, completed: boolean) => Promise<void>;
   onEdit?: (habit: HabitWithLogs) => void;
   onDelete?: (habitId: string) => void;
+  onShowReminders?: (habitId: string) => void;
   compact?: boolean;
 }
 
@@ -19,6 +20,7 @@ export default function HabitCard({
   onComplete,
   onEdit,
   onDelete,
+  onShowReminders,
   compact = false,
 }: HabitCardProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -123,6 +125,18 @@ export default function HabitCard({
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
               <div className="absolute right-0 top-8 z-20 bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg shadow-lg py-1 min-w-32">
+                {onShowReminders && (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      onShowReminders(habit.id);
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm hover:bg-white/10 flex items-center gap-2"
+                  >
+                    <Bell className="w-4 h-4" />
+                    Erinnerungen
+                  </button>
+                )}
                 {onEdit && (
                   <button
                     onClick={() => {

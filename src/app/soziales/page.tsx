@@ -164,7 +164,7 @@ export default function SozialesPage() {
           <div className="w-16 h-16 rounded-full bg-violet-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Users className="w-8 h-8 text-violet-400" />
           </div>
-          <p className="text-white/50">Lade Soziales-Daten...</p>
+          <p className="text-adaptive-muted">Lade Soziales-Daten...</p>
         </div>
       </div>
     );
@@ -242,22 +242,22 @@ export default function SozialesPage() {
           <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 text-center">
             <Users className="w-6 h-6 text-violet-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-violet-400">{totalContacts}</div>
-            <div className="text-sm text-white/50">Kontakte</div>
+            <div className="text-sm text-adaptive-muted">Kontakte</div>
           </div>
           <div className="bg-pink-500/10 border border-pink-500/20 rounded-xl p-4 text-center">
             <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-pink-400">{stats.family}</div>
-            <div className="text-sm text-white/50">Familie</div>
+            <div className="text-sm text-adaptive-muted">Familie</div>
           </div>
           <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 text-center">
             <Users className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-cyan-400">{stats.friend}</div>
-            <div className="text-sm text-white/50">Freunde</div>
+            <div className="text-sm text-adaptive-muted">Freunde</div>
           </div>
           <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-center">
             <Gift className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-yellow-400">{upcomingBirthdays.length}</div>
-            <div className="text-sm text-white/50">Geburtstage</div>
+            <div className="text-sm text-adaptive-muted">Geburtstage</div>
           </div>
         </motion.div>
 
@@ -279,10 +279,10 @@ export default function SozialesPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Kontakte verwalten</h3>
-                  <p className="text-sm text-white/50">{totalContacts} Kontakte</p>
+                  <p className="text-sm text-adaptive-muted">{totalContacts} Kontakte</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              <ChevronRight className="w-5 h-5 text-adaptive-dim group-hover:text-adaptive-muted transition-colors" />
             </div>
           </Link>
 
@@ -297,10 +297,10 @@ export default function SozialesPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Familie hinzufugen</h3>
-                  <p className="text-sm text-white/50">Familienmitglied</p>
+                  <p className="text-sm text-adaptive-muted">Familienmitglied</p>
                 </div>
               </div>
-              <Plus className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              <Plus className="w-5 h-5 text-adaptive-dim group-hover:text-adaptive-muted transition-colors" />
             </div>
           </button>
 
@@ -315,10 +315,10 @@ export default function SozialesPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold">Freund hinzufugen</h3>
-                  <p className="text-sm text-white/50">Neuer Kontakt</p>
+                  <p className="text-sm text-adaptive-muted">Neuer Kontakt</p>
                 </div>
               </div>
-              <Plus className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+              <Plus className="w-5 h-5 text-adaptive-dim group-hover:text-adaptive-muted transition-colors" />
             </div>
           </button>
         </motion.div>
@@ -369,7 +369,7 @@ export default function SozialesPage() {
                           ? 'Morgen'
                           : `In ${contact.days_until_birthday} Tagen`}
                       </span>
-                      <Calendar className="w-4 h-4 text-white/30" />
+                      <Calendar className="w-4 h-4 text-adaptive-dim" />
                     </div>
                   </Link>
                 );
@@ -394,7 +394,7 @@ export default function SozialesPage() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? `bg-${tab.color}-500/20 text-${tab.color}-400 border border-${tab.color}-500/30`
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
                 style={{
                   backgroundColor: activeTab === tab.id
@@ -438,7 +438,7 @@ export default function SozialesPage() {
                     <p className={`text-xs truncate ${isFamily ? 'text-pink-400' : 'text-cyan-400'}`}>
                       {isFamily ? 'Familie' : 'Freund'}
                     </p>
-                    <p className="text-xs text-white/40 truncate">
+                    <p className="text-xs text-adaptive-dim truncate">
                       Level {contact.relationship_level}
                     </p>
                   </Link>
@@ -446,7 +446,7 @@ export default function SozialesPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Noch keine Kontakte in dieser Kategorie</p>
               <Link
@@ -482,7 +482,7 @@ export default function SozialesPage() {
             <div className="flex items-center gap-2">
               <PartyPopper className="w-5 h-5 text-purple-400" />
               <h2 className="font-semibold">Soziale Events</h2>
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-adaptive-dim">
                 {events.length} gesamt
               </span>
             </div>
@@ -508,7 +508,7 @@ export default function SozialesPage() {
                     </div>
                     <div>
                       <div className="font-medium">{event.title}</div>
-                      <div className="text-sm text-white/50">
+                      <div className="text-sm text-adaptive-muted">
                         {new Date(event.occurred_at).toLocaleDateString('de-DE', {
                           day: 'numeric',
                           month: 'short',
@@ -538,7 +538,7 @@ export default function SozialesPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <PartyPopper className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Noch keine Events eingetragen</p>
               <button
