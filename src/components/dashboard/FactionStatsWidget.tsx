@@ -23,7 +23,7 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
       transition={{ duration: 0.5, delay: 0.15 }}
       className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-6"
     >
-      <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-4">
+      <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider mb-4">
         Fraktionen
       </h3>
 
@@ -48,7 +48,7 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
               {/* Left: Icon + Name */}
               <div className="flex items-center gap-3 min-w-[200px]">
                 <span className="text-2xl">{faction.icon}</span>
-                <span className="text-white font-medium">{faction.name_de}</span>
+                <span className="text-adaptive font-medium">{faction.name_de}</span>
               </div>
 
               {/* Center: Level + XP */}
@@ -62,19 +62,19 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
                 >
                   Lvl {level}
                 </span>
-                <span className="text-white/40">•</span>
-                <span className="text-white/60 text-sm">
+                <span className="text-adaptive-dim">•</span>
+                <span className="text-adaptive-muted text-sm">
                   {totalXp.toLocaleString()} XP
                 </span>
               </div>
 
               {/* Right: Weekly Progress */}
-              <div className={`flex items-center gap-2 ${weeklyXp > 0 ? 'text-green-400' : 'text-white/40'}`}>
+              <div className={`flex items-center gap-2 ${weeklyXp > 0 ? 'text-green-400' : 'text-adaptive-dim'}`}>
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-sm font-medium">
                   {weeklyXp > 0 ? `+${weeklyXp.toLocaleString()}` : '+0'} XP
                 </span>
-                <ChevronRight className="w-4 h-4 text-white/40" />
+                <ChevronRight className="w-4 h-4 text-adaptive-dim" />
               </div>
             </motion.button>
           );

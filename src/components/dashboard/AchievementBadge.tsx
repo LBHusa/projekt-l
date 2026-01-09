@@ -56,13 +56,13 @@ export default function AchievementBadgeWidget() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-400" />
-          <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+          <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
             Achievements
           </h3>
         </div>
         <Link
           href="/achievements"
-          className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1"
+          className="text-xs text-adaptive-dim hover:text-adaptive-muted flex items-center gap-1"
         >
           Alle anzeigen <ChevronRight className="w-3 h-3" />
         </Link>
@@ -71,8 +71,8 @@ export default function AchievementBadgeWidget() {
       {/* Progress Bar */}
       <div className="mb-4">
         <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-white/60">Fortschritt</span>
-          <span className="text-white/40">
+          <span className="text-adaptive-muted">Fortschritt</span>
+          <span className="text-adaptive-dim">
             {stats?.unlocked || 0} / {stats?.total || 0}
           </span>
         </div>
@@ -103,7 +103,7 @@ export default function AchievementBadgeWidget() {
                 <p className="text-sm font-medium truncate">{achievement.name}</p>
                 <p className="text-xs text-yellow-400">+{achievement.xp_reward} XP</p>
               </div>
-              <div className="text-xs text-white/30">
+              <div className="text-xs text-adaptive-dim opacity-60">
                 {achievement.rarity === 'legendary' && '👑'}
                 {achievement.rarity === 'epic' && '💎'}
                 {achievement.rarity === 'rare' && '✨'}
@@ -111,7 +111,7 @@ export default function AchievementBadgeWidget() {
             </motion.div>
           ))
         ) : (
-          <div className="text-center py-4 text-white/40 text-sm">
+          <div className="text-center py-4 text-adaptive-dim text-sm">
             <Lock className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>Noch keine Achievements freigeschaltet</p>
             <p className="text-xs mt-1">Schließe Aufgaben ab um welche zu bekommen!</p>

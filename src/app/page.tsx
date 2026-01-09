@@ -13,6 +13,7 @@ import {
   QuickActionsWidget,
   FactionStatsWidget,
   StreakHighlightWidget,
+  WeeklySummary,
   HabitCompletionModal,
   MoodLogModal,
   QuickTransactionModal,
@@ -232,7 +233,7 @@ export default function Dashboard() {
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
               title="Einstellungen"
             >
-              <Settings className="w-5 h-5 text-white/60" />
+              <Settings className="w-5 h-5 text-adaptive-muted" />
             </Link>
           </div>
         </div>
@@ -267,8 +268,8 @@ export default function Dashboard() {
                     <Download className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white text-lg">Daten exportieren</h3>
-                    <p className="text-sm text-white/60">Exportiere alle deine Projekt L Daten</p>
+                    <h3 className="font-semibold text-adaptive text-lg">Daten exportieren</h3>
+                    <p className="text-sm text-adaptive-muted">Exportiere alle deine Projekt L Daten</p>
                   </div>
                 </div>
               </div>
@@ -307,12 +308,14 @@ export default function Dashboard() {
             <AchievementBadgeWidget />
           </div>
 
-          {/* Recent Activity + Contacts Row */}
+          {/* Weekly Summary + Recent Activity Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Recent Activity Feed */}
+            <WeeklySummary />
             <RecentActivityFeed limit={6} />
+          </div>
 
-            {/* Contacts Section */}
+          {/* Contacts Section */}
+          <div className="mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -327,14 +330,14 @@ export default function Dashboard() {
                         <Users className="w-5 h-5 text-pink-400" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-white">Kontakte</h3>
-                        <p className="text-xs text-white/60">Familie & Freunde</p>
+                        <h3 className="font-semibold text-adaptive">Kontakte</h3>
+                        <p className="text-xs text-adaptive-muted">Familie & Freunde</p>
                       </div>
                     </div>
                     {contactsStats && (
                       <div className="flex items-center gap-3 text-sm">
                         <div className="text-center">
-                          <span className="text-lg font-bold text-white">{contactsStats.total}</span>
+                          <span className="text-lg font-bold text-adaptive">{contactsStats.total}</span>
                         </div>
                         {contactsStats.favorites > 0 && (
                           <span className="text-red-400 flex items-center gap-1">
@@ -362,8 +365,8 @@ export default function Dashboard() {
                       <Flame className="w-5 h-5 text-orange-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white">Habits verwalten</h3>
-                      <p className="text-xs text-white/60">Gewohnheiten aufbauen & tracken</p>
+                      <h3 className="font-semibold text-adaptive">Habits verwalten</h3>
+                      <p className="text-xs text-adaptive-muted">Gewohnheiten aufbauen & tracken</p>
                     </div>
                   </div>
                 </div>

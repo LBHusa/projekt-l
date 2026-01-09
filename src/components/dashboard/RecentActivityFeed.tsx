@@ -176,8 +176,8 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-white/60" />
-          <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+          <Activity className="w-5 h-5 text-adaptive-muted" />
+          <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
             Letzte Aktivitäten
           </h3>
         </div>
@@ -209,7 +209,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
       {filteredActivities.length === 0 ? (
         <div className="text-center py-8">
           <Activity className="w-10 h-10 text-white/20 mx-auto mb-2" />
-          <p className="text-white/40 text-sm">Noch keine Aktivitäten</p>
+          <p className="text-adaptive-dim text-sm">Noch keine Aktivitäten</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -232,9 +232,9 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
                   onClick={() => toggleDay(dayKey)}
                   className="flex items-center justify-between w-full mb-2 hover:opacity-80 transition"
                 >
-                  <h3 className="text-sm font-semibold text-white/80">
+                  <h3 className="text-sm font-semibold text-adaptive">
                     {group.label}
-                    <span className="ml-2 text-xs text-white/40">
+                    <span className="ml-2 text-xs text-adaptive-dim">
                       ({group.activities.length})
                     </span>
                   </h3>
@@ -270,7 +270,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-white/90 line-clamp-1">
+                          <p className="text-sm text-adaptive line-clamp-1">
                             {activity.title}
                           </p>
 
@@ -296,7 +296,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
                             )}
 
                             {/* Timestamp */}
-                            <span className="text-xs text-white/30">
+                            <span className="text-xs text-adaptive-dim opacity-60">
                               {new Date(activity.occurred_at).toLocaleTimeString('de-DE', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -330,8 +330,8 @@ function FilterButton({ children, active, onClick, color }: FilterButtonProps) {
       onClick={onClick}
       className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
         active
-          ? 'bg-white/20 text-white'
-          : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/70'
+          ? 'bg-white/20 text-adaptive'
+          : 'bg-white/5 text-adaptive-muted hover:bg-white/10 hover:text-adaptive'
       }`}
       style={active && color ? { backgroundColor: `${color}30`, color } : undefined}
     >

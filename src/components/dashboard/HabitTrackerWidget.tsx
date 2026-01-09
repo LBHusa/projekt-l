@@ -66,13 +66,13 @@ export default function HabitTrackerWidget() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Flame className="w-5 h-5 text-orange-400" />
-          <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+          <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
             Habits heute
           </h3>
         </div>
         <Link
           href="/habits"
-          className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1 transition-colors"
+          className="text-xs text-adaptive-dim hover:text-adaptive-muted flex items-center gap-1 transition-colors"
         >
           Alle anzeigen
           <ChevronRight className="w-3 h-3" />
@@ -82,7 +82,7 @@ export default function HabitTrackerWidget() {
       {/* Progress Bar */}
       {totalPositive > 0 && (
         <div className="mb-4">
-          <div className="flex justify-between text-xs text-white/50 mb-1">
+          <div className="flex justify-between text-xs text-adaptive-muted mb-1">
             <span>{completedCount} von {totalPositive} erledigt</span>
             <span>{Math.round((completedCount / totalPositive) * 100)}%</span>
           </div>
@@ -100,7 +100,7 @@ export default function HabitTrackerWidget() {
       {/* Habits List */}
       {habits.length === 0 ? (
         <div className="text-center py-6">
-          <p className="text-white/40 text-sm mb-2">Keine Habits für heute</p>
+          <p className="text-adaptive-dim text-sm mb-2">Keine Habits für heute</p>
           <Link
             href="/habits"
             className="text-xs text-[var(--accent-primary)] hover:underline"
@@ -133,7 +133,7 @@ export default function HabitTrackerWidget() {
           {habits.length > 6 && (
             <Link
               href="/habits"
-              className="block text-center text-xs text-white/40 hover:text-white/60 py-2 transition-colors"
+              className="block text-center text-xs text-adaptive-dim hover:text-adaptive-muted py-2 transition-colors"
             >
               +{habits.length - 6} weitere Habits
             </Link>
@@ -144,7 +144,7 @@ export default function HabitTrackerWidget() {
       {/* Streak Summary */}
       {habits.some(h => h.current_streak > 0) && (
         <div className="mt-4 pt-3 border-t border-white/10">
-          <div className="flex items-center gap-2 text-xs text-white/50">
+          <div className="flex items-center gap-2 text-xs text-adaptive-muted">
             <Flame className="w-3 h-3 text-orange-400" />
             <span>
               Beste Streak: {Math.max(...habits.map(h => h.current_streak))} Tage
@@ -195,7 +195,7 @@ function HabitItem({ habit, onToggle, isNegative }: HabitItemProps) {
             ? 'bg-green-500 text-white'
             : isNegative
             ? 'bg-red-500/20 text-red-400'
-            : 'bg-white/10 text-white/60'
+            : 'bg-white/10 text-adaptive-muted'
         }`}
       >
         {isLoading ? (
@@ -210,7 +210,7 @@ function HabitItem({ habit, onToggle, isNegative }: HabitItemProps) {
       </div>
 
       <div className="flex-1 text-left min-w-0">
-        <span className={`text-sm ${isCompleted ? 'line-through text-white/50' : ''}`}>
+        <span className={`text-sm ${isCompleted ? 'line-through text-adaptive-muted' : ''}`}>
           {habit.name}
         </span>
       </div>
