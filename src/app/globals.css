@@ -338,3 +338,32 @@ body::before {
   background: rgba(255,255,255,0.4);
   border-radius: 0 4px 4px 0;
 }
+
+/* ============================================
+   THEME-ADAPTIVE TEXT UTILITIES
+   ============================================ */
+
+/* Primary text - adapts to theme foreground */
+.text-adaptive {
+  color: var(--foreground);
+}
+
+/* Muted text - less prominent than primary */
+.text-adaptive-muted {
+  color: var(--foreground-muted);
+}
+
+/* Dim text - very subtle, for secondary info */
+.text-adaptive-dim {
+  color: var(--foreground-dim);
+}
+
+/* Hover states for links and interactive elements */
+.text-adaptive:hover {
+  color: var(--foreground);
+  opacity: 0.8;
+}
+
+.text-adaptive-muted:hover {
+  color: var(--foreground);
+}
