@@ -706,17 +706,20 @@ export async function logHabitWithTime(
   }
 
   // Check achievements
-  await checkHabitAchievements(habitId, userId);
+  const totalHabits = await getHabits(userId);
+  const habitStats = await getHabitStats(userId);
+  await checkHabitAchievements(userId, totalHabits.length, habitStats.longestStreak);
 
   // Log activity
   await logActivity({
-    user_id: userId,
-    activity_type: 'habit_completed',
+    userId,
+    activityType: 'habit_completed',
+    factionId: 'geist', // Default to Geist for habit tracking
     title: `${habit?.name || 'Habit'} geloggt`,
     description: `${durationMinutes} Minuten`,
-    xp_amount: habit?.xp_per_completion || 0,
-    related_entity_type: 'habit',
-    related_entity_id: habitId,
+    xpAmount: habit?.xp_per_completion || 0,
+    relatedEntityType: 'habit',
+    relatedEntityId: habitId,
   });
 }
 
