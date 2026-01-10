@@ -22,6 +22,9 @@ import {
   BudgetCard,
   BudgetsList,
   BudgetForm,
+  PortfolioOverview,
+  AssetAllocationChart,
+  InvestmentsList,
 } from '@/components/finanzen';
 import type { AccountFormData, SavingsGoalFormData, TransactionFormData, RecurringFlowFormData, BudgetFormData } from '@/components/finanzen';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
@@ -43,6 +46,7 @@ import {
   getBudgetProgress,
   createBudget,
   updateBudget,
+  getInvestments,
 } from '@/lib/data/finanzen';
 import type {
   FactionWithStats,
@@ -56,6 +60,7 @@ import type {
   UserNetWorthExtended,
   RecurringFlow,
   Budget,
+  Investment,
 } from '@/lib/database.types';
 
 export default function FinanzenPage() {
@@ -80,6 +85,7 @@ export default function FinanzenPage() {
   const [showBudgetForm, setShowBudgetForm] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [budgetPeriod, setBudgetPeriod] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
+  const [investments, setInvestments] = useState<Investment[]>([]);
 
   const loadData = async () => {
     try {
@@ -100,6 +106,7 @@ export default function FinanzenPage() {
         streaksData,
         tipsData,
         budgetData,
+        investmentsData,
       ] = await Promise.all([
         getFaction('finanzen'),
         getUserFactionStat('finanzen'),
@@ -113,6 +120,7 @@ export default function FinanzenPage() {
         getFinanceStreaks(),
         getSmartTips(),
         getBudgetProgress(currentYear, currentMonth),
+        getInvestments(),
       ]);
 
       if (factionData) {
@@ -132,6 +140,7 @@ export default function FinanzenPage() {
       setStreaks(streaksData);
       setTips(tipsData);
       setBudgets(budgetData);
+      setInvestments(investmentsData);
     } catch (err) {
       console.error('Error loading finanzen data:', err);
     } finally {
@@ -378,6 +387,41 @@ export default function FinanzenPage() {
         >
           <NetWorthWidget netWorth={netWorth} />
         </motion.div>
+
+        {/* Investment Portfolio Section */}
+        {investments.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Portfolio Overview */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <PortfolioOverview investments={investments} />
+            </motion.div>
+
+            {/* Asset Allocation Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.28 }}
+            >
+              <AssetAllocationChart investments={investments} />
+            </motion.div>
+          </div>
+        )}
+
+        {/* Investments List - Full Width */}
+        {investments.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.31 }}
+            className="mb-6"
+          >
+            <InvestmentsList investments={investments} />
+          </motion.div>
+        )}
 
         {/* Money Flow Canvas - Full Width */}
         {moneyFlow && (

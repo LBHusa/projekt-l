@@ -12,6 +12,12 @@ export { SavingsStreak } from './SavingsStreak';
 export { SmartTips } from './SmartTips';
 export { CSVImport } from './CSVImport';
 export { default as BudgetCard, BudgetsList } from './BudgetCard';
+export { PortfolioOverview } from './PortfolioOverview';
+export { AssetAllocationChart } from './AssetAllocationChart';
+export { InvestmentCard } from './InvestmentCard';
+export { InvestmentsList } from './InvestmentsList';
+export { PerformanceChart } from './PerformanceChart';
+export { InvestmentForm } from './InvestmentForm';
 
 // Form Components
 export { AccountForm } from './forms/AccountForm';
