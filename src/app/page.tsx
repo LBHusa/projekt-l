@@ -21,7 +21,7 @@ import {
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot } from 'lucide-react';
+import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { getAllDomains } from '@/lib/data/domains';
 import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/user-skills';
@@ -384,6 +384,21 @@ export default function Dashboard() {
                     <div>
                       <h3 className="font-semibold text-adaptive">AI Skill-Coach</h3>
                       <p className="text-xs text-adaptive-muted">Skills per Chat verwalten</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Quest System Quick Link */}
+              <Link href="/quests">
+                <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-4 hover:from-blue-500/30 hover:to-cyan-500/30 transition-all cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center">
+                      <Swords className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-adaptive">Quest System</h3>
+                      <p className="text-xs text-adaptive-muted">AI-generierte Herausforderungen</p>
                     </div>
                   </div>
                 </div>
