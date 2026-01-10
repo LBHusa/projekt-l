@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Target, TrendingUp, Clock, Users } from 'lucide-react';
-import Link from 'next/link';
+import { Briefcase, Target, TrendingUp, Clock } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
 import { JobTimeline, SalaryChart, SalaryTimeline, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
@@ -213,33 +212,6 @@ export default function KarrierePage() {
             additionalStats={additionalStats}
           />
         </div>
-
-        {/* Freelancer Mode Link */}
-        <Link href="/karriere/freelancer">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-8 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4 md:p-6 hover:border-purple-500/50 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-purple-500/30 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">Freelancer-Modus</h3>
-                  <p className="text-sm text-white/70">
-                    Verwalte deine Kunden, Projekte und Umsätze
-                  </p>
-                </div>
-              </div>
-              <div className="text-white/50 text-sm hidden md:block">
-                Klicken zum Öffnen →
-              </div>
-            </div>
-          </motion.div>
-        </Link>
 
         {/* Current Job Highlight */}
         {stats?.currentJob && (
