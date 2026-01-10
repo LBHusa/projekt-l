@@ -4,7 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell, Activity, Scale, Flame, Timer, TrendingUp, Plus } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { WorkoutForm, BodyMetricForm } from '@/components/koerper';
+import {
+  WorkoutForm,
+  BodyMetricForm,
+  WorkoutSession,
+  PersonalRecordsCard,
+  WorkoutStreakCard,
+} from '@/components/koerper';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getRecentWorkouts,
@@ -26,6 +32,7 @@ export default function KoerperPage() {
   // Modal states
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showMetricForm, setShowMetricForm] = useState(false);
+  const [showWorkoutSession, setShowWorkoutSession] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -182,13 +189,22 @@ export default function KoerperPage() {
               <Activity className="w-5 h-5 text-green-400" />
               <h2 className="font-semibold">Letzte Workouts</h2>
             </div>
-            <button
-              className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
-              onClick={() => setShowWorkoutForm(true)}
-            >
-              <Plus className="w-4 h-4" />
-              Workout loggen
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg text-sm transition-colors"
+                onClick={() => setShowWorkoutSession(true)}
+              >
+                <Dumbbell className="w-4 h-4" />
+                Training starten
+              </button>
+              <button
+                className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors"
+                onClick={() => setShowWorkoutForm(true)}
+              >
+                <Plus className="w-4 h-4" />
+                Quick Log
+              </button>
+            </div>
           </div>
 
           {workouts.length > 0 ? (
@@ -302,25 +318,24 @@ export default function KoerperPage() {
           )}
         </motion.div>
 
-        {/* Training Plan Placeholder */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-8 bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-blue-400" />
-            <h2 className="font-semibold">Trainingsplan</h2>
-            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full">
-              Phase 3
-            </span>
-          </div>
-          <div className="text-center py-6 text-white/40">
-            <p>Trainingsplane kommen in Phase 3</p>
-            <p className="text-sm mt-1">Erstelle Wochenplane und verfolge deinen Fortschritt</p>
-          </div>
-        </motion.div>
+        {/* Gamification Stats */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <WorkoutStreakCard />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <PersonalRecordsCard />
+          </motion.div>
+        </div>
 
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
@@ -343,6 +358,16 @@ export default function KoerperPage() {
         <BodyMetricForm
           onSubmit={handleCreateMetric}
           onCancel={() => setShowMetricForm(false)}
+        />
+      )}
+
+      {showWorkoutSession && (
+        <WorkoutSession
+          onClose={() => setShowWorkoutSession(false)}
+          onComplete={() => {
+            setShowWorkoutSession(false);
+            loadData();
+          }}
         />
       )}
     </div>
