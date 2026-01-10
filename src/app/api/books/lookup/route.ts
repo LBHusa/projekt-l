@@ -8,9 +8,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // OpenLibrary API
+    // OpenLibrary API with explicit Accept header
     const response = await fetch(
-      `https://openlibrary.org/isbn/${isbn}.json`
+      `https://openlibrary.org/isbn/${isbn}.json`,
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+      }
     );
 
     if (!response.ok) {
@@ -23,7 +28,12 @@ export async function GET(request: NextRequest) {
     let authorName = '';
     if (data.authors?.[0]?.key) {
       const authorResponse = await fetch(
-        `https://openlibrary.org${data.authors[0].key}.json`
+        `https://openlibrary.org${data.authors[0].key}.json`,
+        {
+          headers: {
+            'Accept': 'application/json',
+          },
+        }
       );
       if (authorResponse.ok) {
         const authorData = await authorResponse.json();

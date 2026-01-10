@@ -59,6 +59,10 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
     .single();
 
   if (error) {
+    // PGRST116 = no rows found - this is a valid state (no active plan)
+    if (error.code === 'PGRST116') {
+      return null;
+    }
     console.error('Error fetching active plan:', error);
     return null;
   }

@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     if (format === 'json') {
       return NextResponse.json(exportData, {
         headers: {
+          'Content-Type': 'application/json',
           'Content-Disposition': `attachment; filename="projekt-l-export-${new Date().toISOString().split('T')[0]}.json"`,
         },
       });

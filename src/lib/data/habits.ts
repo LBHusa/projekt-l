@@ -732,8 +732,12 @@ export async function getTodayTimeStats(
     .rpc('get_today_time_summary', { p_user_id: userId });
 
   if (error) {
+    // PGRST116 = no rows found, or RPC returns empty - graceful degradation
+    if (error.code === 'PGRST116' || error.message?.includes('no rows')) {
+      return [];
+    }
     console.error('Error fetching today time stats:', error);
-    throw error;
+    return []; // Return empty array instead of throwing
   }
 
   return data || [];

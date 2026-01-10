@@ -343,7 +343,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                   {/* Stress Impact */}
                   <div>
                     <label className="block text-sm font-medium mb-1.5">
-                      Stress-Einfluss: {formData.mental_stress_impact > 0 ? '+' : ''}{formData.mental_stress_impact}
+                      Stress-Einfluss: {(formData.mental_stress_impact ?? 0) > 0 ? '+' : ''}{formData.mental_stress_impact ?? 0}
                     </label>
                     <input
                       type="range"
@@ -366,7 +366,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                   {/* Focus Impact */}
                   <div>
                     <label className="block text-sm font-medium mb-1.5">
-                      Fokus-Einfluss: {formData.mental_focus_impact > 0 ? '+' : ''}{formData.mental_focus_impact}
+                      Fokus-Einfluss: {(formData.mental_focus_impact ?? 0) > 0 ? '+' : ''}{formData.mental_focus_impact ?? 0}
                     </label>
                     <input
                       type="range"
