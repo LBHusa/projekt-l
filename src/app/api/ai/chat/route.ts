@@ -5,13 +5,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { skillTools, executeSkillTool } from '@/lib/ai/skill-tools';
+import { createClient } from '@/lib/supabase/server';
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // ============================================
 // SYSTEM PROMPT
@@ -53,9 +52,19 @@ Skills werden durch XP gelevelt - jedes Level braucht mehr XP als das vorherige.
 // API ROUTE
 // ============================================
 
+// Demo fallback user ID (used when not authenticated)
+// TODO: Remove this once proper authentication is enforced
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+
 export async function POST(request: NextRequest) {
   try {
-    const { messages, userId } = await request.json();
+    // Get authenticated user from Supabase session
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { messages } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -64,7 +73,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const currentUserId = userId || TEST_USER_ID;
+    // Use authenticated user ID, fallback to demo user for testing
+    // TODO: Make authentication required once auth system is fully implemented
+    const currentUserId = user?.id || DEMO_USER_ID;
 
     // Create initial request to Claude
     const response = await anthropic.messages.create({
