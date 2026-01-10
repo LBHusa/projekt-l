@@ -42,7 +42,7 @@ export default function TrainingPlanModal({ plan, onClose, onSave }: TrainingPla
       sun: [],
     }
   );
-  const [isActive, setIsActive] = useState(plan?.is_active || true);
+  const [isActive, setIsActive] = useState<boolean>(plan?.is_active ?? true);
 
   const handleLoadTemplate = (templateKey: keyof typeof TRAINING_TEMPLATES) => {
     const template = TRAINING_TEMPLATES[templateKey];
