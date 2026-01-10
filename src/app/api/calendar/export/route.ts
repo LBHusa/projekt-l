@@ -11,13 +11,20 @@ import type { Contact, RelationshipCategory } from '@/lib/types/contacts';
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Supabase Service Client für Server-Operationen
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase configuration missing');
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey);
+}
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
 
     // Query Parameter parsen
