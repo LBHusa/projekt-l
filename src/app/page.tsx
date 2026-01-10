@@ -13,6 +13,7 @@ import {
   QuickActionsWidget,
   FactionStatsWidget,
   StreakHighlightWidget,
+  TimeTrackingWidget,
   WeeklySummary,
   HabitCompletionModal,
   MoodLogModal,
@@ -292,14 +293,15 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Quick Actions + Habits + Streak Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Quick Actions + Habits + Time Tracking + Streak Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
             <QuickActionsWidget
               onOpenHabitModal={() => setHabitModalOpen(true)}
               onOpenMoodModal={() => setMoodModalOpen(true)}
               onOpenTransactionModal={() => setTransactionModalOpen(true)}
             />
             <HabitTrackerWidget />
+            <TimeTrackingWidget />
             <StreakHighlightWidget />
           </div>
 
