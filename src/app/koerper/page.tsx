@@ -10,6 +10,8 @@ import {
   WorkoutSession,
   PersonalRecordsCard,
   WorkoutStreakCard,
+  TrainingPlanCard,
+  TrainingPlanModal,
 } from '@/components/koerper';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
@@ -33,6 +35,7 @@ export default function KoerperPage() {
   const [showWorkoutForm, setShowWorkoutForm] = useState(false);
   const [showMetricForm, setShowMetricForm] = useState(false);
   const [showWorkoutSession, setShowWorkoutSession] = useState(false);
+  const [showTrainingPlanModal, setShowTrainingPlanModal] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -318,12 +321,22 @@ export default function KoerperPage() {
           )}
         </motion.div>
 
+        {/* Training Plan */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mb-8"
+        >
+          <TrainingPlanCard onCreatePlan={() => setShowTrainingPlanModal(true)} />
+        </motion.div>
+
         {/* Gamification Stats */}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
           >
             <WorkoutStreakCard />
           </motion.div>
@@ -331,7 +344,7 @@ export default function KoerperPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.6 }}
           >
             <PersonalRecordsCard />
           </motion.div>
@@ -366,6 +379,16 @@ export default function KoerperPage() {
           onClose={() => setShowWorkoutSession(false)}
           onComplete={() => {
             setShowWorkoutSession(false);
+            loadData();
+          }}
+        />
+      )}
+
+      {showTrainingPlanModal && (
+        <TrainingPlanModal
+          onClose={() => setShowTrainingPlanModal(false)}
+          onSave={() => {
+            setShowTrainingPlanModal(false);
             loadData();
           }}
         />
