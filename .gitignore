@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Worker CLAUDE.md files (each worker has its own)
+CLAUDE.md
