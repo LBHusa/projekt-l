@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pixel Avatar Test</title>
+  <style>
+    body {
+      background: #1a1a2e;
+      color: white;
+      font-family: system-ui;
+      padding: 2rem;
+      text-align: center;
+    }
+    .avatar-container {
+      display: inline-block;
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #9333ea;
+      background: linear-gradient(135deg, #334155, #1e293b);
+      margin: 1rem;
+    }
+    .avatar-container svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>DiceBear Pixel Art Avatar Test</h1>
+  <div id="avatars"></div>
+
+  <script type="module">
+    import { createAvatar } from 'https://esm.sh/@dicebear/core@9.x';
+    import { pixelArt } from 'https://esm.sh/@dicebear/collection@9.x';
+
+    const seeds = [
+      'wise-old-wizard',
+      'gandalf-the-grey',
+      'old-man-staff',
+      'wizard-hat',
+      'sage-elder',
+      'merlin'
+    ];
+
+    const container = document.getElementById('avatars');
+
+    seeds.forEach(seed => {
+      const avatar = createAvatar(pixelArt, {
+        seed,
+        size: 128
+      });
+
+      const div = document.createElement('div');
+      div.style.display = 'inline-block';
+      div.style.margin = '1rem';
+
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'avatar-container';
+      avatarDiv.innerHTML = avatar.toString();
+
+      const label = document.createElement('p');
+      label.textContent = seed;
+      label.style.fontSize = '12px';
+      label.style.color = '#9ca3af';
+
+      div.appendChild(avatarDiv);
+      div.appendChild(label);
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>
