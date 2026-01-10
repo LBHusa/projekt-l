@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
-import type { Habit, HabitType, HabitFrequency, FactionId } from '@/lib/database.types';
+import { useState, useEffect } from 'react';
+import { X, Sparkles, Clock, Brain } from 'lucide-react';
+import type { Habit, HabitType, HabitFrequency, FactionId, ActivityCategory } from '@/lib/database.types';
 import { HABIT_ICONS, HABIT_COLORS, FACTIONS, DAYS } from '@/lib/ui/constants';
 import HabitTemplateSelector from './HabitTemplateSelector';
 import type { HabitTemplate } from '@/lib/data/habit-templates';
+import { getActivityCategories } from '@/lib/data/habits';
 
 interface HabitFormProps {
   habit?: Habit | null;
@@ -23,10 +24,16 @@ export interface HabitFormData {
   target_days: string[];
   xp_per_completion: number;
   factions?: { faction_id: FactionId; weight: number }[];
+  // Time tracking fields for negative habits
+  activity_category_id?: string;
+  affects_mental_stats?: boolean;
+  mental_stress_impact?: number;
+  mental_focus_impact?: number;
 }
 
 export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activityCategories, setActivityCategories] = useState<ActivityCategory[]>([]);
   const [formData, setFormData] = useState<HabitFormData>({
     name: habit?.name || '',
     description: habit?.description || '',
@@ -39,6 +46,10 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
     factions: habit?.faction_id
       ? [{ faction_id: habit.faction_id, weight: 100 }]
       : undefined,
+    activity_category_id: habit?.activity_category_id || undefined,
+    affects_mental_stats: habit?.affects_mental_stats || false,
+    mental_stress_impact: habit?.mental_stress_impact || 0,
+    mental_focus_impact: habit?.mental_focus_impact || 0,
   });
 
   const [selectedFactions, setSelectedFactions] = useState<Set<FactionId>>(
@@ -46,6 +57,19 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
   );
 
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+
+  // Load activity categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categories = await getActivityCategories();
+        setActivityCategories(categories);
+      } catch (err) {
+        console.error('Error loading activity categories:', err);
+      }
+    };
+    loadCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,6 +281,114 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
               </button>
             </div>
           </div>
+
+          {/* Time Tracking & Mental Stats (only for negative habits) */}
+          {formData.habit_type === 'negative' && (
+            <div className="space-y-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <div className="flex items-center gap-2 text-red-400">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-medium">Zeit-Tracking</span>
+              </div>
+
+              {/* Activity Category */}
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Aktivitäts-Kategorie</label>
+                <select
+                  value={formData.activity_category_id || ''}
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    activity_category_id: e.target.value || undefined
+                  }))}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
+                >
+                  <option value="">Keine Kategorie</option>
+                  {activityCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.icon} {cat.name_de}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-white/40 mt-1">
+                  Kategorisiere diese Aktivität für Zeit-Tracking Statistiken
+                </p>
+              </div>
+
+              {/* Mental Stats Toggle */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.affects_mental_stats}
+                    onChange={e => setFormData(prev => ({
+                      ...prev,
+                      affects_mental_stats: e.target.checked,
+                      mental_stress_impact: e.target.checked ? prev.mental_stress_impact : 0,
+                      mental_focus_impact: e.target.checked ? prev.mental_focus_impact : 0,
+                    }))}
+                    className="w-4 h-4 rounded bg-white/5 border-white/10 checked:bg-[var(--accent-primary)]"
+                  />
+                  <span className="text-sm font-medium flex items-center gap-1">
+                    <Brain className="w-4 h-4" />
+                    Beeinflusst Mental Stats
+                  </span>
+                </label>
+                <p className="text-xs text-white/40 mt-1">
+                  Aktiviere dies wenn diese Aktivität Stress oder Fokus beeinflusst
+                </p>
+              </div>
+
+              {/* Mental Impact Sliders */}
+              {formData.affects_mental_stats && (
+                <div className="space-y-3 pl-6 border-l-2 border-red-500/30">
+                  {/* Stress Impact */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">
+                      Stress-Einfluss: {formData.mental_stress_impact > 0 ? '+' : ''}{formData.mental_stress_impact}
+                    </label>
+                    <input
+                      type="range"
+                      min="-10"
+                      max="10"
+                      step="1"
+                      value={formData.mental_stress_impact}
+                      onChange={e => setFormData(prev => ({
+                        ...prev,
+                        mental_stress_impact: parseInt(e.target.value)
+                      }))}
+                      className="w-full accent-red-500"
+                    />
+                    <div className="flex justify-between text-xs text-white/40 mt-1">
+                      <span>Beruhigend (-10)</span>
+                      <span>Stressig (+10)</span>
+                    </div>
+                  </div>
+
+                  {/* Focus Impact */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">
+                      Fokus-Einfluss: {formData.mental_focus_impact > 0 ? '+' : ''}{formData.mental_focus_impact}
+                    </label>
+                    <input
+                      type="range"
+                      min="-10"
+                      max="10"
+                      step="1"
+                      value={formData.mental_focus_impact}
+                      onChange={e => setFormData(prev => ({
+                        ...prev,
+                        mental_focus_impact: parseInt(e.target.value)
+                      }))}
+                      className="w-full accent-blue-500"
+                    />
+                    <div className="flex justify-between text-xs text-white/40 mt-1">
+                      <span>Ablenkend (-10)</span>
+                      <span>Fokussierend (+10)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Icon */}
           <div>
