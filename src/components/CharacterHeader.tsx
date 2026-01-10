@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import PixelAvatar from './character/PixelAvatar';
 
 interface CharacterHeaderProps {
   username: string | null;
@@ -50,13 +51,12 @@ export default function CharacterHeader({
               className="w-14 h-14 rounded-full object-cover border-2 border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20"
             />
           ) : (
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold border-2 border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
-              }}
-            >
-              {initials}
+            <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-2 border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20 bg-gradient-to-br from-slate-700 to-slate-900">
+              <PixelAvatar
+                seed={username || 'wise-old-wizard'}
+                size={56}
+                className="w-full h-full flex items-center justify-center"
+              />
             </div>
           )}
 
