@@ -8,7 +8,7 @@ import {
   PartyPopper, MessageCircle, Gift, Plus
 } from 'lucide-react';
 import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/components/factions';
-import { EventForm, type EventFormData, ContactForm, RelationshipScoreCard } from '@/components/soziales';
+import { EventForm, type EventFormData, ContactForm, RelationshipScoreCard, SocialSuggestions, SocialChallenges } from '@/components/soziales';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import {
   getContactsByCategory,
@@ -327,6 +327,17 @@ export default function SozialesPage() {
         <RelationshipScoreCard
           contacts={[...familyContacts, ...friendContacts]}
           maxDisplay={5}
+        />
+
+        {/* Social Suggestions (Event-Vorschläge) */}
+        <SocialSuggestions
+          contacts={[...familyContacts, ...friendContacts]}
+          maxDisplay={5}
+        />
+
+        {/* Social Challenges */}
+        <SocialChallenges
+          events={events}
         />
 
         {/* Upcoming Birthdays */}
