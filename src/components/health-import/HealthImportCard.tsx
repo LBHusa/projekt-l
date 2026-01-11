@@ -34,21 +34,22 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
 
   async function loadSyncStatus() {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch('/api/health/status');
-      // const data = await response.json();
+      const response = await fetch('/api/integrations/health-import/status');
+      const data = await response.json();
 
-      // Mock data for now
-      setStatus({
-        isConnected: false,
-        lastSync: null,
-        totalDataPoints: 0,
-        totalXpEarned: 0,
-        sleepDataCount: 0,
-        activityDataCount: 0,
-      });
+      if (data.success && data.status) {
+        setStatus({
+          isConnected: data.status.hasApiKey,
+          lastSync: data.status.lastSync,
+          totalDataPoints: data.status.totalItemsImported || 0,
+          totalXpEarned: data.status.totalXpEarned || 0,
+          sleepDataCount: data.status.sleepDataCount || 0,
+          activityDataCount: data.status.totalImports || 0,
+        });
+      }
     } catch (error) {
       console.error('Error loading sync status:', error);
+      // Keep default values on error
     } finally {
       setIsLoading(false);
     }

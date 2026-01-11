@@ -202,7 +202,7 @@ CREATE TRIGGER trigger_habit_mental_impact
 -- 8. CREATE INDEXES
 -- ============================================
 CREATE INDEX IF NOT EXISTS idx_habit_logs_duration ON habit_logs(duration_minutes) WHERE duration_minutes IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_habit_logs_date ON habit_logs(DATE(logged_at));
+-- INDEX on DATE(logged_at) removed - use logged_at::date in queries instead
 CREATE INDEX IF NOT EXISTS idx_habits_activity_category ON habits(activity_category_id);
 CREATE INDEX IF NOT EXISTS idx_habits_mental_stats ON habits(affects_mental_stats) WHERE affects_mental_stats = TRUE;
 

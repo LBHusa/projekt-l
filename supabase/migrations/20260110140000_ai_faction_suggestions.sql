@@ -19,12 +19,12 @@ CREATE TABLE IF NOT EXISTS ai_faction_suggestions_feedback (
   location TEXT,
 
   -- AI Suggestion
-  suggested_faction_id faction_key NOT NULL,
+  suggested_faction_id TEXT NOT NULL,
   confidence_score INT NOT NULL CHECK (confidence_score >= 0 AND confidence_score <= 100),
   suggestion_reasoning TEXT,
 
   -- User Feedback
-  actual_faction_id faction_key NOT NULL,
+  actual_faction_id TEXT NOT NULL,
   accepted BOOLEAN NOT NULL DEFAULT FALSE, -- TRUE if user accepted suggestion
 
   -- Metadata

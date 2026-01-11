@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import HealthImportCard from '@/components/health-import/HealthImportCard';
 import ApiKeyDisplay from '@/components/health-import/ApiKeyDisplay';
 import ShortcutInstructions from '@/components/health-import/ShortcutInstructions';
+import ImportHistoryList from '@/components/health-import/ImportHistoryList';
 
 export default function IntegrationsPage() {
   return (
@@ -42,6 +43,9 @@ export default function IntegrationsPage() {
 
           {/* Instructions */}
           <ShortcutInstructions />
+
+          {/* Import History */}
+          <ImportHistoryList />
         </div>
 
         {/* Future Integrations Placeholder */}
