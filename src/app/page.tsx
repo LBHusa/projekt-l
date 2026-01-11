@@ -230,7 +230,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link
-              href="/settings/notifications"
+              href="/settings"
               className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
               title="Einstellungen"
             >
