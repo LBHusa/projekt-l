@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@/lib/supabase';
-import type { JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
+import type { JobHistory, SalaryEntry, CareerGoal, CareerSource } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
 

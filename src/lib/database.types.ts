@@ -712,6 +712,27 @@ export interface CareerGoal {
   updated_at: string;
 }
 
+export type CareerSourceType = 'employment' | 'freelance' | 'business' | 'passive';
+export type CareerSourceCurrency = 'EUR' | 'USD' | 'GBP' | 'CHF';
+
+export interface CareerSource {
+  id: string;
+  user_id: string;
+  name: string;
+  type: CareerSourceType;
+  monthly_income: number | null;
+  currency: CareerSourceCurrency;
+  is_primary: boolean;
+  is_active: boolean;
+  start_date: string | null;
+  end_date: string | null;
+  linked_domain_id: string | null;
+  xp_multiplier: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // =============================================
 // Hobbys (Hobbies)
 // =============================================
