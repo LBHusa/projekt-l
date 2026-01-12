@@ -6,6 +6,7 @@ import type { Anthropic } from '@anthropic-ai/sdk';
 import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
+import { createTransaction, getAccounts } from '@/lib/data/finanzen';
 import type { UserSkillFull } from '@/lib/database.types';
 
 // ============================================
@@ -120,6 +121,32 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'log_income',
+    description: 'Füge ein Einkommen hinzu (Gehalt, Bonus, Freelance, etc.). Nutze dies wenn der User sagt "ich verdiene X Euro", "ich habe Y bekommen", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        amount: {
+          type: 'number',
+          description: 'Betrag in Euro',
+        },
+        category: {
+          type: 'string',
+          description: 'Kategorie (z.B. "Gehalt", "Bonus", "Freelance", "Dividenden")',
+        },
+        description: {
+          type: 'string',
+          description: 'Optional: Beschreibung',
+        },
+        is_recurring: {
+          type: 'boolean',
+          description: 'Ist dies wiederkehrend (z.B. monatliches Gehalt)?',
+        },
+      },
+      required: ['amount'],
+    },
+  },
 ];
 
 // ============================================
@@ -152,6 +179,9 @@ export async function executeSkillTool(
 
       case 'suggest_skills':
         return await handleSuggestSkills(toolInput, userId);
+
+      case 'log_income':
+        return await handleLogIncome(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -338,5 +368,59 @@ async function handleSuggestSkills(
     success: true,
     suggestions,
     context: context || null,
+  });
+}
+
+async function handleLogIncome(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const amount = input.amount as number;
+  const category = (input.category as string) || 'Gehalt';
+  const description = input.description as string | undefined;
+  const isRecurring = input.is_recurring as boolean | undefined;
+
+  // Get first account (or we could add account selection logic)
+  const accounts = await getAccounts();
+  if (accounts.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Kein Konto gefunden. Bitte erstelle zuerst ein Konto.',
+    });
+  }
+
+  const defaultAccount = accounts[0]; // Use first account
+
+  // Create income transaction
+  const transaction = await createTransaction({
+    account_id: defaultAccount.id,
+    transaction_type: 'income',
+    category,
+    amount,
+    description: description || `Einkommen: ${category}`,
+    occurred_at: new Date().toISOString(),
+    to_account_id: null,
+    tags: [],
+    is_recurring: isRecurring || false,
+    recurring_frequency: isRecurring ? 'monthly' : null,
+    next_occurrence: isRecurring ? new Date().toISOString().split('T')[0] : null,
+    recurrence_end_date: null,
+  });
+
+  if (!transaction) {
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Erstellen der Transaktion',
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    transaction_id: transaction.id,
+    amount,
+    category,
+    account_name: defaultAccount.name,
+    is_recurring: isRecurring || false,
+    message: `💰 ${amount}€ Einkommen (${category}) auf ${defaultAccount.name} eingetragen!`,
   });
 }
