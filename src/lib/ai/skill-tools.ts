@@ -6,8 +6,10 @@ import type { Anthropic } from '@anthropic-ai/sdk';
 import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
-import { createTransaction, getAccounts } from '@/lib/data/finanzen';
-import type { UserSkillFull } from '@/lib/database.types';
+import { createTransaction, getAccounts, getBudgetProgress } from '@/lib/data/finanzen';
+import { getHabits, logHabitCompletion } from '@/lib/data/habits';
+import { createWorkout, type WorkoutFormData } from '@/lib/data/koerper';
+import type { UserSkillFull, WorkoutType, WorkoutIntensity } from '@/lib/database.types';
 
 // ============================================
 // TOOL DEFINITIONS
@@ -121,6 +123,9 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Finanzen
+  // ============================================
   {
     name: 'log_income',
     description: 'Füge ein Einkommen hinzu (Gehalt, Bonus, Freelance, etc.). Nutze dies wenn der User sagt "ich verdiene X Euro", "ich habe Y bekommen", etc.',
@@ -145,6 +150,80 @@ export const skillTools: Anthropic.Tool[] = [
         },
       },
       required: ['amount'],
+    },
+  },
+  {
+    name: 'log_expense',
+    description: 'Füge eine Ausgabe hinzu. Nutze dies wenn der User sagt "ich habe X für Y bezahlt", "ich habe Z ausgegeben", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        amount: {
+          type: 'number',
+          description: 'Betrag in Euro',
+        },
+        category: {
+          type: 'string',
+          description: 'Kategorie (z.B. "Essen", "Transport", "Wohnen", "Shopping", "Unterhaltung")',
+        },
+        description: {
+          type: 'string',
+          description: 'Optional: Beschreibung',
+        },
+      },
+      required: ['amount'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Körper/Fitness
+  // ============================================
+  {
+    name: 'log_workout',
+    description: 'Trage ein Workout/Training ins Trainingslog ein. Nutze dies wenn der User sagt "ich war joggen", "ich war im Gym", "ich habe trainiert", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        workout_type: {
+          type: 'string',
+          description: 'Art des Workouts. Mögliche Werte: "cardio" (Joggen, Laufen, Radfahren), "strength" (Krafttraining, Gym), "hiit" (HIIT, Intervalltraining), "yoga" (Yoga), "flexibility" (Stretching, Dehnen), "sports" (Fußball, Tennis, etc.), "other" (Sonstiges)',
+          enum: ['cardio', 'strength', 'hiit', 'yoga', 'flexibility', 'sports', 'other'],
+        },
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        intensity: {
+          type: 'string',
+          description: 'Optional: Intensität des Workouts (low, medium, high)',
+          enum: ['low', 'medium', 'high'],
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen zum Workout',
+        },
+      },
+      required: ['workout_type', 'duration_minutes'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Habits
+  // ============================================
+  {
+    name: 'log_habit',
+    description: 'Markiere ein Habit als erledigt. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Wasser getrunken", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        habit_name: {
+          type: 'string',
+          description: 'Name des Habits (z.B. "Meditation", "Wasser trinken", "Sport")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen zur Completion',
+        },
+      },
+      required: ['habit_name'],
     },
   },
 ];
@@ -183,6 +262,15 @@ export async function executeSkillTool(
       case 'log_income':
         return await handleLogIncome(toolInput, userId);
 
+      case 'log_expense':
+        return await handleLogExpense(toolInput, userId);
+
+      case 'log_workout':
+        return await handleLogWorkout(toolInput, userId);
+
+      case 'log_habit':
+        return await handleLogHabit(toolInput, userId);
+
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }
@@ -196,7 +284,7 @@ export async function executeSkillTool(
 }
 
 // ============================================
-// TOOL HANDLERS
+// TOOL HANDLERS - Skills
 // ============================================
 
 async function handleListUserSkills(
@@ -371,6 +459,10 @@ async function handleSuggestSkills(
   });
 }
 
+// ============================================
+// TOOL HANDLERS - Finanzen
+// ============================================
+
 async function handleLogIncome(
   input: Record<string, unknown>,
   userId: string
@@ -423,4 +515,178 @@ async function handleLogIncome(
     is_recurring: isRecurring || false,
     message: `💰 ${amount}€ Einkommen (${category}) auf ${defaultAccount.name} eingetragen!`,
   });
+}
+
+async function handleLogExpense(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const amount = input.amount as number;
+  const category = (input.category as string | undefined) || 'Sonstiges';
+  const description = (input.description as string | undefined) || '';
+
+  // Get first active account (default account)
+  const accounts = await getAccounts();
+  if (accounts.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine Konten gefunden. Bitte erstelle zuerst ein Konto.',
+    });
+  }
+
+  const defaultAccount = accounts[0];
+
+  // Create transaction
+  const transaction = await createTransaction({
+    account_id: defaultAccount.id,
+    transaction_type: 'expense',
+    category,
+    amount,
+    description,
+    occurred_at: new Date().toISOString(),
+    to_account_id: null,
+    tags: [],
+    is_recurring: false,
+    recurring_frequency: null,
+    next_occurrence: null,
+    recurrence_end_date: null,
+  });
+
+  if (!transaction) {
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Erstellen der Transaktion',
+    });
+  }
+
+  // Check budget status
+  const now = new Date();
+  const budgetProgress = await getBudgetProgress(now.getFullYear(), now.getMonth() + 1);
+  const categoryBudget = budgetProgress.find((b) => b.category === category);
+
+  let budgetWarning = null;
+  if (categoryBudget && categoryBudget.remaining < 0) {
+    budgetWarning = `⚠️ Budget für ${category} überschritten! Noch ${Math.abs(categoryBudget.remaining).toFixed(2)}€ über dem Limit.`;
+  } else if (categoryBudget && categoryBudget.remaining < categoryBudget.budget * 0.2) {
+    budgetWarning = `💡 Budget für ${category} fast aufgebraucht. Noch ${categoryBudget.remaining.toFixed(2)}€ verfügbar.`;
+  }
+
+  return JSON.stringify({
+    success: true,
+    transaction_id: transaction.id,
+    amount: transaction.amount,
+    category: transaction.category,
+    account: defaultAccount.name,
+    message: `Ausgabe von ${amount}€ für ${category} erfolgreich gespeichert`,
+    budget_warning: budgetWarning,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Körper/Fitness
+// ============================================
+
+async function handleLogWorkout(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const workoutType = input.workout_type as WorkoutType;
+  const durationMinutes = input.duration_minutes as number;
+  const intensity = (input.intensity as WorkoutIntensity | undefined) || undefined;
+  const notes = input.notes as string | undefined;
+
+  // Determine workout name based on type
+  const workoutNames: Record<WorkoutType, string> = {
+    cardio: 'Cardio Training',
+    strength: 'Krafttraining',
+    hiit: 'HIIT Training',
+    yoga: 'Yoga Session',
+    flexibility: 'Mobility & Stretching',
+    sports: 'Sport',
+    other: 'Training',
+  };
+
+  const workoutData: WorkoutFormData = {
+    name: workoutNames[workoutType] || 'Training',
+    workout_type: workoutType,
+    duration_minutes: durationMinutes,
+    intensity,
+    notes,
+    occurred_at: new Date().toISOString(),
+  };
+
+  const workout = await createWorkout(workoutData);
+
+  if (!workout) {
+    throw new Error('Fehler beim Erstellen des Workouts');
+  }
+
+  return JSON.stringify({
+    success: true,
+    workout: {
+      id: workout.id,
+      name: workout.name,
+      type: workout.workout_type,
+      duration: workout.duration_minutes,
+      xp_earned: workout.xp_gained,
+    },
+    message: `🏋️ Workout erfolgreich eingetragen! Du hast ${workout.xp_gained} XP verdient.`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Habits
+// ============================================
+
+async function handleLogHabit(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const habitName = input.habit_name as string;
+  const notes = (input.notes as string | undefined) || undefined;
+
+  // Get all habits
+  const habits = await getHabits(userId);
+  if (habits.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine Habits gefunden. Bitte erstelle zuerst ein Habit.',
+    });
+  }
+
+  // Fuzzy match habit by name
+  const normalizedSearch = habitName.toLowerCase().trim();
+  const matchedHabit = habits.find((h) =>
+    h.name.toLowerCase().includes(normalizedSearch) || normalizedSearch.includes(h.name.toLowerCase())
+  );
+
+  if (!matchedHabit) {
+    return JSON.stringify({
+      success: false,
+      error: `Habit "${habitName}" nicht gefunden`,
+      available_habits: habits.map((h) => h.name),
+    });
+  }
+
+  // Log habit completion
+  try {
+    const result = await logHabitCompletion(matchedHabit.id, true, notes, userId);
+
+    return JSON.stringify({
+      success: true,
+      habit_name: matchedHabit.name,
+      habit_icon: matchedHabit.icon,
+      xp_gained: result.xpGained,
+      current_streak: result.newStreak,
+      message:
+        result.newStreak > 1
+          ? `${matchedHabit.icon} ${matchedHabit.name} erledigt! ${result.newStreak} Tage Streak 🔥 (+${result.xpGained} XP)`
+          : `${matchedHabit.icon} ${matchedHabit.name} erledigt! (+${result.xpGained} XP)`,
+    });
+  } catch (error) {
+    return JSON.stringify({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unbekannter Fehler beim Loggen des Habits',
+    });
+  }
 }
