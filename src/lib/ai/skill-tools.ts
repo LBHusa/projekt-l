@@ -7,6 +7,7 @@ import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import type { UserSkillFull } from '@/lib/database.types';
+import { createTransaction, getAccounts, getBudgetProgress } from '@/lib/data/finanzen';
 
 // ============================================
 // TOOL DEFINITIONS
@@ -120,6 +121,28 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'log_expense',
+    description: 'Füge eine Ausgabe hinzu. Nutze dies wenn der User sagt "ich habe X für Y bezahlt", "ich habe Z ausgegeben", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        amount: {
+          type: 'number',
+          description: 'Betrag in Euro',
+        },
+        category: {
+          type: 'string',
+          description: 'Kategorie (z.B. "Essen", "Transport", "Wohnen", "Shopping", "Unterhaltung")',
+        },
+        description: {
+          type: 'string',
+          description: 'Optional: Beschreibung',
+        },
+      },
+      required: ['amount'],
+    },
+  },
 ];
 
 // ============================================
@@ -152,6 +175,9 @@ export async function executeSkillTool(
 
       case 'suggest_skills':
         return await handleSuggestSkills(toolInput, userId);
+
+      case 'log_expense':
+        return await handleLogExpense(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -338,5 +364,70 @@ async function handleSuggestSkills(
     success: true,
     suggestions,
     context: context || null,
+  });
+}
+
+async function handleLogExpense(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const amount = input.amount as number;
+  const category = (input.category as string | undefined) || 'Sonstiges';
+  const description = (input.description as string | undefined) || '';
+
+  // Get first active account (default account)
+  const accounts = await getAccounts();
+  if (accounts.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine Konten gefunden. Bitte erstelle zuerst ein Konto.',
+    });
+  }
+
+  const defaultAccount = accounts[0];
+
+  // Create transaction
+  const transaction = await createTransaction({
+    account_id: defaultAccount.id,
+    transaction_type: 'expense',
+    category,
+    amount,
+    description,
+    occurred_at: new Date().toISOString(),
+    to_account_id: null,
+    tags: [],
+    is_recurring: false,
+    recurring_frequency: null,
+    next_occurrence: null,
+    recurrence_end_date: null,
+  });
+
+  if (!transaction) {
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Erstellen der Transaktion',
+    });
+  }
+
+  // Check budget status
+  const now = new Date();
+  const budgetProgress = await getBudgetProgress(now.getFullYear(), now.getMonth() + 1);
+  const categoryBudget = budgetProgress.find((b) => b.category === category);
+
+  let budgetWarning = null;
+  if (categoryBudget && categoryBudget.remaining < 0) {
+    budgetWarning = `⚠️ Budget für ${category} überschritten! Noch ${Math.abs(categoryBudget.remaining).toFixed(2)}€ über dem Limit.`;
+  } else if (categoryBudget && categoryBudget.remaining < categoryBudget.budget * 0.2) {
+    budgetWarning = `💡 Budget für ${category} fast aufgebraucht. Noch ${categoryBudget.remaining.toFixed(2)}€ verfügbar.`;
+  }
+
+  return JSON.stringify({
+    success: true,
+    transaction_id: transaction.id,
+    amount: transaction.amount,
+    category: transaction.category,
+    account: defaultAccount.name,
+    message: `Ausgabe von ${amount}€ für ${category} erfolgreich gespeichert`,
+    budget_warning: budgetWarning,
   });
 }
