@@ -8,6 +8,7 @@ import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import type { UserSkillFull } from '@/lib/database.types';
 import { createTransaction, getAccounts, getBudgetProgress } from '@/lib/data/finanzen';
+import { getHabits, logHabitCompletion } from '@/lib/data/habits';
 
 // ============================================
 // TOOL DEFINITIONS
@@ -143,6 +144,24 @@ export const skillTools: Anthropic.Tool[] = [
       required: ['amount'],
     },
   },
+  {
+    name: 'log_habit',
+    description: 'Markiere ein Habit als erledigt. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Wasser getrunken", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        habit_name: {
+          type: 'string',
+          description: 'Name des Habits (z.B. "Meditation", "Wasser trinken", "Sport")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen zur Completion',
+        },
+      },
+      required: ['habit_name'],
+    },
+  },
 ];
 
 // ============================================
@@ -178,6 +197,9 @@ export async function executeSkillTool(
 
       case 'log_expense':
         return await handleLogExpense(toolInput, userId);
+
+      case 'log_habit':
+        return await handleLogHabit(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -430,4 +452,57 @@ async function handleLogExpense(
     message: `Ausgabe von ${amount}€ für ${category} erfolgreich gespeichert`,
     budget_warning: budgetWarning,
   });
+}
+
+async function handleLogHabit(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const habitName = input.habit_name as string;
+  const notes = (input.notes as string | undefined) || undefined;
+
+  // Get all habits
+  const habits = await getHabits(userId);
+  if (habits.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine Habits gefunden. Bitte erstelle zuerst ein Habit.',
+    });
+  }
+
+  // Fuzzy match habit by name
+  const normalizedSearch = habitName.toLowerCase().trim();
+  const matchedHabit = habits.find((h) =>
+    h.name.toLowerCase().includes(normalizedSearch) || normalizedSearch.includes(h.name.toLowerCase())
+  );
+
+  if (!matchedHabit) {
+    return JSON.stringify({
+      success: false,
+      error: `Habit "${habitName}" nicht gefunden`,
+      available_habits: habits.map((h) => h.name),
+    });
+  }
+
+  // Log habit completion
+  try {
+    const result = await logHabitCompletion(matchedHabit.id, true, notes, userId);
+
+    return JSON.stringify({
+      success: true,
+      habit_name: matchedHabit.name,
+      habit_icon: matchedHabit.icon,
+      xp_gained: result.xpGained,
+      current_streak: result.newStreak,
+      message:
+        result.newStreak > 1
+          ? `${matchedHabit.icon} ${matchedHabit.name} erledigt! ${result.newStreak} Tage Streak 🔥 (+${result.xpGained} XP)`
+          : `${matchedHabit.icon} ${matchedHabit.name} erledigt! (+${result.xpGained} XP)`,
+    });
+  } catch (error) {
+    return JSON.stringify({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unbekannter Fehler beim Loggen des Habits',
+    });
+  }
 }
