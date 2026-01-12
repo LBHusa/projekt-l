@@ -6,7 +6,8 @@ import type { Anthropic } from '@anthropic-ai/sdk';
 import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
-import type { UserSkillFull } from '@/lib/database.types';
+import { createWorkout, type WorkoutFormData } from '@/lib/data/koerper';
+import type { UserSkillFull, WorkoutType, WorkoutIntensity } from '@/lib/database.types';
 
 // ============================================
 // TOOL DEFINITIONS
@@ -120,6 +121,34 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'log_workout',
+    description: 'Trage ein Workout/Training ins Trainingslog ein. Nutze dies wenn der User sagt "ich war joggen", "ich war im Gym", "ich habe trainiert", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        workout_type: {
+          type: 'string',
+          description: 'Art des Workouts. Mögliche Werte: "cardio" (Joggen, Laufen, Radfahren), "strength" (Krafttraining, Gym), "hiit" (HIIT, Intervalltraining), "yoga" (Yoga), "flexibility" (Stretching, Dehnen), "sports" (Fußball, Tennis, etc.), "other" (Sonstiges)',
+          enum: ['cardio', 'strength', 'hiit', 'yoga', 'flexibility', 'sports', 'other'],
+        },
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        intensity: {
+          type: 'string',
+          description: 'Optional: Intensität des Workouts (low, medium, high)',
+          enum: ['low', 'medium', 'high'],
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen zum Workout',
+        },
+      },
+      required: ['workout_type', 'duration_minutes'],
+    },
+  },
 ];
 
 // ============================================
@@ -152,6 +181,9 @@ export async function executeSkillTool(
 
       case 'suggest_skills':
         return await handleSuggestSkills(toolInput, userId);
+
+      case 'log_workout':
+        return await handleLogWorkout(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -338,5 +370,53 @@ async function handleSuggestSkills(
     success: true,
     suggestions,
     context: context || null,
+  });
+}
+
+async function handleLogWorkout(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const workoutType = input.workout_type as WorkoutType;
+  const durationMinutes = input.duration_minutes as number;
+  const intensity = (input.intensity as WorkoutIntensity | undefined) || undefined;
+  const notes = input.notes as string | undefined;
+
+  // Determine workout name based on type
+  const workoutNames: Record<WorkoutType, string> = {
+    cardio: 'Cardio Training',
+    strength: 'Krafttraining',
+    hiit: 'HIIT Training',
+    yoga: 'Yoga Session',
+    flexibility: 'Mobility & Stretching',
+    sports: 'Sport',
+    other: 'Training',
+  };
+
+  const workoutData: WorkoutFormData = {
+    name: workoutNames[workoutType] || 'Training',
+    workout_type: workoutType,
+    duration_minutes: durationMinutes,
+    intensity,
+    notes,
+    occurred_at: new Date().toISOString(),
+  };
+
+  const workout = await createWorkout(workoutData);
+
+  if (!workout) {
+    throw new Error('Fehler beim Erstellen des Workouts');
+  }
+
+  return JSON.stringify({
+    success: true,
+    workout: {
+      id: workout.id,
+      name: workout.name,
+      type: workout.workout_type,
+      duration: workout.duration_minutes,
+      xp_earned: workout.xp_gained,
+    },
+    message: `🏋️ Workout erfolgreich eingetragen! Du hast ${workout.xp_gained} XP verdient.`,
   });
 }
