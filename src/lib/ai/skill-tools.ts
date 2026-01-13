@@ -8,6 +8,7 @@ import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import { getNetWorth, getMonthlyCashflow, getAccounts } from '@/lib/data/finanzen';
 import { saveJournalEntry } from '@/lib/data/geist';
+import { createContact } from '@/lib/data/contacts';
 import type { UserSkillFull } from '@/lib/database.types';
 
 // ============================================
@@ -155,6 +156,28 @@ export const skillTools: Anthropic.Tool[] = [
       required: ['content'],
     },
   },
+  {
+    name: 'create_contact',
+    description: 'Neuen Kontakt anlegen. Nutze dies wenn der User eine neue Person zu seinem Netzwerk hinzufügen möchte.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Name des Kontakts (Vor- und Nachname)',
+        },
+        relationship_type: {
+          type: 'string',
+          description: 'Beziehungstyp: parent, sibling, partner, child, relative, best_friend, close_friend, friend, acquaintance, colleague, boss, employee, business_partner, mentor, student, other',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optionale Notizen zum Kontakt',
+        },
+      },
+      required: ['name'],
+    },
+  },
 ];
 
 // ============================================
@@ -193,6 +216,9 @@ export async function executeSkillTool(
 
       case 'create_journal':
         return await handleCreateJournal(toolInput, userId);
+
+      case 'create_contact':
+        return await handleCreateContact(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -491,6 +517,54 @@ async function handleCreateJournal(
     return JSON.stringify({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to create journal entry',
+    });
+  }
+}
+
+async function handleCreateContact(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const name = input.name as string;
+  const relationshipType = (input.relationship_type as string) || 'other';
+  const notes = input.notes as string | undefined;
+
+  if (!name || name.trim().length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Name is required and cannot be empty',
+    });
+  }
+
+  // Parse name into first_name and last_name
+  const nameParts = name.trim().split(' ');
+  const firstName = nameParts[0];
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
+
+  try {
+    const contact = await createContact({
+      first_name: firstName,
+      last_name: lastName,
+      relationship_type: relationshipType as any,
+      notes: notes,
+    });
+
+    return JSON.stringify({
+      success: true,
+      contact: {
+        id: contact.id,
+        name: `${contact.first_name}${contact.last_name ? ' ' + contact.last_name : ''}`,
+        relationship_type: contact.relationship_type,
+        relationship_category: contact.relationship_category,
+        created_at: contact.created_at,
+      },
+      message: `Kontakt "${contact.first_name}${contact.last_name ? ' ' + contact.last_name : ''}" erfolgreich angelegt!`,
+    });
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    return JSON.stringify({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create contact',
     });
   }
 }
