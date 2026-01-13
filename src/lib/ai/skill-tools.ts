@@ -7,6 +7,9 @@ import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import { createWorkout, type WorkoutFormData } from '@/lib/data/koerper';
+import { getContacts } from '@/lib/data/contacts';
+import { createInteraction } from '@/lib/data/interactions';
+import type { InteractionFormData } from '@/lib/types/contacts';
 import type { UserSkillFull, WorkoutType, WorkoutIntensity } from '@/lib/database.types';
 
 // ============================================
@@ -149,6 +152,38 @@ export const skillTools: Anthropic.Tool[] = [
       required: ['workout_type', 'duration_minutes'],
     },
   },
+  {
+    name: 'log_interaction',
+    description: 'Logge eine soziale Interaktion mit einer Person (Treffen, Anruf, Nachricht, etc.). Nutze dies wenn der User sagt "ich habe mich mit X getroffen", "ich habe mit Y telefoniert", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        contact_name: {
+          type: 'string',
+          description: 'Name der Person (z.B. "Max", "Anna Schmidt"). Wird automatisch gegen vorhandene Kontakte gematcht.',
+        },
+        interaction_type: {
+          type: 'string',
+          description: 'Art der Interaktion',
+          enum: ['meeting', 'call', 'video_call', 'message', 'activity', 'event', 'gift', 'support', 'quality_time', 'other'],
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen zur Interaktion (was wurde besprochen, was gemacht, etc.)',
+        },
+        quality: {
+          type: 'string',
+          description: 'Optional: Qualität der Interaktion (poor, neutral, good, great, exceptional). Default: good',
+          enum: ['poor', 'neutral', 'good', 'great', 'exceptional'],
+        },
+        duration_minutes: {
+          type: 'number',
+          description: 'Optional: Dauer in Minuten (besonders relevant für Calls/Meetings)',
+        },
+      },
+      required: ['contact_name'],
+    },
+  },
 ];
 
 // ============================================
@@ -184,6 +219,9 @@ export async function executeSkillTool(
 
       case 'log_workout':
         return await handleLogWorkout(toolInput, userId);
+
+      case 'log_interaction':
+        return await handleLogInteraction(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -418,5 +456,171 @@ async function handleLogWorkout(
       xp_earned: workout.xp_gained,
     },
     message: `🏋️ Workout erfolgreich eingetragen! Du hast ${workout.xp_gained} XP verdient.`,
+  });
+}
+
+// ============================================
+// HELPER: Fuzzy Match Contact Name
+// ============================================
+
+/**
+ * Simple Levenshtein distance for fuzzy string matching
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j] + 1 // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
+/**
+ * Fuzzy match a contact name against available contacts
+ * Returns the best matching contact or null if no good match found
+ */
+async function fuzzyMatchContact(searchName: string, userId: string) {
+  const contacts = await getContacts({ is_archived: false });
+
+  if (contacts.length === 0) {
+    return null;
+  }
+
+  const searchLower = searchName.toLowerCase().trim();
+
+  // Build candidate strings for each contact
+  const candidates = contacts.map((contact) => {
+    const firstName = contact.first_name.toLowerCase();
+    const lastName = contact.last_name?.toLowerCase() || '';
+    const nickname = contact.nickname?.toLowerCase() || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+
+    return {
+      contact,
+      searchStrings: [firstName, fullName, nickname].filter(Boolean),
+    };
+  });
+
+  // Score each contact
+  const scored = candidates.map(({ contact, searchStrings }) => {
+    let bestScore = Infinity;
+
+    for (const str of searchStrings) {
+      // Exact match gets score 0
+      if (str === searchLower) {
+        bestScore = 0;
+        break;
+      }
+
+      // Starts with search gets bonus
+      if (str.startsWith(searchLower)) {
+        bestScore = Math.min(bestScore, 1);
+        continue;
+      }
+
+      // Contains search
+      if (str.includes(searchLower)) {
+        bestScore = Math.min(bestScore, 2);
+        continue;
+      }
+
+      // Levenshtein distance
+      const distance = levenshteinDistance(searchLower, str);
+      bestScore = Math.min(bestScore, distance + 3);
+    }
+
+    return { contact, score: bestScore };
+  });
+
+  // Sort by score (lower is better)
+  scored.sort((a, b) => a.score - b.score);
+
+  const best = scored[0];
+
+  // Only return if score is reasonable (exact match, starts with, contains, or very close)
+  // Threshold: accept if distance <= 3 or search is short and distance <= 2
+  const threshold = searchLower.length <= 3 ? 5 : 6;
+
+  if (best.score <= threshold) {
+    return best.contact;
+  }
+
+  return null;
+}
+
+async function handleLogInteraction(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const contactName = input.contact_name as string;
+  const interactionType = (input.interaction_type as string | undefined) || 'other';
+  const notes = input.notes as string | undefined;
+  const quality = (input.quality as string | undefined) || 'good';
+  const durationMinutes = input.duration_minutes as number | undefined;
+
+  // Fuzzy match contact
+  const contact = await fuzzyMatchContact(contactName, userId);
+
+  if (!contact) {
+    // No contact found - suggest creating one
+    return JSON.stringify({
+      success: false,
+      error: 'contact_not_found',
+      message: `Konnte keinen Kontakt für "${contactName}" finden. Bitte erstelle zuerst einen Kontakt oder überprüfe die Schreibweise.`,
+      suggestion: `Möchtest du einen Kontakt "${contactName}" anlegen?`,
+    });
+  }
+
+  // Create the interaction
+  const interactionData = {
+    contact_id: contact.id,
+    interaction_type: interactionType as any,
+    quality: quality as any,
+    description: notes,
+    duration_minutes: durationMinutes,
+  };
+
+  const interaction = await createInteraction(interactionData);
+
+  if (!interaction) {
+    throw new Error('Fehler beim Erstellen der Interaktion');
+  }
+
+  // Build display name
+  const displayName =
+    contact.nickname ||
+    (contact.last_name ? `${contact.first_name} ${contact.last_name}` : contact.first_name);
+
+  return JSON.stringify({
+    success: true,
+    interaction: {
+      id: interaction.id,
+      contact_name: displayName,
+      contact_id: contact.id,
+      type: interaction.interaction_type,
+      quality: interaction.quality,
+      xp_earned: interaction.xp_gained,
+      duration: interaction.duration_minutes,
+    },
+    message: `✅ Interaktion mit ${displayName} erfolgreich geloggt! (+${interaction.xp_gained} XP)`,
   });
 }

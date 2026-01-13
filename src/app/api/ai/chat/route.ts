@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
-import { skillTools, executeSkillTool } from '@/lib/ai/skill-tools';
+import { getAllTools, executeTool } from '@/lib/ai/tool-registry';
 import { createClient } from '@/lib/supabase/server';
 
 // Initialize Anthropic client
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: messages as Anthropic.MessageParam[],
-      tools: skillTools,
+      tools: getAllTools(),
     });
 
     // Handle tool use
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       // Execute all tools
       const toolResults: Anthropic.ToolResultBlockParam[] = [];
       for (const toolUse of toolUses) {
-        const result = await executeSkillTool(
+        const result = await executeTool(
           toolUse.name,
           toolUse.input as Record<string, unknown>,
           currentUserId
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
             content: toolResults,
           },
         ] as Anthropic.MessageParam[],
-        tools: skillTools,
+        tools: getAllTools(),
       });
 
       return NextResponse.json({
