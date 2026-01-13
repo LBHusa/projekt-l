@@ -7,6 +7,7 @@ import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import { getNetWorth, getMonthlyCashflow, getAccounts } from '@/lib/data/finanzen';
+import { saveJournalEntry } from '@/lib/data/geist';
 import type { UserSkillFull } from '@/lib/database.types';
 
 // ============================================
@@ -136,6 +137,24 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'create_journal',
+    description: 'Tagebucheintrag erstellen. Nutze dies wenn der User einen Tagebucheintrag schreiben möchte oder reflektieren will.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        content: {
+          type: 'string',
+          description: 'Der Tagebucheintrag-Text',
+        },
+        prompt: {
+          type: 'string',
+          description: 'Optionaler Prompt/Frage die beantwortet wird',
+        },
+      },
+      required: ['content'],
+    },
+  },
 ];
 
 // ============================================
@@ -171,6 +190,9 @@ export async function executeSkillTool(
 
       case 'get_balance':
         return await handleGetBalance(toolInput, userId);
+
+      case 'create_journal':
+        return await handleCreateJournal(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -435,4 +457,40 @@ function formatEuro(amount: number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(amount);
+}
+
+async function handleCreateJournal(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const content = input.content as string;
+  const prompt = input.prompt as string | undefined;
+
+  if (!content || content.trim().length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Content is required and cannot be empty',
+    });
+  }
+
+  try {
+    const entry = await saveJournalEntry(content, prompt, userId);
+
+    return JSON.stringify({
+      success: true,
+      entry: {
+        id: entry.id,
+        word_count: entry.word_count,
+        xp_gained: entry.xp_gained,
+        created_at: entry.created_at,
+      },
+      message: `Tagebucheintrag erstellt! ${entry.word_count} Wörter, +${entry.xp_gained} XP`,
+    });
+  } catch (error) {
+    console.error('Error creating journal entry:', error);
+    return JSON.stringify({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create journal entry',
+    });
+  }
 }
