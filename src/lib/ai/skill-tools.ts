@@ -7,7 +7,7 @@ import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
 import { createTransaction, getAccounts, getBudgetProgress } from '@/lib/data/finanzen';
-import { getHabits, logHabitCompletion } from '@/lib/data/habits';
+import { getHabits, getHabitsWithLogs, logHabitCompletion } from '@/lib/data/habits';
 import { createWorkout, type WorkoutFormData } from '@/lib/data/koerper';
 import type { UserSkillFull, WorkoutType, WorkoutIntensity } from '@/lib/database.types';
 
@@ -209,6 +209,20 @@ export const skillTools: Anthropic.Tool[] = [
   // LIFE DOMAIN TOOLS - Habits
   // ============================================
   {
+    name: 'list_habits',
+    description: 'Liste alle Habits des Users auf. Nützlich um zu wissen welche Habits existieren bevor man sie loggt.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        include_completed_today: {
+          type: 'boolean',
+          description: 'Zeige auch an welche Habits heute schon erledigt wurden',
+        },
+      },
+      required: [],
+    },
+  },
+  {
     name: 'log_habit',
     description: 'Markiere ein Habit als erledigt. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Wasser getrunken", etc.',
     input_schema: {
@@ -267,6 +281,9 @@ export async function executeSkillTool(
 
       case 'log_workout':
         return await handleLogWorkout(toolInput, userId);
+
+      case 'list_habits':
+        return await handleListHabits(toolInput, userId);
 
       case 'log_habit':
         return await handleLogHabit(toolInput, userId);
@@ -637,6 +654,44 @@ async function handleLogWorkout(
 // ============================================
 // TOOL HANDLERS - Habits
 // ============================================
+
+async function handleListHabits(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const includeCompletedToday = input.include_completed_today as boolean | undefined;
+
+  // Get habits with logs for today
+  const habitsWithLogs = await getHabitsWithLogs(userId, 1);
+
+  // Map to response format
+  const habitsList = habitsWithLogs.map(habit => {
+    const lastCompletionLog = habit.logs && habit.logs.length > 0 ? habit.logs[0] : null;
+
+    return {
+      id: habit.id,
+      name: habit.name,
+      icon: habit.icon,
+      current_streak: habit.current_streak,
+      longest_streak: habit.longest_streak,
+      total_completions: habit.total_completions,
+      xp_per_completion: habit.xp_per_completion,
+      completed_today: includeCompletedToday ? habit.completedToday : undefined,
+      last_completion: lastCompletionLog ? lastCompletionLog.logged_at : null,
+      frequency: habit.frequency,
+      habit_type: habit.habit_type,
+    };
+  });
+
+  return JSON.stringify({
+    success: true,
+    count: habitsList.length,
+    habits: habitsList,
+    message: habitsList.length === 0
+      ? 'Keine Habits gefunden. Erstelle erst ein Habit im Dashboard.'
+      : `${habitsList.length} Habit${habitsList.length > 1 ? 's' : ''} gefunden`,
+  });
+}
 
 async function handleLogHabit(
   input: Record<string, unknown>,
