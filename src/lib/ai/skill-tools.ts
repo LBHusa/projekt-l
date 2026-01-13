@@ -6,6 +6,7 @@ import type { Anthropic } from '@anthropic-ai/sdk';
 import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
 import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
 import { getAllDomains } from '@/lib/data/domains';
+import { getNetWorth, getMonthlyCashflow, getAccounts } from '@/lib/data/finanzen';
 import type { UserSkillFull } from '@/lib/database.types';
 
 // ============================================
@@ -120,6 +121,21 @@ export const skillTools: Anthropic.Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'get_balance',
+    description: 'Ruft Kontostand und Networth ab. Nutze dies wenn der User fragt "wie viel Geld habe ich?", "wie ist mein Kontostand?", "wie sieht mein Budget aus?"',
+    input_schema: {
+      type: 'object',
+      properties: {
+        detail_level: {
+          type: 'string',
+          enum: ['summary', 'detailed'],
+          description: 'Detailgrad: summary = nur Networth, detailed = alle Konten',
+        },
+      },
+      required: [],
+    },
+  },
 ];
 
 // ============================================
@@ -152,6 +168,9 @@ export async function executeSkillTool(
 
       case 'suggest_skills':
         return await handleSuggestSkills(toolInput, userId);
+
+      case 'get_balance':
+        return await handleGetBalance(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -339,4 +358,81 @@ async function handleSuggestSkills(
     suggestions,
     context: context || null,
   });
+}
+
+async function handleGetBalance(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const detailLevel = (input.detail_level as string) || 'summary';
+
+  // Get networth data
+  const netWorth = await getNetWorth();
+
+  // Get current month's cashflow
+  const now = new Date();
+  const cashflow = await getMonthlyCashflow(now.getFullYear(), now.getMonth() + 1);
+
+  if (detailLevel === 'summary') {
+    // Summary view: just networth and cashflow
+    return JSON.stringify({
+      success: true,
+      detail_level: 'summary',
+      net_worth: netWorth?.net_worth || 0,
+      assets_total: netWorth?.assets_total || 0,
+      debt_total: netWorth?.debt_total || 0,
+      monthly_income: cashflow.income,
+      monthly_expenses: cashflow.expenses,
+      monthly_savings: cashflow.savings,
+      monthly_net: cashflow.net,
+      formatted: {
+        net_worth: formatEuro(netWorth?.net_worth || 0),
+        assets_total: formatEuro(netWorth?.assets_total || 0),
+        debt_total: formatEuro(netWorth?.debt_total || 0),
+        monthly_income: formatEuro(cashflow.income),
+        monthly_expenses: formatEuro(cashflow.expenses),
+        monthly_savings: formatEuro(cashflow.savings),
+        monthly_net: formatEuro(cashflow.net),
+      },
+    });
+  } else {
+    // Detailed view: include all accounts
+    const accounts = await getAccounts();
+
+    return JSON.stringify({
+      success: true,
+      detail_level: 'detailed',
+      net_worth: netWorth?.net_worth || 0,
+      assets_total: netWorth?.assets_total || 0,
+      debt_total: netWorth?.debt_total || 0,
+      monthly_income: cashflow.income,
+      monthly_expenses: cashflow.expenses,
+      monthly_savings: cashflow.savings,
+      monthly_net: cashflow.net,
+      accounts: accounts.map(a => ({
+        id: a.id,
+        name: a.name,
+        type: a.account_type,
+        balance: a.current_balance,
+        formatted_balance: formatEuro(a.current_balance),
+        currency: a.currency,
+      })),
+      formatted: {
+        net_worth: formatEuro(netWorth?.net_worth || 0),
+        assets_total: formatEuro(netWorth?.assets_total || 0),
+        debt_total: formatEuro(netWorth?.debt_total || 0),
+        monthly_income: formatEuro(cashflow.income),
+        monthly_expenses: formatEuro(cashflow.expenses),
+        monthly_savings: formatEuro(cashflow.savings),
+        monthly_net: formatEuro(cashflow.net),
+      },
+    });
+  }
+}
+
+function formatEuro(amount: number): string {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(amount);
 }
