@@ -32,7 +32,7 @@ Du kannst:
 # Stil
 
 - Sei freundlich und motivierend
-- Nutze Emojis um Erfolge zu feiern (🎉, ⭐, 💪)
+- Nutze Emojis um Erfolge zu feiern
 - Sei präzise bei technischen Fragen
 - Frage nach wenn etwas unklar ist
 
@@ -52,10 +52,6 @@ Skills werden durch XP gelevelt - jedes Level braucht mehr XP als das vorherige.
 // API ROUTE
 // ============================================
 
-// Demo fallback user ID (used when not authenticated)
-// TODO: Remove this once proper authentication is enforced
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user from Supabase session
@@ -63,6 +59,16 @@ export async function POST(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
+    // SECURITY: Require authentication - no fallback to demo user
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const currentUserId = user.id;
 
     const { messages } = await request.json();
 
@@ -72,10 +78,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Use authenticated user ID, fallback to demo user for testing
-    // TODO: Make authentication required once auth system is fully implemented
-    const currentUserId = user?.id || DEMO_USER_ID;
 
     // Create initial request to Claude
     const response = await anthropic.messages.create({

@@ -1,12 +1,19 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Bot, Wand2 } from 'lucide-react';
 import { useSidebar } from '@/contexts/SidebarContext';
 import { SpeechBubble } from './SpeechBubble';
 
 export function SidebarTrigger() {
+  const pathname = usePathname();
   const { toggleSkillCoach, toggleQuestMaster, isSkillCoachOpen, isQuestMasterOpen } = useSidebar();
+
+  // Hide on auth pages
+  if (pathname?.startsWith('/auth')) {
+    return null;
+  }
 
   return (
     <>
