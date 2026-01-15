@@ -305,6 +305,44 @@ export default function Dashboard() {
             <StreakHighlightWidget />
           </div>
 
+
+          {/* AI & Quests Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          >
+            {/* Questmaster Card */}
+            <Link href="/quests" className="block">
+              <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-6 hover:border-purple-500/50 transition-colors group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                    <Swords className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-adaptive">Questmaster</h3>
+                    <p className="text-adaptive-muted text-sm">Tägliche & wöchentliche Quests</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* AI Skill-Coach Card */}
+            <Link href="/ai-chat-demo" className="block">
+              <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-6 hover:border-cyan-500/50 transition-colors group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                    <Bot className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-adaptive">AI Skill-Coach</h3>
+                    <p className="text-adaptive-muted text-sm">Persönlicher Lern-Assistent</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
           {/* Achievements Row */}
           <div className="mb-8">
             <AchievementBadgeWidget />
