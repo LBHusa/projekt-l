@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { logHabitCompletion } from '@/lib/data/habits';
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { habitId, reminderId } = await request.json();
 
     if (!habitId) {
@@ -16,15 +21,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Log habit completion
-    const result = await logHabitCompletion(habitId, true, 'Completed via notification', TEST_USER_ID);
+    const result = await logHabitCompletion(habitId, true, 'Completed via notification', user.id);
 
     // Update reminder delivery log
     if (reminderId) {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
       await supabase
         .from('reminder_delivery_log')
         .update({

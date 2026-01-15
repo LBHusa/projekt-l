@@ -3,8 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import type { FactionId } from '@/lib/database.types';
 import { FACTION_COLORS, FACTIONS } from '@/lib/ui/constants';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 export interface WeeklySummaryData {
   weeklyXp: number;
   habitsCompleted: number;
@@ -16,7 +14,13 @@ export interface WeeklySummaryData {
 export async function GET() {
   try {
     const supabase = await createClient();
-    const userId = TEST_USER_ID;
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const userId = user.id;
 
     // Calculate week start (Monday)
     const now = new Date();

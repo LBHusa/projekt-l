@@ -3,16 +3,12 @@ import { google } from 'googleapis';
 import { createClient } from '@/lib/supabase/server';
 import type { FactionId } from '@/lib/database.types';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 // Helper to get authenticated calendar client
-async function getAuthenticatedCalendar() {
-  const supabase = await createClient();
-
+async function getAuthenticatedCalendar(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: integration, error } = await supabase
     .from('google_calendar_integrations')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .eq('is_active', true)
     .single();
 
@@ -45,7 +41,7 @@ async function getAuthenticatedCalendar() {
         token_expiry: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', TEST_USER_ID);
+      .eq('user_id', userId);
   } else {
     oauth2Client.setCredentials({
       access_token: integration.access_token,
@@ -95,6 +91,13 @@ function categorizeEvent(summary: string, description?: string | null): {
 // Syncs calendar events and creates activity log entries
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { startDate, endDate } = body;
 
@@ -105,8 +108,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const calendar = await getAuthenticatedCalendar();
-    const supabase = await createClient();
+    const calendar = await getAuthenticatedCalendar(user.id, supabase);
 
     // Fetch events from Google Calendar
     const response = await calendar.events.list({
@@ -156,7 +158,7 @@ export async function POST(request: NextRequest) {
         const { data: existing } = await supabase
           .from('activity_log')
           .select('id')
-          .eq('user_id', TEST_USER_ID)
+          .eq('user_id', user.id)
           .eq('external_id', event.id)
           .single();
 
@@ -165,7 +167,7 @@ export async function POST(request: NextRequest) {
           const xpAmount = durationMinutes;
 
           await supabase.from('activity_log').insert({
-            user_id: TEST_USER_ID,
+            user_id: user.id,
             activity_type: 'calendar_event',
             description: `${event.summary} (${durationMinutes}min)`,
             xp_amount: xpAmount,
@@ -197,7 +199,7 @@ export async function POST(request: NextRequest) {
       .update({
         last_sync_at: new Date().toISOString()
       })
-      .eq('user_id', TEST_USER_ID);
+      .eq('user_id', user.id);
 
     return NextResponse.json({
       success: true,

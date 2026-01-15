@@ -3,16 +3,7 @@
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// Test-User ID (TODO: Replace with auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
-// Create Supabase client with service role for server-side operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { createClient } from '@/lib/supabase/server';
 
 interface PushSubscription {
   endpoint: string;
@@ -29,6 +20,13 @@ interface PushSubscription {
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const subscription: PushSubscription = await request.json();
 
     // Validate subscription
@@ -43,7 +41,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabase
       .from('notification_settings')
       .select('id')
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', user.id)
       .single();
 
     if (existing) {
@@ -55,7 +53,7 @@ export async function POST(request: NextRequest) {
           push_subscription: subscription,
           updated_at: new Date().toISOString(),
         })
-        .eq('user_id', TEST_USER_ID);
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('Error updating subscription:', error);
@@ -69,7 +67,7 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase
         .from('notification_settings')
         .insert({
-          user_id: TEST_USER_ID,
+          user_id: user.id,
           push_enabled: true,
           push_subscription: subscription,
         });
@@ -99,6 +97,13 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE() {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { error } = await supabase
       .from('notification_settings')
       .update({
@@ -106,7 +111,7 @@ export async function DELETE() {
         push_subscription: null,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', TEST_USER_ID);
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Error removing subscription:', error);

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@/lib/supabase/server';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -14,6 +12,15 @@ const oauth2Client = new google.auth.OAuth2(
 // Handles OAuth2 callback from Google
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.redirect(
+        new URL('/auth/login', request.url)
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
     const error = searchParams.get('error');
@@ -37,12 +44,10 @@ export async function GET(request: NextRequest) {
     oauth2Client.setCredentials(tokens);
 
     // Store tokens in database
-    const supabase = await createClient();
-
     const { error: dbError } = await supabase
       .from('google_calendar_integrations')
       .upsert({
-        user_id: TEST_USER_ID,
+        user_id: user.id,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
         token_expiry: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,

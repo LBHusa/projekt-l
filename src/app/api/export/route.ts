@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createBrowserClient } from '@/lib/supabase';
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   const format = request.nextUrl.searchParams.get('format') || 'json';
-  const userId = request.nextUrl.searchParams.get('userId') || TEST_USER_ID;
 
   if (!['json', 'csv'].includes(format)) {
     return NextResponse.json({ error: 'Invalid format. Use json or csv' }, { status: 400 });
   }
 
   try {
-    const supabase = createBrowserClient();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = user.id;
 
     // Fetch all user data
     const [
@@ -73,7 +77,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function convertToCSV(exportData: any): string {
+function convertToCSV(exportData: { exported_at: string; user_id: string; data: Record<string, unknown[]> }): string {
   let csv = `# Projekt L Data Export\n`;
   csv += `# Exported at: ${exportData.exported_at}\n`;
   csv += `# User ID: ${exportData.user_id}\n\n`;
@@ -85,13 +89,13 @@ function convertToCSV(exportData: any): string {
     csv += `\n## ${tableName.toUpperCase()}\n`;
 
     // Headers
-    const headers = Object.keys(records[0]);
+    const headers = Object.keys(records[0] as Record<string, unknown>);
     csv += headers.join(',') + '\n';
 
     // Rows
     for (const record of records) {
       const row = headers.map(header => {
-        const value = record[header];
+        const value = (record as Record<string, unknown>)[header];
         if (value === null || value === undefined) return '';
         // Escape commas and quotes
         const strValue = String(value).replace(/"/g, '""');

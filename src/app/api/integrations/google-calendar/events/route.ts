@@ -2,17 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@/lib/supabase/server';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 // Helper to get authenticated calendar client
-async function getAuthenticatedCalendar() {
-  const supabase = await createClient();
-
+async function getAuthenticatedCalendar(userId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
   // Get stored tokens
   const { data: integration, error } = await supabase
     .from('google_calendar_integrations')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .eq('is_active', true)
     .single();
 
@@ -48,7 +44,7 @@ async function getAuthenticatedCalendar() {
         token_expiry: credentials.expiry_date ? new Date(credentials.expiry_date).toISOString() : null,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', TEST_USER_ID);
+      .eq('user_id', userId);
   } else {
     oauth2Client.setCredentials({
       access_token: integration.access_token,
@@ -63,13 +59,20 @@ async function getAuthenticatedCalendar() {
 // Fetches calendar events from Google Calendar
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const calendarId = searchParams.get('calendar') || 'primary';
     const maxResults = parseInt(searchParams.get('maxResults') || '50', 10);
     const timeMin = searchParams.get('timeMin') || new Date().toISOString();
     const timeMax = searchParams.get('timeMax');
 
-    const calendar = await getAuthenticatedCalendar();
+    const calendar = await getAuthenticatedCalendar(user.id, supabase);
 
     const response = await calendar.events.list({
       calendarId,

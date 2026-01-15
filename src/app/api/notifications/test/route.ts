@@ -3,11 +3,8 @@
 // ============================================
 
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import webpush from 'web-push';
-
-// Test-User ID (TODO: Replace with auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Configure web-push lazily (only when needed)
 let vapidConfigured = false;
@@ -22,23 +19,24 @@ function ensureVapidConfigured() {
   }
 }
 
-// Create Supabase client with service role for server-side operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 /**
  * POST /api/notifications/test
  * Send a test push notification to the current user
  */
 export async function POST() {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Get user's push subscription from database
     const { data: settings, error: fetchError } = await supabase
       .from('notification_settings')
       .select('push_subscription, push_enabled')
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', user.id)
       .single();
 
     if (fetchError) {
@@ -71,7 +69,7 @@ export async function POST() {
 
       // Log successful notification
       await supabase.from('notification_log').insert({
-        user_id: TEST_USER_ID,
+        user_id: user.id,
         channel: 'push',
         notification_type: 'custom',
         title: 'Test-Benachrichtigung',
@@ -97,7 +95,7 @@ export async function POST() {
             push_enabled: false,
             push_subscription: null,
           })
-          .eq('user_id', TEST_USER_ID);
+          .eq('user_id', user.id);
 
         return NextResponse.json(
           { error: 'Push-Subscription abgelaufen. Bitte erneut aktivieren.' },
