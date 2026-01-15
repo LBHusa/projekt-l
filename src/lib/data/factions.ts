@@ -9,6 +9,9 @@ import type { Faction, FactionId, UserFactionStats, FactionWithStats } from '@/l
 // Default test user ID (for MVP without auth)
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
+// Maximum faction level for radar chart scaling
+export const MAX_FACTION_LEVEL = 20;
+
 // ============================================
 // FACTIONS CRUD
 // ============================================

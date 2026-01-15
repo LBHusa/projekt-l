@@ -54,12 +54,14 @@ interface GeneratedQuest {
   expires_at?: Date
 }
 
-// Anthropic Client Setup
+// Anthropic Client Setup with timeout
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 25000, // 25 seconds timeout
 })
 
 const QUEST_GENERATION_MODEL = 'claude-3-5-sonnet-20241022'
+const MAX_RETRIES = 1
 
 /**
  * Fetch user context for quest generation
@@ -154,33 +156,48 @@ export async function getUserQuestContext(userId: string): Promise<UserQuestCont
 }
 
 /**
- * Generate AI quests using Claude
+ * Generate AI quests using Claude with retry logic
  */
 export async function generateQuests(
   context: UserQuestContext,
   questType: 'daily' | 'weekly' | 'story',
   count: number = 1
 ): Promise<GeneratedQuest[]> {
-  // Build context prompt
   const contextPrompt = buildContextPrompt(context, questType, count)
 
-  const message = await anthropic.messages.create({
-    model: QUEST_GENERATION_MODEL,
-    max_tokens: 4000,
-    temperature: 0.8, // More creative for quest generation
-    messages: [
-      {
-        role: 'user',
-        content: contextPrompt,
-      },
-    ],
-  })
+  let lastError: Error | null = null
 
-  // Parse Claude's response
-  const responseText =
-    message.content[0].type === 'text' ? message.content[0].text : ''
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const message = await anthropic.messages.create({
+        model: QUEST_GENERATION_MODEL,
+        max_tokens: 4000,
+        temperature: 0.8,
+        messages: [{ role: 'user', content: contextPrompt }],
+      })
 
-  return parseQuestResponse(responseText, questType, context)
+      const responseText = message.content[0].type === 'text'
+        ? message.content[0].text
+        : ''
+
+      return parseQuestResponse(responseText, questType, context)
+    } catch (error: any) {
+      lastError = error
+      const isTimeout = error.message?.includes('timeout') ||
+                       error.code === 'ETIMEDOUT' ||
+                       error.code === 'ECONNABORTED'
+
+      if (isTimeout && attempt < MAX_RETRIES) {
+        console.warn(`[Quest Generator] Timeout on attempt ${attempt + 1}, retrying...`)
+        continue
+      }
+
+      console.error(`[Quest Generator] Error on attempt ${attempt + 1}:`, error.message)
+      throw error
+    }
+  }
+
+  throw lastError || new Error('Quest generation failed after retries')
 }
 
 /**
@@ -285,38 +302,59 @@ Generate the quests now!`
 }
 
 /**
- * Parse Claude's JSON response into quest objects
+ * Parse Claude's JSON response with multiple fallback strategies
  */
 function parseQuestResponse(
   responseText: string,
   questType: 'daily' | 'weekly' | 'story',
   context: UserQuestContext
 ): GeneratedQuest[] {
-  try {
-    // Extract JSON from markdown code blocks if present
-    const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/)
-    const jsonText = jsonMatch ? jsonMatch[1] : responseText
+  // Multiple parsing strategies for robustness
+  const strategies = [
+    // Strategy 1: Standard markdown JSON block
+    () => {
+      const match = responseText.match(/```json\n([\s\S]*?)\n```/)
+      return match ? JSON.parse(match[1]) : null
+    },
+    // Strategy 2: Generic code block
+    () => {
+      const match = responseText.match(/```\n?([\s\S]*?)\n?```/)
+      return match ? JSON.parse(match[1]) : null
+    },
+    // Strategy 3: Find JSON object with "quests" key
+    () => {
+      const match = responseText.match(/\{[\s\S]*"quests"[\s\S]*\}/)
+      return match ? JSON.parse(match[0]) : null
+    },
+    // Strategy 4: Direct JSON parse
+    () => JSON.parse(responseText),
+  ]
 
-    const parsed = JSON.parse(jsonText)
-    const quests = parsed.quests || []
-
-    return quests.map((q: any) => ({
-      type: questType,
-      difficulty: q.difficulty || context.preferences.preferred_difficulty,
-      title: q.title,
-      description: q.description,
-      motivation: q.motivation || '',
-      target_skill_ids: q.target_skill_ids || [],
-      target_faction_ids: q.target_faction_ids || [],
-      xp_reward: q.xp_reward || calculateDefaultXP(questType, q.difficulty),
-      required_actions: q.required_actions || 1,
-      expires_at: calculateExpiryDate(questType),
-    }))
-  } catch (error) {
-    console.error('Failed to parse quest response:', error)
-    console.error('Response text:', responseText)
-    throw new Error('Failed to generate quests. Please try again.')
+  for (const strategy of strategies) {
+    try {
+      const parsed = strategy()
+      if (parsed?.quests || Array.isArray(parsed)) {
+        const quests = parsed.quests || parsed
+        return quests.map((q: any) => ({
+          type: questType,
+          difficulty: q.difficulty || context.preferences.preferred_difficulty,
+          title: q.title || 'Quest',
+          description: q.description || '',
+          motivation: q.motivation || '',
+          target_skill_ids: q.target_skill_ids || [],
+          target_faction_ids: q.target_faction_ids || [],
+          xp_reward: q.xp_reward || calculateDefaultXP(questType, q.difficulty),
+          required_actions: q.required_actions || 1,
+          expires_at: calculateExpiryDate(questType),
+        }))
+      }
+    } catch {
+      // Try next strategy
+    }
   }
+
+  console.error('[Quest Generator] Failed to parse response:', responseText.slice(0, 500))
+  throw new Error('Failed to parse AI response. Please try again.')
 }
 
 /**

@@ -506,3 +506,70 @@ export async function getDomainStats(
     totalXp,
   };
 }
+
+// ============================================
+// ATTRIBUTE CALCULATION
+// ============================================
+
+type UserAttributes = {
+  str: number;
+  dex: number;
+  int: number;
+  cha: number;
+  wis: number;
+  vit: number;
+};
+
+const FACTION_TO_ATTR: Record<FactionId, keyof UserAttributes> = {
+  koerper: 'str',
+  hobbys: 'dex',
+  weisheit: 'int',
+  soziales: 'cha',
+  geist: 'wis',
+  karriere: 'vit',
+  finanzen: 'vit',
+};
+
+/**
+ * Calculate user attributes based on XP gained in the last 30 days
+ * Maps faction activity to RPG attributes (STR, DEX, INT, CHA, WIS, VIT)
+ */
+export async function calculateAttributes(
+  userId: string = TEST_USER_ID
+): Promise<UserAttributes> {
+  const supabase = createBrowserClient();
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data: experiences } = await supabase
+    .from('experiences')
+    .select('faction_id, xp_gained')
+    .eq('user_id', userId)
+    .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+    .not('faction_id', 'is', null);
+
+  const xpByAttr: Record<keyof UserAttributes, number> = {
+    str: 0,
+    dex: 0,
+    int: 0,
+    cha: 0,
+    wis: 0,
+    vit: 0,
+  };
+
+  for (const exp of experiences || []) {
+    const attr = FACTION_TO_ATTR[exp.faction_id as FactionId];
+    if (attr) xpByAttr[attr] += exp.xp_gained;
+  }
+
+  // Base 10 + bonus from XP (every 500 XP = +1, max 100)
+  return {
+    str: Math.min(100, 10 + Math.floor(xpByAttr.str / 500)),
+    dex: Math.min(100, 10 + Math.floor(xpByAttr.dex / 500)),
+    int: Math.min(100, 10 + Math.floor(xpByAttr.int / 500)),
+    cha: Math.min(100, 10 + Math.floor(xpByAttr.cha / 500)),
+    wis: Math.min(100, 10 + Math.floor(xpByAttr.wis / 500)),
+    vit: Math.min(100, 10 + Math.floor(xpByAttr.vit / 500)),
+  };
+}

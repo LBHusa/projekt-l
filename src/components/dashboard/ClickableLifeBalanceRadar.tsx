@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
 import { motion } from 'framer-motion';
 import type { FactionWithStats, FactionId } from '@/lib/database.types';
-import { factionLevelProgress } from '@/lib/data/factions';
+import { factionLevelProgress, MAX_FACTION_LEVEL } from '@/lib/data/factions';
 import { FACTION_ORDER } from '@/lib/ui/constants';
 
 interface ClickableLifeBalanceRadarProps {
@@ -21,10 +21,10 @@ export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBal
       return {
         subject: factionId,
         factionId,
-        value: 0,
+        value: 1, // Minimum level 1
         level: 1,
         xp: 0,
-        fullMark: 100,
+        fullMark: MAX_FACTION_LEVEL,
         icon: '',
         color: '#666',
       };
@@ -32,16 +32,15 @@ export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBal
 
     const level = faction.stats?.level || 1;
     const xp = faction.stats?.total_xp || 0;
-    const displayValue = Math.min(level * 10, 100);
 
     return {
       subject: `${faction.icon} ${faction.name_de}`,
       factionId: faction.id,
-      value: displayValue,
+      value: level, // Use raw level (1-20)
       level,
       xp,
       progress: factionLevelProgress(xp),
-      fullMark: 100,
+      fullMark: MAX_FACTION_LEVEL,
       icon: faction.icon,
       color: faction.color,
     };
