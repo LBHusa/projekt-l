@@ -232,13 +232,15 @@ export const skillTools: Anthropic.Tool[] = [
 // TOOL EXECUTION
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 export async function executeSkillTool(
   toolName: string,
   toolInput: Record<string, unknown>,
-  userId: string = TEST_USER_ID
+  userId: string
 ): Promise<string> {
+  if (!userId) {
+    throw new Error('userId is required for tool execution');
+  }
+
   try {
     switch (toolName) {
       case 'list_user_skills':
@@ -473,7 +475,7 @@ async function handleLogIncome(
   const isRecurring = input.is_recurring as boolean | undefined;
 
   // Get first account (or we could add account selection logic)
-  const accounts = await getAccounts();
+  const accounts = await getAccounts(userId);
   if (accounts.length === 0) {
     return JSON.stringify({
       success: false,
@@ -497,7 +499,7 @@ async function handleLogIncome(
     recurring_frequency: isRecurring ? 'monthly' : null,
     next_occurrence: isRecurring ? new Date().toISOString().split('T')[0] : null,
     recurrence_end_date: null,
-  });
+  }, userId);
 
   if (!transaction) {
     return JSON.stringify({
@@ -526,7 +528,7 @@ async function handleLogExpense(
   const description = (input.description as string | undefined) || '';
 
   // Get first active account (default account)
-  const accounts = await getAccounts();
+  const accounts = await getAccounts(userId);
   if (accounts.length === 0) {
     return JSON.stringify({
       success: false,
@@ -550,7 +552,7 @@ async function handleLogExpense(
     recurring_frequency: null,
     next_occurrence: null,
     recurrence_end_date: null,
-  });
+  }, userId);
 
   if (!transaction) {
     return JSON.stringify({
@@ -615,7 +617,7 @@ async function handleLogWorkout(
     occurred_at: new Date().toISOString(),
   };
 
-  const workout = await createWorkout(workoutData);
+  const workout = await createWorkout(workoutData, userId);
 
   if (!workout) {
     throw new Error('Fehler beim Erstellen des Workouts');

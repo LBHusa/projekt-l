@@ -104,13 +104,13 @@ export async function getNetWorthHistory(months: number = 12): Promise<NetWorthH
 // ACCOUNTS
 // =============================================
 
-export async function getAccounts(): Promise<Account[]> {
+export async function getAccounts(userId: string = TEST_USER_ID): Promise<Account[]> {
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('accounts')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .eq('is_active', true)
     .order('account_type', { ascending: true })
     .order('name', { ascending: true });
@@ -278,7 +278,8 @@ export async function getTransactionsByCategory(
 }
 
 export async function createTransaction(
-  transaction: Omit<Transaction, 'id' | 'user_id' | 'created_at'>
+  transaction: Omit<Transaction, 'id' | 'user_id' | 'created_at'>,
+  userId: string = TEST_USER_ID
 ): Promise<Transaction | null> {
   const supabase = createBrowserClient();
 
@@ -286,7 +287,7 @@ export async function createTransaction(
     .from('transactions')
     .insert({
       ...transaction,
-      user_id: TEST_USER_ID,
+      user_id: userId,
     })
     .select()
     .single();

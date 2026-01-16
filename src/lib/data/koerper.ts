@@ -247,7 +247,8 @@ function calculateWorkoutXP(data: WorkoutFormData): number {
  * Create a new workout
  */
 export async function createWorkout(
-  data: WorkoutFormData
+  data: WorkoutFormData,
+  userId: string = TEST_USER_ID
 ): Promise<Workout | null> {
   const supabase = createBrowserClient();
 
@@ -256,7 +257,7 @@ export async function createWorkout(
   const { data: workout, error } = await supabase
     .from('workouts')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: userId,
       name: data.name,
       workout_type: data.workout_type,
       duration_minutes: data.duration_minutes || null,
