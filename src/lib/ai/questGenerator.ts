@@ -60,7 +60,7 @@ const anthropic = new Anthropic({
   timeout: 25000, // 25 seconds timeout
 })
 
-const QUEST_GENERATION_MODEL = 'claude-3-5-sonnet-20241022'
+const QUEST_GENERATION_MODEL = 'claude-sonnet-4-5-20250929'
 const MAX_RETRIES = 1
 
 /**
@@ -341,7 +341,7 @@ function parseQuestResponse(
           title: q.title || 'Quest',
           description: q.description || '',
           motivation: q.motivation || '',
-          target_skill_ids: q.target_skill_ids || [],
+          target_skill_ids: [],
           target_faction_ids: q.target_faction_ids || [],
           xp_reward: q.xp_reward || calculateDefaultXP(questType, q.difficulty),
           required_actions: q.required_actions || 1,
@@ -410,7 +410,7 @@ export async function saveQuests(quests: GeneratedQuest[], userId: string) {
     title: q.title,
     description: q.description,
     motivation: q.motivation,
-    target_skill_ids: q.target_skill_ids,
+    target_skill_ids: [],
     target_faction_ids: q.target_faction_ids,
     xp_reward: q.xp_reward,
     required_actions: q.required_actions,
