@@ -33,6 +33,9 @@ export default function NotificationSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+  const [isConnectingTelegram, setIsConnectingTelegram] = useState(false);
+  const [telegramDeepLink, setTelegramDeepLink] = useState<string | null>(null);
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false);
 
   // Form State
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -197,11 +200,80 @@ export default function NotificationSettingsPage() {
 
   async function handleDisconnectTelegram() {
     try {
-      await removeTelegramConnection();
-      setTelegramEnabled(false);
-      loadSettings();
+      const response = await fetch('/api/integrations/telegram/connect', {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setTelegramEnabled(false);
+        setTelegramDeepLink(null);
+        loadSettings();
+        setSaveMessage('Telegram getrennt');
+        setTimeout(() => setSaveMessage(null), 3000);
+      }
     } catch (error) {
       console.error('Error disconnecting Telegram:', error);
+      setSaveMessage('Fehler beim Trennen');
+    }
+  }
+
+  async function handleConnectTelegram() {
+    setIsConnectingTelegram(true);
+    try {
+      const response = await fetch('/api/integrations/telegram/connect', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (response.ok && data.deepLink) {
+        setTelegramDeepLink(data.deepLink);
+        // Open the deep link in a new window
+        window.open(data.deepLink, '_blank');
+        setSaveMessage(`Code: ${data.code} - Öffne Telegram und klicke Start`);
+        // Poll for connection status
+        const pollInterval = setInterval(async () => {
+          const statusResponse = await fetch('/api/integrations/telegram/connect');
+          const statusData = await statusResponse.json();
+          if (statusData.connected) {
+            clearInterval(pollInterval);
+            setTelegramEnabled(true);
+            setTelegramDeepLink(null);
+            loadSettings();
+            setSaveMessage('Telegram verbunden!');
+            setTimeout(() => setSaveMessage(null), 3000);
+          }
+        }, 3000);
+        // Stop polling after 5 minutes
+        setTimeout(() => clearInterval(pollInterval), 5 * 60 * 1000);
+      } else {
+        setSaveMessage(data.error || 'Fehler beim Verbinden');
+      }
+    } catch (error) {
+      console.error('Error connecting Telegram:', error);
+      setSaveMessage('Fehler beim Verbinden');
+    } finally {
+      setIsConnectingTelegram(false);
+    }
+  }
+
+  async function handleTestTelegram() {
+    setIsTestingTelegram(true);
+    try {
+      const response = await fetch('/api/integrations/telegram/test', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setSaveMessage('Telegram Test-Nachricht gesendet!');
+      } else {
+        setSaveMessage(data.error || 'Fehler beim Senden');
+      }
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      console.error('Error testing Telegram:', error);
+      setSaveMessage('Fehler beim Senden');
+    } finally {
+      setIsTestingTelegram(false);
     }
   }
 
@@ -305,7 +377,7 @@ export default function NotificationSettingsPage() {
               <div>
                 <h3 className="font-semibold text-adaptive">Telegram Bot</h3>
                 <p className="text-sm text-adaptive-dim">
-                  Benachrichtigungen über @ProjektL_Bot
+                  Benachrichtigungen über @ProjektL_bot
                 </p>
               </div>
             </div>
@@ -317,30 +389,63 @@ export default function NotificationSettingsPage() {
                 Trennen
               </button>
             ) : (
-              <a
-                href="https://t.me/ProjektL_Bot?start=connect"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+              <button
+                onClick={handleConnectTelegram}
+                disabled={isConnectingTelegram}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors disabled:opacity-50"
               >
+                {isConnectingTelegram ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="w-4 h-4" />
+                )}
                 Verbinden
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              </button>
             )}
           </div>
 
           {telegramEnabled && settings?.telegram_chat_id && (
-            <div className="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 rounded-lg p-3">
-              <Check className="w-4 h-4" />
-              Telegram verbunden (Chat ID: {settings.telegram_chat_id})
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 rounded-lg p-3">
+                <Check className="w-4 h-4" />
+                Telegram verbunden
+              </div>
+              <button
+                onClick={handleTestTelegram}
+                disabled={isTestingTelegram}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-white/80 hover:bg-white/10 transition-colors disabled:opacity-50"
+              >
+                {isTestingTelegram ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                Test-Nachricht senden
+              </button>
             </div>
           )}
 
-          {!telegramEnabled && (
+          {!telegramEnabled && !telegramDeepLink && (
             <p className="text-sm text-adaptive-dim">
-              Klicke auf &quot;Verbinden&quot; und starte den Bot in Telegram, um
-              Benachrichtigungen zu erhalten.
+              Klicke auf &quot;Verbinden&quot; um einen Verknüpfungs-Code zu generieren.
+              Dann öffnet sich Telegram und du klickst auf Start.
             </p>
+          )}
+
+          {telegramDeepLink && (
+            <div className="space-y-2">
+              <p className="text-sm text-blue-400">
+                Telegram wurde geöffnet. Klicke dort auf &quot;Start&quot; um die Verbindung abzuschließen.
+              </p>
+              <a
+                href={telegramDeepLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-400 underline"
+              >
+                Link erneut öffnen
+              </a>
+            </div>
           )}
         </motion.div>
 
