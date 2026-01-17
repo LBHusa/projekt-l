@@ -12,7 +12,7 @@ interface LifeBalanceRadarProps {
 // Order for radar display (clockwise from top)
 const FACTION_ORDER = [
   'karriere',
-  'hobbys',
+  'hobby',
   'gesundheit',
   'finanzen',
   'freunde',

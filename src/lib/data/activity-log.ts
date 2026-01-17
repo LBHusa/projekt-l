@@ -312,7 +312,7 @@ export async function logBookFinished(
   return logActivity({
     userId,
     activityType: 'book_finished',
-    factionId: 'weisheit',
+    factionId: 'wissen',
     title: `"${bookTitle}" fertig gelesen`,
     description: rating ? `Bewertung: ${'⭐'.repeat(rating)}` : undefined,
     xpAmount: xpGained,
@@ -332,7 +332,7 @@ export async function logCourseCompleted(
   return logActivity({
     userId,
     activityType: 'course_completed',
-    factionId: 'weisheit',
+    factionId: 'wissen',
     title: `Kurs "${courseTitle}" abgeschlossen`,
     description: platform ? `auf ${platform}` : undefined,
     xpAmount: xpGained,

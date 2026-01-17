@@ -470,7 +470,7 @@ describe('Weisheit Data Layer', () => {
 describe('Weisheit Faction Integration', () => {
   it('books and courses belong to weisheit faction', () => {
     // The weisheit data layer should automatically assign faction_id to activities
-    const expectedFactionId = 'weisheit';
+    const expectedFactionId = 'wissen';
 
     // Simulating activity log entries
     const bookFinishedActivity = {
@@ -487,8 +487,8 @@ describe('Weisheit Faction Integration', () => {
       xp_amount: 200,
     };
 
-    expect(bookFinishedActivity.faction_id).toBe('weisheit');
-    expect(courseCompletedActivity.faction_id).toBe('weisheit');
+    expect(bookFinishedActivity.faction_id).toBe('wissen');
+    expect(courseCompletedActivity.faction_id).toBe('wissen');
   });
 
   it('XP from books and courses contributes to weisheit faction XP', () => {

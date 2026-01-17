@@ -14,12 +14,12 @@ import type { FactionId } from '@/lib/database.types';
  */
 export const FACTION_ORDER: FactionId[] = [
   'karriere',
-  'hobbys',
+  'hobby',
   'koerper',
   'geist',
   'finanzen',
   'soziales',
-  'weisheit',
+  'wissen',
 ];
 
 /**
@@ -27,12 +27,12 @@ export const FACTION_ORDER: FactionId[] = [
  */
 export const FACTION_COLORS: Record<FactionId, string> = {
   karriere: '#3B82F6',   // Blue - Beruf
-  hobbys: '#8B5CF6',     // Purple - Freizeit
+  hobby: '#8B5CF6',     // Purple - Freizeit
   koerper: '#10B981',    // Green - Körper/Fitness
   geist: '#F59E0B',      // Amber - Geist/Mental
   finanzen: '#14B8A6',   // Teal - Finanzen
   soziales: '#EC4899',   // Pink - Soziales
-  weisheit: '#6366F1',   // Indigo - Weisheit/Lernen
+  wissen: '#6366F1',   // Indigo - Weisheit/Lernen
 };
 
 /**
@@ -40,12 +40,12 @@ export const FACTION_COLORS: Record<FactionId, string> = {
  */
 export const FACTIONS: { id: FactionId; name: string; icon: string }[] = [
   { id: 'karriere', name: 'Karriere', icon: '💼' },
-  { id: 'hobbys', name: 'Hobbys', icon: '🎨' },
+  { id: 'hobby', name: 'Hobby', icon: '🎨' },
   { id: 'koerper', name: 'Körper', icon: '💪' },
   { id: 'geist', name: 'Geist', icon: '🧠' },
   { id: 'finanzen', name: 'Finanzen', icon: '💰' },
   { id: 'soziales', name: 'Soziales', icon: '👥' },
-  { id: 'weisheit', name: 'Weisheit', icon: '📚' },
+  { id: 'wissen', name: 'Wissen', icon: '📚' },
 ];
 
 // =============================================

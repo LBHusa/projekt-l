@@ -5,12 +5,12 @@ import { FACTIONS, FACTION_ORDER, FACTION_COLORS } from '@/lib/ui/constants';
 // Die 7 neuen Faction-IDs
 const ALL_FACTION_IDS: FactionId[] = [
   'karriere',
-  'hobbys',
+  'hobby',
   'koerper',
   'geist',
   'finanzen',
   'soziales',
-  'weisheit',
+  'wissen',
 ];
 
 // Mapping der alten zu neuen Factions (für Migration)
@@ -19,10 +19,10 @@ const FACTION_MIGRATION_MAP: Record<string, FactionId> = {
   familie: 'soziales',
   freunde: 'soziales',
   gesundheit: 'koerper',
-  lernen: 'weisheit',
+  lernen: 'wissen',
   // Bleiben gleich
   karriere: 'karriere',
-  hobbys: 'hobbys',
+  hobbys: 'hobby',
   finanzen: 'finanzen',
 };
 
@@ -45,12 +45,12 @@ describe('FactionId Type System', () => {
 
     it('includes all required faction IDs', () => {
       expect(ALL_FACTION_IDS).toContain('karriere');
-      expect(ALL_FACTION_IDS).toContain('hobbys');
+      expect(ALL_FACTION_IDS).toContain('hobby');
       expect(ALL_FACTION_IDS).toContain('koerper');
       expect(ALL_FACTION_IDS).toContain('geist');
       expect(ALL_FACTION_IDS).toContain('finanzen');
       expect(ALL_FACTION_IDS).toContain('soziales');
-      expect(ALL_FACTION_IDS).toContain('weisheit');
+      expect(ALL_FACTION_IDS).toContain('wissen');
     });
 
     it('does not include old faction IDs', () => {
@@ -87,12 +87,12 @@ describe('FactionId Type System', () => {
     });
 
     it('maps lernen to weisheit', () => {
-      expect(FACTION_MIGRATION_MAP['lernen']).toBe('weisheit');
+      expect(FACTION_MIGRATION_MAP['lernen']).toBe('wissen');
     });
 
     it('keeps karriere, hobbys, finanzen unchanged', () => {
       expect(FACTION_MIGRATION_MAP['karriere']).toBe('karriere');
-      expect(FACTION_MIGRATION_MAP['hobbys']).toBe('hobbys');
+      expect(FACTION_MIGRATION_MAP['hobby']).toBe('hobby');
       expect(FACTION_MIGRATION_MAP['finanzen']).toBe('finanzen');
     });
 
@@ -177,7 +177,7 @@ describe('FactionId Type System', () => {
     });
 
     it('weisheit has learning-related icon', () => {
-      expect(FACTION_METADATA['weisheit'].icon).toBe('📚');
+      expect(FACTION_METADATA['wissen'].icon).toBe('📚');
     });
   });
 
@@ -185,8 +185,8 @@ describe('FactionId Type System', () => {
     // Kategorisierung der Factions nach Bereich
     const PERSONAL_FACTIONS: FactionId[] = ['koerper', 'geist'];
     const SOCIAL_FACTIONS: FactionId[] = ['soziales'];
-    const DEVELOPMENT_FACTIONS: FactionId[] = ['karriere', 'weisheit'];
-    const LIFESTYLE_FACTIONS: FactionId[] = ['hobbys', 'finanzen'];
+    const DEVELOPMENT_FACTIONS: FactionId[] = ['karriere', 'wissen'];
+    const LIFESTYLE_FACTIONS: FactionId[] = ['hobby', 'finanzen'];
 
     it('personal factions include koerper and geist', () => {
       expect(PERSONAL_FACTIONS).toContain('koerper');
@@ -200,7 +200,7 @@ describe('FactionId Type System', () => {
 
     it('development factions include karriere and weisheit', () => {
       expect(DEVELOPMENT_FACTIONS).toContain('karriere');
-      expect(DEVELOPMENT_FACTIONS).toContain('weisheit');
+      expect(DEVELOPMENT_FACTIONS).toContain('wissen');
     });
 
     it('all factions are categorized exactly once', () => {

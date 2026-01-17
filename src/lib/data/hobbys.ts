@@ -152,10 +152,10 @@ export async function updateHobbyProject(
   ) {
     const xpGained = calculateProjectXp(data);
 
-    // Update Faction Stats (adds XP to 'hobbys' faction)
+    // Update Faction Stats (adds XP to 'hobby' faction)
     if (xpGained > 0) {
       try {
-        await updateFactionStats('hobbys', xpGained, userId);
+        await updateFactionStats('hobby', xpGained, userId);
       } catch (err) {
         console.error('Error updating faction stats for hobby project:', err);
       }
@@ -166,7 +166,7 @@ export async function updateHobbyProject(
       await logActivity({
         userId,
         activityType: 'project_completed',
-        factionId: 'hobbys',
+        factionId: 'hobby',
         title: `Projekt abgeschlossen: "${data.name}"`,
         description: `${data.total_hours || 0} Stunden investiert`,
         xpAmount: xpGained,

@@ -20,7 +20,7 @@ const mockActivities: Partial<ActivityLog>[] = [
   {
     id: '3',
     activity_type: 'book_finished',
-    faction_id: 'weisheit',
+    faction_id: 'wissen',
     xp_amount: 75,
     occurred_at: '2024-01-16T09:00:00Z',
   },
@@ -68,12 +68,12 @@ describe('Activity Log Helper Functions', () => {
       it('assigns weisheit faction to books', () => {
         const bookActivity = {
           activity_type: 'book_finished',
-          faction_id: 'weisheit' as FactionId,
+          faction_id: 'wissen' as FactionId,
           title: '"Clean Code" fertig gelesen',
           xp_amount: 100,
         };
 
-        expect(bookActivity.faction_id).toBe('weisheit');
+        expect(bookActivity.faction_id).toBe('wissen');
         expect(bookActivity.activity_type).toBe('book_finished');
       });
 
@@ -89,12 +89,12 @@ describe('Activity Log Helper Functions', () => {
       it('assigns weisheit faction to courses', () => {
         const courseActivity = {
           activity_type: 'course_completed',
-          faction_id: 'weisheit' as FactionId,
+          faction_id: 'wissen' as FactionId,
           title: 'React Masterclass abgeschlossen',
           xp_amount: 150,
         };
 
-        expect(courseActivity.faction_id).toBe('weisheit');
+        expect(courseActivity.faction_id).toBe('wissen');
         expect(courseActivity.activity_type).toBe('course_completed');
       });
     });
@@ -156,7 +156,7 @@ describe('Activity Log Helper Functions', () => {
 
     describe('logGoalAchieved', () => {
       it('accepts any faction ID for goals', () => {
-        const factionIds: FactionId[] = ['karriere', 'koerper', 'geist', 'soziales', 'weisheit', 'hobbys', 'finanzen'];
+        const factionIds: FactionId[] = ['karriere', 'koerper', 'geist', 'soziales', 'wissen', 'hobby', 'finanzen'];
 
         factionIds.forEach(factionId => {
           const goalActivity = {
@@ -238,7 +238,7 @@ describe('Activity Log Helper Functions', () => {
 
       expect(summary.byFaction['karriere']).toBe(1);
       expect(summary.byFaction['koerper']).toBe(1);
-      expect(summary.byFaction['weisheit']).toBe(1);
+      expect(summary.byFaction['wissen']).toBe(1);
       expect(summary.byFaction['soziales']).toBe(1);
       expect(summary.byFaction['geist']).toBe(1);
     });
@@ -356,7 +356,7 @@ describe('Activity Log Helper Functions', () => {
       // We have karriere, koerper, weisheit, soziales, geist in mock data
       expect(usedFactionIds.has('karriere')).toBe(true);
       expect(usedFactionIds.has('koerper')).toBe(true);
-      expect(usedFactionIds.has('weisheit')).toBe(true);
+      expect(usedFactionIds.has('wissen')).toBe(true);
       expect(usedFactionIds.has('soziales')).toBe(true);
       expect(usedFactionIds.has('geist')).toBe(true);
     });
@@ -364,8 +364,8 @@ describe('Activity Log Helper Functions', () => {
     it('activity types map to correct factions', () => {
       const activityFactionMap: Record<string, FactionId> = {
         'workout_logged': 'koerper',
-        'book_finished': 'weisheit',
-        'course_completed': 'weisheit',
+        'book_finished': 'wissen',
+        'course_completed': 'wissen',
         'job_started': 'karriere',
         'salary_updated': 'karriere',
         'event_logged': 'soziales',
@@ -373,7 +373,7 @@ describe('Activity Log Helper Functions', () => {
 
       Object.entries(activityFactionMap).forEach(([activityType, expectedFaction]) => {
         expect(expectedFaction).toBeTruthy();
-        const validFactions: FactionId[] = ['karriere', 'hobbys', 'koerper', 'geist', 'finanzen', 'soziales', 'weisheit'];
+        const validFactions: FactionId[] = ['karriere', 'hobby', 'koerper', 'geist', 'finanzen', 'soziales', 'wissen'];
         expect(validFactions).toContain(expectedFaction);
       });
     });

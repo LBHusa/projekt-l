@@ -32,7 +32,7 @@ describe('AI Faction Suggester', () => {
       });
 
       expect(suggestions.length).toBeGreaterThan(0);
-      expect(suggestions[0].faction_id).toBe('hobbys');
+      expect(suggestions[0].faction_id).toBe('hobby');
     });
 
     it('should suggest "gesundheit" for gym activities', async () => {
@@ -162,7 +162,7 @@ describe('AI Faction Suggester', () => {
         currentTime: evening,
       });
 
-      const hobbySuggestion = suggestions.find(s => s.faction_id === 'hobbys');
+      const hobbySuggestion = suggestions.find(s => s.faction_id === 'hobby');
       expect(hobbySuggestion).toBeTruthy();
     });
 
@@ -176,7 +176,7 @@ describe('AI Faction Suggester', () => {
       });
 
       // Late night work is more likely hobby/passion project
-      const hobbySuggestion = suggestions.find(s => s.faction_id === 'hobbys');
+      const hobbySuggestion = suggestions.find(s => s.faction_id === 'hobby');
       expect(hobbySuggestion).toBeTruthy();
     });
   });

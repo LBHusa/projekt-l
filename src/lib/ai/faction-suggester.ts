@@ -144,7 +144,7 @@ function getRuleBasedSuggestions(input: SuggestFactionInput): FactionSuggestion[
   if (hour >= 18 || hour <= 6) {
     if (desc.includes('code') || desc.includes('projekt')) {
       suggestions.push({
-        faction_id: 'hobbys',
+        faction_id: 'hobby',
         confidence: 70,
         reasoning: 'Abends/Nachts → wahrscheinlich Hobby-Projekt',
       });
@@ -190,7 +190,7 @@ function getRuleBasedSuggestions(input: SuggestFactionInput): FactionSuggestion[
   // Default: If no suggestions, suggest karriere during work hours, hobbys otherwise
   if (suggestions.length === 0) {
     suggestions.push({
-      faction_id: hour >= 9 && hour <= 17 ? 'karriere' : 'hobbys',
+      faction_id: hour >= 9 && hour <= 17 ? 'karriere' : 'hobby',
       confidence: 50,
       reasoning: 'Keine klaren Hinweise - basierend auf Uhrzeit',
     });
@@ -208,9 +208,9 @@ function isFactionId(value: unknown): value is FactionId {
     'koerper',
     'soziales',
     'finanzen',
-    'hobbys',
+    'hobby',
     'geist',
-    'weisheit',
+    'wissen',
   ];
   return typeof value === 'string' && validFactions.includes(value as FactionId);
 }

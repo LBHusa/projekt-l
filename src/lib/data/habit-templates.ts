@@ -93,7 +93,7 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
   // Weisheit (2)
   {
     id: 'weisheit-reading',
-    category: 'weisheit',
+    category: 'wissen',
     name: '30 Min Lesen',
     description: 'Täglich Wissen aufbauen',
     icon: '📚',
@@ -102,11 +102,11 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
     frequency: 'daily',
     target_days: [],
     xp_per_completion: 25,
-    factions: [{ faction_id: 'weisheit', weight: 100 }],
+    factions: [{ faction_id: 'wissen', weight: 100 }],
   },
   {
     id: 'weisheit-language',
-    category: 'weisheit',
+    category: 'wissen',
     name: 'Sprache üben',
     description: '15 Min Sprachenlernen (App oder Buch)',
     icon: '📚',
@@ -115,7 +115,7 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
     frequency: 'specific_days',
     target_days: ['mon', 'wed', 'fri'],
     xp_per_completion: 20,
-    factions: [{ faction_id: 'weisheit', weight: 100 }],
+    factions: [{ faction_id: 'wissen', weight: 100 }],
   },
 
   // Karriere (2)
@@ -205,7 +205,7 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
   // Hobbys (2)
   {
     id: 'hobbys-creative',
-    category: 'hobbys',
+    category: 'hobby',
     name: 'Kreativzeit',
     description: 'Malen, Musik, Basteln - 30 Min',
     icon: '🎨',
@@ -214,11 +214,11 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
     frequency: 'specific_days',
     target_days: ['wed', 'sat', 'sun'],
     xp_per_completion: 25,
-    factions: [{ faction_id: 'hobbys', weight: 100 }],
+    factions: [{ faction_id: 'hobby', weight: 100 }],
   },
   {
     id: 'hobbys-screen-free',
-    category: 'hobbys',
+    category: 'hobby',
     name: 'Bildschirmfreie Zeit',
     description: '1h ohne Handy/PC/TV',
     icon: '📱',
@@ -227,7 +227,7 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
     frequency: 'daily',
     target_days: [],
     xp_per_completion: 20,
-    factions: [{ faction_id: 'hobbys', weight: 100 }],
+    factions: [{ faction_id: 'hobby', weight: 100 }],
   },
 ];
 

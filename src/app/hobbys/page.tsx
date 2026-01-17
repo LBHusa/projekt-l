@@ -49,8 +49,8 @@ export default function HobbysPage() {
   const loadData = useCallback(async () => {
     try {
       const [factionData, factionStats, projectsData, hobbyStats, logs] = await Promise.all([
-        getFaction('hobbys'),
-        getUserFactionStat('hobbys'),
+        getFaction('hobby'),
+        getUserFactionStat('hobby'),
         getHobbyProjects(),
         getHobbyStats(),
         getRecentTimeLogs(undefined, 5),
@@ -334,7 +334,7 @@ export default function HobbysPage() {
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
           <FactionSkillsSection
-            factionId="hobbys"
+            factionId="hobby"
             factionColor={faction.color}
           />
         </div>

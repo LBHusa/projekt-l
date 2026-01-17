@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Save, Trash2 } from 'lucide-react';
 import Modal from './Modal';
+import DomainFactionEditor, { type FactionWeight } from './DomainFactionEditor';
+import type { FactionId } from '@/lib/database.types';
 
 interface DomainFormProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ export interface DomainFormData {
   icon: string;
   color: string;
   description: string;
+  factions: FactionWeight[];
 }
 
 const commonIcons = ['💻', '🔬', '🎨', '💪', '💰', '📚', '🎯', '🧠', '🌍', '🎮', '🎵', '📷'];
@@ -47,6 +50,7 @@ export default function DomainForm({
   const [icon, setIcon] = useState(initialData?.icon || '🎯');
   const [color, setColor] = useState(initialData?.color || '#6366f1');
   const [description, setDescription] = useState(initialData?.description || '');
+  const [factions, setFactions] = useState<FactionWeight[]>(initialData?.factions || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -56,12 +60,18 @@ export default function DomainForm({
       setIcon(initialData?.icon || '🎯');
       setColor(initialData?.color || '#6366f1');
       setDescription(initialData?.description || '');
+      setFactions(initialData?.factions || []);
       setShowDeleteConfirm(false);
     }
   }, [isOpen, initialData]);
 
+  const handleFactionsChange = useCallback((newFactions: FactionWeight[]) => {
+    setFactions(newFactions);
+  }, []);
+
   const handleSubmit = async () => {
     if (!name.trim()) return;
+    if (factions.length === 0) return;
 
     setIsSubmitting(true);
     try {
@@ -70,6 +80,7 @@ export default function DomainForm({
         icon,
         color,
         description: description.trim(),
+        factions,
       });
       onClose();
     } catch (error) {
@@ -201,6 +212,13 @@ export default function DomainForm({
           />
         </div>
 
+        {/* Faction Assignment (N:M) */}
+        <DomainFactionEditor
+          initialFactions={factions}
+          onChange={handleFactionsChange}
+          domainName={name}
+        />
+
         {/* Actions */}
         <div className="flex gap-3">
           {mode === 'edit' && onDelete && (
@@ -223,7 +241,7 @@ export default function DomainForm({
                     whileTap={{ scale: 0.98 }}
                   >
                     <Trash2 className="w-4 h-4" />
-                    Löschen
+                    Loeschen
                   </motion.button>
                 </div>
               ) : (
@@ -242,7 +260,7 @@ export default function DomainForm({
           {!showDeleteConfirm && (
             <motion.button
               onClick={handleSubmit}
-              disabled={!name.trim() || isSubmitting}
+              disabled={!name.trim() || factions.length === 0 || isSubmitting}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: color }}
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}

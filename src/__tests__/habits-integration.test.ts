@@ -85,7 +85,7 @@ describe('Habits Multi-Faction Integration', () => {
 
     it('should support all 7 faction IDs for habits', () => {
       const allFactionIds: FactionId[] = [
-        'karriere', 'hobbys', 'koerper', 'geist', 'finanzen', 'soziales', 'weisheit',
+        'karriere', 'hobby', 'koerper', 'geist', 'finanzen', 'soziales', 'wissen',
       ];
 
       allFactionIds.forEach(factionId => {
@@ -168,7 +168,7 @@ describe('Habits Multi-Faction Integration', () => {
       const factions = [
         { faction_id: 'koerper' as FactionId, weight: 33 },
         { faction_id: 'geist' as FactionId, weight: 33 },
-        { faction_id: 'weisheit' as FactionId, weight: 34 },
+        { faction_id: 'wissen' as FactionId, weight: 34 },
       ];
 
       const distribution = distributeXp(100, factions);
@@ -184,7 +184,7 @@ describe('Habits Multi-Faction Integration', () => {
       const factions = [
         { faction_id: 'koerper' as FactionId, weight: 60 },
         { faction_id: 'geist' as FactionId, weight: 25 },
-        { faction_id: 'weisheit' as FactionId, weight: 15 },
+        { faction_id: 'wissen' as FactionId, weight: 15 },
       ];
 
       const distribution = distributeXp(100, factions);
@@ -361,7 +361,7 @@ describe('Habits Multi-Faction Integration', () => {
       const factions = [
         { faction_id: 'koerper' as FactionId, weight: 25 },
         { faction_id: 'geist' as FactionId, weight: 25 },
-        { faction_id: 'weisheit' as FactionId, weight: 25 },
+        { faction_id: 'wissen' as FactionId, weight: 25 },
         { faction_id: 'karriere' as FactionId, weight: 25 },
       ];
 
@@ -487,12 +487,12 @@ describe('Habits Multi-Faction Integration', () => {
     it('should handle all 7 factions assigned to one habit', () => {
       const allFactions: { faction_id: FactionId; weight: number }[] = [
         { faction_id: 'karriere', weight: 14 },
-        { faction_id: 'hobbys', weight: 14 },
+        { faction_id: 'hobby', weight: 14 },
         { faction_id: 'koerper', weight: 15 },
         { faction_id: 'geist', weight: 15 },
         { faction_id: 'finanzen', weight: 14 },
         { faction_id: 'soziales', weight: 14 },
-        { faction_id: 'weisheit', weight: 14 },
+        { faction_id: 'wissen', weight: 14 },
       ];
 
       const totalWeight = allFactions.reduce((sum, f) => sum + f.weight, 0);
@@ -570,14 +570,14 @@ describe('Habits Multi-Faction Integration', () => {
       // Simulate: delete existing + insert new
       const existingFactions = mockHabitFactions;
       const newFactions = [
-        { faction_id: 'weisheit' as FactionId, weight: 60 },
+        { faction_id: 'wissen' as FactionId, weight: 60 },
         { faction_id: 'karriere' as FactionId, weight: 40 },
       ];
 
       // After setHabitFactions, old factions should be gone
-      expect(existingFactions.map(f => f.faction_id)).not.toContain('weisheit');
+      expect(existingFactions.map(f => f.faction_id)).not.toContain('wissen');
       expect(newFactions).toHaveLength(2);
-      expect(newFactions[0].faction_id).toBe('weisheit');
+      expect(newFactions[0].faction_id).toBe('wissen');
     });
 
     it('should clear all factions when empty array passed', () => {
@@ -634,7 +634,7 @@ describe('Multi-Faction Helper Functions', () => {
   describe('Faction ID Type Safety', () => {
     it('should only accept valid FactionId values', () => {
       const validFactionIds: FactionId[] = [
-        'karriere', 'hobbys', 'koerper', 'geist', 'finanzen', 'soziales', 'weisheit',
+        'karriere', 'hobby', 'koerper', 'geist', 'finanzen', 'soziales', 'wissen',
       ];
 
       const isValidFactionId = (id: string): id is FactionId => {

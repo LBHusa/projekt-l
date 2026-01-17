@@ -38,8 +38,8 @@ export default function WeisheitPage() {
   const loadData = async () => {
     try {
       const [factionData, factionStats, booksData, coursesData, weisheitStats] = await Promise.all([
-        getFaction('weisheit'),
-        getUserFactionStat('weisheit'),
+        getFaction('wissen'),
+        getUserFactionStat('wissen'),
         getBooks(),
         getCourses(),
         getWeisheitStats(),
@@ -299,7 +299,7 @@ export default function WeisheitPage() {
         {/* Skills Section */}
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
           <FactionSkillsSection
-            factionId="weisheit"
+            factionId="wissen"
             factionColor={faction.color}
           />
         </div>

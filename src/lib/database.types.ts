@@ -419,12 +419,12 @@ export interface UserProfileWithAttributes extends UserProfile {
 
 export interface UserFactions {
   karriere: number;   // 💼 Karriere/Arbeit
-  hobbys: number;     // 🎮 Hobbys/Freizeit
+  hobby: number;      // 🎮 Hobby/Freizeit
   koerper: number;    // 🏃 Koerper/Fitness
   geist: number;      // 🧠 Geist/Mental
   finanzen: number;   // 💰 Finanzen
   soziales: number;   // 👥 Soziales (Familie + Freunde)
-  weisheit: number;   // 📚 Weisheit/Bildung
+  wissen: number;     // 📚 Wissen/Bildung
 }
 
 // =============================================
@@ -446,7 +446,7 @@ export interface MentalStats {
 // Phase 1 Implementation
 // =============================================
 
-export type FactionId = 'karriere' | 'hobbys' | 'koerper' | 'geist' | 'finanzen' | 'soziales' | 'weisheit';
+export type FactionId = 'karriere' | 'hobby' | 'koerper' | 'geist' | 'finanzen' | 'soziales' | 'wissen';
 
 export interface Faction {
   id: FactionId;
@@ -1479,4 +1479,40 @@ export interface UserAchievement {
   unlocked_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// =============================================
+// N:M Skill Domain Factions
+// Phase 3: Weighted XP Distribution
+// =============================================
+
+export interface SkillDomainFaction {
+  id: string;
+  domain_id: string;
+  faction_id: FactionId;
+  weight: number; // 0-100
+  is_primary: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserDomainActivation {
+  id: string;
+  user_id: string;
+  domain_id: string;
+  is_active: boolean;
+  custom_weights: Record<FactionId, number> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SkillDomainWithFactions extends SkillDomain {
+  factions: SkillDomainFaction[];
+  created_by: string | null;
+  is_template: boolean;
+}
+
+export interface XpDistributionResult {
+  faction_id: FactionId;
+  xp_distributed: number;
 }

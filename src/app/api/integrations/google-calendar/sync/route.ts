@@ -71,7 +71,7 @@ function categorizeEvent(summary: string, description?: string | null): {
 
   // Bildung keywords
   if (text.match(/learn|kurs|course|study|lecture|seminar|workshop|training|reading|lesen/)) {
-    return { faction: 'weisheit', category: 'education' };
+    return { faction: 'wissen', category: 'education' };
   }
 
   // Familie keywords
@@ -81,7 +81,7 @@ function categorizeEvent(summary: string, description?: string | null): {
 
   // Hobbies keywords
   if (text.match(/hobby|game|gaming|movie|film|concert|musik|art|creative|basteln/)) {
-    return { faction: 'hobbys', category: 'hobby' };
+    return { faction: 'hobby', category: 'hobby' };
   }
 
   return { faction: null, category: 'other' };

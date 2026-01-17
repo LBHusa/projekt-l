@@ -118,7 +118,7 @@ export async function createBook(
     // Award XP to Weisheit faction
     if (xpGained > 0) {
       try {
-        await updateFactionStats('weisheit', xpGained, userId);
+        await updateFactionStats('wissen', xpGained, userId);
       } catch (err) {
         console.error('Error updating faction stats for book creation:', err);
       }
@@ -129,7 +129,7 @@ export async function createBook(
       await logActivity({
         userId,
         activityType: 'book_finished',
-        factionId: 'weisheit',
+        factionId: 'wissen',
         title: `Buch gelesen: "${data.title}"`,
         description: data.author ? `von ${data.author}` : undefined,
         xpAmount: xpGained,
@@ -251,7 +251,7 @@ export async function updateBookProgress(
     // Award XP to user's Weisheit faction
     if (xpGained > 0) {
       try {
-        await updateFactionStats('weisheit', xpGained, userId);
+        await updateFactionStats('wissen', xpGained, userId);
       } catch (err) {
         console.error('Error updating faction stats for book completion:', err);
       }
@@ -262,7 +262,7 @@ export async function updateBookProgress(
       await logActivity({
         userId,
         activityType: 'book_finished',
-        factionId: 'weisheit',
+        factionId: 'wissen',
         title: `"${book.title}" fertig gelesen`,
         description: book.rating ? `Bewertung: ${'⭐'.repeat(book.rating)}` : undefined,
         xpAmount: xpGained,
@@ -408,13 +408,13 @@ export async function createCourse(
     const xpGained = calculateCourseXp(data.total_hours);
 
     // Update faction stats
-    await updateFactionStats('weisheit', xpGained, userId);
+    await updateFactionStats('wissen', xpGained, userId);
 
     // Log activity
     await logActivity({
       userId,
       activityType: 'course_completed',
-      factionId: 'weisheit',
+      factionId: 'wissen',
       title: `Kurs abgeschlossen: '${data.title}'`,
       description: data.platform ? `Platform: ${data.platform}` : undefined,
       xpAmount: xpGained,
@@ -529,7 +529,7 @@ export async function updateCourseProgress(
     // Award XP to user's Weisheit faction
     if (xpGained > 0) {
       try {
-        await updateFactionStats('weisheit', xpGained, userId);
+        await updateFactionStats('wissen', xpGained, userId);
       } catch (err) {
         console.error('Error updating faction stats for course completion:', err);
       }
@@ -540,7 +540,7 @@ export async function updateCourseProgress(
       await logActivity({
         userId,
         activityType: 'course_completed',
-        factionId: 'weisheit',
+        factionId: 'wissen',
         title: `Kurs abgeschlossen: "${course.title}"`,
         description: course.platform ? `Platform: ${course.platform}` : undefined,
         xpAmount: xpGained,

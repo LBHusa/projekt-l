@@ -1,7 +1,8 @@
 import { createBrowserClient } from '@/lib/supabase';
-import type { UserSkill, UserSkillFull, Experience, UserProfile, FactionId } from '@/lib/database.types';
+import type { UserSkill, UserSkillFull, Experience, UserProfile, FactionId, XpDistributionResult } from '@/lib/database.types';
 import { addXp, xpForLevel } from '@/lib/xp';
 import { getFactionForSkill, updateFactionStats } from './factions';
+import { getDomainFactions, getPrimaryFactionForDomain } from './domains';
 
 // ============================================
 // USER SKILLS DATA ACCESS
@@ -121,6 +122,7 @@ export interface AddXpResult {
   leveledUp: boolean;
   factionId: FactionId | null;
   factionLeveledUp?: boolean;
+  xpDistribution?: XpDistributionResult[];
 }
 
 export async function addXpToSkill(
@@ -182,10 +184,23 @@ export async function addXpToSkill(
   // Update user profile total XP
   await updateUserTotalXp(userId, xpAmount);
 
-  // Update faction stats if we have a faction
+  // Update faction stats using weighted N:M distribution
   let factionLeveledUp = false;
-  if (factionId) {
-    try {
+  let xpDistribution: XpDistributionResult[] = [];
+
+  try {
+    // Get the skill's domain_id for N:M distribution
+    const { data: skillData } = await supabase
+      .from('skills')
+      .select('domain_id')
+      .eq('id', skillId)
+      .single();
+
+    if (skillData?.domain_id && !factionOverride) {
+      // Use N:M weighted distribution
+      xpDistribution = await distributeXpToFactions(skillData.domain_id, xpAmount, userId);
+    } else if (factionId) {
+      // Fallback: Single faction (legacy or override)
       const beforeStats = await supabase
         .from('user_faction_stats')
         .select('level')
@@ -194,13 +209,13 @@ export async function addXpToSkill(
         .single();
 
       const beforeLevel = beforeStats.data?.level || 1;
-
       const updatedFaction = await updateFactionStats(factionId, xpAmount, userId);
       factionLeveledUp = updatedFaction.level > beforeLevel;
-    } catch (err) {
-      // Don't fail XP logging if faction update fails
-      console.error('Error updating faction stats:', err);
+
+      xpDistribution = [{ faction_id: factionId, xp_distributed: xpAmount }];
     }
+  } catch (err) {
+    console.error('Error updating faction stats:', err);
   }
 
   // XP Propagation to parent skills (50% by default)
@@ -217,7 +232,51 @@ export async function addXpToSkill(
     leveledUp: result.leveledUp,
     factionId,
     factionLeveledUp,
+    xpDistribution,
   };
+}
+
+/**
+/**
+ * Distribute XP to multiple factions based on domain weights
+ * Uses N:M skill_domain_factions mappings
+ */
+async function distributeXpToFactions(
+  domainId: string,
+  xpAmount: number,
+  userId: string
+): Promise<XpDistributionResult[]> {
+  const domainFactions = await getDomainFactions(domainId);
+
+  if (domainFactions.length === 0) {
+    // Fallback to legacy faction_key
+    const primaryFaction = await getPrimaryFactionForDomain(domainId);
+    if (primaryFaction) {
+      await updateFactionStats(primaryFaction, xpAmount, userId);
+      return [{ faction_id: primaryFaction, xp_distributed: xpAmount }];
+    }
+    return [];
+  }
+
+  // Calculate total weight for normalization
+  const totalWeight = domainFactions.reduce((sum, df) => sum + df.weight, 0);
+  if (totalWeight === 0) return [];
+
+  const results: XpDistributionResult[] = [];
+
+  // Distribute XP proportionally
+  for (const df of domainFactions) {
+    const distributedXp = Math.round((xpAmount * df.weight) / totalWeight);
+    if (distributedXp > 0) {
+      await updateFactionStats(df.faction_id, distributedXp, userId);
+      results.push({
+        faction_id: df.faction_id,
+        xp_distributed: distributedXp,
+      });
+    }
+  }
+
+  return results;
 }
 
 /**
@@ -522,8 +581,8 @@ type UserAttributes = {
 
 const FACTION_TO_ATTR: Record<FactionId, keyof UserAttributes> = {
   koerper: 'str',
-  hobbys: 'dex',
-  weisheit: 'int',
+  hobby: 'dex',
+  wissen: 'int',
   soziales: 'cha',
   geist: 'wis',
   karriere: 'vit',
