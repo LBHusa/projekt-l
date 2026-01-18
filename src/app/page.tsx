@@ -21,9 +21,9 @@ import {
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords } from 'lucide-react';
+import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords, Plus } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { getAllDomains } from '@/lib/data/domains';
+import { getAllDomains, createDomainWithFactions } from '@/lib/data/domains';
 import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/user-skills';
 import { getFactionsWithStats } from '@/lib/data/factions';
 import { getContactsStats, getUpcomingBirthdays, getContactsNeedingAttention } from '@/lib/data/contacts';
@@ -34,6 +34,7 @@ import { createTransaction, getAccounts } from '@/lib/data/finanzen';
 import type { SkillDomain, UserAttributes, MentalStats, FactionWithStats, Account, MoodValue } from '@/lib/database.types';
 import type { ContactWithStats } from '@/lib/types/contacts';
 import type { QuickTransactionData } from '@/components/dashboard/modals/QuickTransactionModal';
+import DomainForm, { type DomainFormData } from '@/components/DomainForm';
 
 // Familie-Domain ID - wird aus der Anzeige gefiltert
 const FAMILIE_DOMAIN_ID = '77777777-7777-7777-7777-777777777777';
@@ -99,6 +100,7 @@ export default function Dashboard() {
   const [moodModalOpen, setMoodModalOpen] = useState(false);
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [showDomainForm, setShowDomainForm] = useState(false);
 
   // Load data function
   const loadData = async () => {
@@ -194,6 +196,31 @@ export default function Dashboard() {
       await loadData();
     } catch (error) {
       console.error('Error creating transaction:', error);
+    }
+  };
+
+  const handleDomainCreate = async (data: DomainFormData) => {
+    try {
+      const factionsMapped = data.factions.map(f => ({
+        faction_id: f.faction_id,
+        weight: f.weight,
+        is_primary: f.is_primary,
+      }));
+      
+      await createDomainWithFactions(
+        {
+          name: data.name,
+          icon: data.icon,
+          color: data.color,
+          description: data.description,
+        },
+        factionsMapped
+      );
+      
+      setShowDomainForm(false);
+      await loadData();
+    } catch (error) {
+      console.error("Error creating domain:", error);
     }
   };
 
@@ -456,14 +483,25 @@ export default function Dashboard() {
             </motion.div>
           </div>
 
-          {/* Skill Domains Section */}
           <motion.div
             className="text-center mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <h2 className="text-2xl font-bold mb-2">Skill-Bereiche</h2>
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <h2 className="text-2xl font-bold">Skill-Bereiche</h2>
+              <motion.button
+                onClick={() => setShowDomainForm(true)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--accent-primary)]/20 hover:bg-[var(--accent-primary)]/30 border border-[var(--accent-primary)]/30 text-[var(--accent-primary)] transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title="Neuen Bereich erstellen"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm font-medium">Neu</span>
+              </motion.button>
+            </div>
             <p className="text-[var(--foreground-muted)]">
               Wähle einen Bereich, um deine Skills zu erkunden
             </p>
@@ -557,6 +595,13 @@ export default function Dashboard() {
         onClose={() => setTransactionModalOpen(false)}
         onSubmit={handleTransactionCreate}
         accounts={accounts}
+      />
+
+      <DomainForm
+        isOpen={showDomainForm}
+        onClose={() => setShowDomainForm(false)}
+        onSubmit={handleDomainCreate}
+        mode="create"
       />
     </div>
   );

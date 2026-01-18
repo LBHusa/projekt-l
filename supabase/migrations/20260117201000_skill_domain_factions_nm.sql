@@ -33,7 +33,7 @@ ALTER TABLE skill_domains
 
 -- 4. Trigger to ensure only 1 primary per domain
 CREATE OR REPLACE FUNCTION ensure_single_primary_faction()
-RETURNS TRIGGER AS 44922
+RETURNS TRIGGER AS $$
 BEGIN
   IF NEW.is_primary THEN
     UPDATE skill_domain_factions
@@ -42,7 +42,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-44922 LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trigger_single_primary_faction ON skill_domain_factions;
 CREATE TRIGGER trigger_single_primary_faction
@@ -52,12 +52,12 @@ CREATE TRIGGER trigger_single_primary_faction
 
 -- 5. Trigger to update updated_at
 CREATE OR REPLACE FUNCTION update_skill_domain_factions_updated_at()
-RETURNS TRIGGER AS 44922
+RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-44922 LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trigger_skill_domain_factions_updated_at ON skill_domain_factions;
 CREATE TRIGGER trigger_skill_domain_factions_updated_at
@@ -89,7 +89,7 @@ CREATE POLICY "user_domain_activations_own" ON user_domain_activations
 
 -- 7. Helper function to get weighted XP distribution
 CREATE OR REPLACE FUNCTION get_domain_faction_weights(p_domain_id UUID)
-RETURNS TABLE(faction_id TEXT, weight INTEGER, is_primary BOOLEAN) AS 44922
+RETURNS TABLE(faction_id TEXT, weight INTEGER, is_primary BOOLEAN) AS $$
 BEGIN
   RETURN QUERY
   SELECT sdf.faction_id, sdf.weight, sdf.is_primary
@@ -97,7 +97,7 @@ BEGIN
   WHERE sdf.domain_id = p_domain_id
   ORDER BY sdf.is_primary DESC, sdf.weight DESC;
 END;
-44922 LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- 8. Helper function to distribute XP to factions
 CREATE OR REPLACE FUNCTION distribute_xp_to_factions(
@@ -105,7 +105,7 @@ CREATE OR REPLACE FUNCTION distribute_xp_to_factions(
   p_xp_amount INTEGER,
   p_user_id UUID
 )
-RETURNS TABLE(faction_id TEXT, xp_distributed INTEGER) AS 44922
+RETURNS TABLE(faction_id TEXT, xp_distributed INTEGER) AS $$
 DECLARE
   v_total_weight INTEGER;
   v_faction RECORD;
@@ -139,7 +139,7 @@ BEGIN
     RETURN NEXT;
   END LOOP;
 END;
-44922 LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_skill_domain_factions_domain ON skill_domain_factions(domain_id);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Link2, LayoutGrid, GitBranch } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, LayoutGrid, GitBranch, Settings } from 'lucide-react';
 import SkillGraph from '@/components/SkillGraph';
 import SkillTreeView from '@/components/SkillTreeView';
 import SkillBreadcrumb from '@/components/SkillBreadcrumb';
@@ -11,11 +11,13 @@ import SkillForm, { type SkillFormData } from '@/components/SkillForm';
 import ConnectionForm, { type ConnectionFormData } from '@/components/ConnectionForm';
 import GraphViewManager from '@/components/GraphViewManager';
 import type { SkillNodeData } from '@/components/SkillNode';
-import { getDomainById } from '@/lib/data/domains';
+import { getDomainById, getDomainFactions, setDomainFactions, updateDomain } from '@/lib/data/domains';
 import { getSkillsByDomain, getSkillTree, getConnectionsForDomain, createSkill, updateSkill, deleteSkill, createConnection } from '@/lib/data/skills';
 import { getUserSkills } from '@/lib/data/user-skills';
 import { getGraphViewsByDomain, getDefaultGraphView } from '@/lib/data/graph-views';
 import type { SkillDomain, Skill, SkillConnection, SkillWithHierarchy, GraphView, ViewState } from '@/lib/database.types';
+import DomainForm, { type DomainFormData } from '@/components/DomainForm';
+import type { FactionWeight } from '@/components/DomainFactionEditor';
 
 export default function DomainPage() {
   const params = useParams();
@@ -36,6 +38,8 @@ export default function DomainPage() {
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [showConnectionForm, setShowConnectionForm] = useState(false);
   const [editingSkill, setEditingSkill] = useState<SkillNodeData | null>(null);
+  const [showDomainEditForm, setShowDomainEditForm] = useState(false);
+  const [domainFactions, setDomainFactionsState] = useState<FactionWeight[]>([]);
 
   // User levels map for tree view
   const [userLevels, setUserLevels] = useState<Map<string, number>>(new Map());
@@ -75,6 +79,14 @@ export default function DomainPage() {
         return;
       }
       setDomain(domainData);
+
+      // Load domain factions for edit form
+      const factionsData = await getDomainFactions(domainId);
+      setDomainFactionsState(factionsData.map(f => ({
+        faction_id: f.faction_id,
+        weight: f.weight,
+        is_primary: f.is_primary,
+      })));
 
       // Lade Graph Views
       await loadGraphViews();
@@ -205,6 +217,32 @@ export default function DomainPage() {
   const openEditModal = (skill: SkillNodeData) => {
     setEditingSkill(skill);
     setShowSkillForm(true);
+  };
+
+  const handleDomainUpdate = async (data: DomainFormData) => {
+    if (!domain) return;
+    
+    try {
+      // Update domain basic info
+      await updateDomain(domain.id, {
+        name: data.name,
+        icon: data.icon,
+        color: data.color,
+        description: data.description,
+      });
+      
+      // Update faction assignments
+      await setDomainFactions(domain.id, data.factions.map(f => ({
+        faction_id: f.faction_id,
+        weight: f.weight,
+        is_primary: f.is_primary,
+      })));
+      
+      setShowDomainEditForm(false);
+      await loadData();
+    } catch (error) {
+      console.error("Error updating domain:", error);
+    }
   };
 
   const handleCreateConnection = async (data: ConnectionFormData) => {
@@ -344,6 +382,17 @@ export default function DomainPage() {
                   <LayoutGrid className="w-4 h-4" />
                 </button>
               </div>
+
+              <motion.button
+                className="p-2 rounded-lg border border-[var(--orb-border)] hover:bg-[var(--background-secondary)] transition-colors"
+                style={{ borderColor: domain.color }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowDomainEditForm(true)}
+                title="Bereich bearbeiten"
+              >
+                <Settings className="w-5 h-5" style={{ color: domain.color }} />
+              </motion.button>
 
               <motion.button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--orb-border)] hover:bg-[var(--background-secondary)] transition-colors"
@@ -564,6 +613,23 @@ export default function DomainPage() {
         skills={skillList.map(s => ({ id: s.id, name: s.name, icon: s.icon }))}
         domainColor={domain.color}
       />
+
+      {/* Domain Edit Form Modal */}
+      {domain && (
+        <DomainForm
+          isOpen={showDomainEditForm}
+          onClose={() => setShowDomainEditForm(false)}
+          onSubmit={handleDomainUpdate}
+          initialData={{
+            name: domain.name,
+            icon: domain.icon,
+            color: domain.color,
+            description: domain.description || '',
+            factions: domainFactions,
+          }}
+          mode="edit"
+        />
+      )}
     </div>
   );
 }

@@ -42,7 +42,7 @@ export const FACTIONS: { id: FactionId; name: string; icon: string }[] = [
   { id: 'karriere', name: 'Karriere', icon: '💼' },
   { id: 'hobby', name: 'Hobby', icon: '🎨' },
   { id: 'koerper', name: 'Körper', icon: '💪' },
-  { id: 'geist', name: 'Geist', icon: '🧠' },
+  { id: 'geist', name: 'Geist & Seele', icon: '🧠' },
   { id: 'finanzen', name: 'Finanzen', icon: '💰' },
   { id: 'soziales', name: 'Soziales', icon: '👥' },
   { id: 'wissen', name: 'Wissen', icon: '📚' },
