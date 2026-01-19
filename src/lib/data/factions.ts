@@ -1,13 +1,11 @@
 // ============================================
 // FACTIONS DATA ACCESS
-// Phase 1: Zwei-Ebenen-System
+// Uses authenticated user from session
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type { Faction, FactionId, UserFactionStats, FactionWithStats } from '@/lib/database.types';
-
-// Default test user ID (for MVP without auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Maximum faction level for radar chart scaling
 export const MAX_FACTION_LEVEL = 20;
@@ -64,16 +62,18 @@ export async function getFaction(factionId: FactionId): Promise<Faction | null> 
 
 /**
  * Get user's stats for all factions
+ * @param userId - Optional user ID. If not provided, uses current authenticated user
  */
 export async function getUserFactionStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserFactionStats[]> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('user_faction_stats')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('faction_id');
 
   if (error) {
@@ -86,17 +86,20 @@ export async function getUserFactionStats(
 
 /**
  * Get user's stats for a specific faction
+ * @param factionId - The faction ID
+ * @param userId - Optional user ID. If not provided, uses current authenticated user
  */
 export async function getUserFactionStat(
   factionId: FactionId,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserFactionStats | null> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('user_faction_stats')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('faction_id', factionId)
     .maybeSingle();
 
@@ -110,9 +113,10 @@ export async function getUserFactionStat(
 
 /**
  * Get all factions with user stats joined
+ * @param userId - Optional user ID. If not provided, uses current authenticated user
  */
 export async function getFactionsWithStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<FactionWithStats[]> {
   const factions = await getAllFactions();
   const stats = await getUserFactionStats(userId);
@@ -125,19 +129,22 @@ export async function getFactionsWithStats(
 
 /**
  * Update faction stats after XP gain
- * Called from addXpToSkill when XP is logged
+ * @param factionId - The faction ID
+ * @param xpAmount - XP to add
+ * @param userId - Optional user ID. If not provided, uses current authenticated user
  */
 export async function updateFactionStats(
   factionId: FactionId,
   xpAmount: number,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserFactionStats> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   // Call the database function to upsert and recalculate level
   const { error: fnError } = await supabase
     .rpc('update_faction_stats', {
-      p_user_id: userId,
+      p_user_id: resolvedUserId,
       p_faction_id: factionId,
       p_xp_amount: xpAmount,
     });
@@ -148,7 +155,7 @@ export async function updateFactionStats(
   }
 
   // Return the updated stats
-  const updated = await getUserFactionStat(factionId, userId);
+  const updated = await getUserFactionStat(factionId, resolvedUserId);
   if (!updated) {
     throw new Error(`Failed to get updated faction stats for ${factionId}`);
   }
@@ -158,16 +165,15 @@ export async function updateFactionStats(
 
 /**
  * Initialize faction stats for a new user
- * Creates entries for all 7 factions with 0 XP
+ * @param userId - Optional user ID. If not provided, uses current authenticated user
  */
-export async function initUserFactionStats(
-  userId: string = TEST_USER_ID
-): Promise<void> {
+export async function initUserFactionStats(userId?: string): Promise<void> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const factions = await getAllFactions();
 
   const inserts = factions.map(f => ({
-    user_id: userId,
+    user_id: resolvedUserId,
     faction_id: f.id,
     total_xp: 0,
     weekly_xp: 0,
@@ -191,11 +197,6 @@ export async function initUserFactionStats(
 
 /**
  * Calculate faction level from total XP
- * Formula: floor(sqrt(xp/100))
- * Level 1: 0-99 XP
- * Level 2: 100-399 XP
- * Level 5: 2,500-3,599 XP
- * Level 10: 10,000-12,099 XP
  */
 export function calculateFactionLevel(totalXp: number): number {
   if (totalXp <= 0) return 1;
@@ -204,7 +205,6 @@ export function calculateFactionLevel(totalXp: number): number {
 
 /**
  * Calculate XP needed for a specific level
- * Inverse of calculateFactionLevel
  */
 export function xpForFactionLevel(level: number): number {
   return Math.pow(level, 2) * 100;
@@ -228,7 +228,6 @@ export function factionLevelProgress(totalXp: number): number {
 
 /**
  * Get the default faction for a skill domain
- * Uses skill_domains.faction_key
  */
 export async function getFactionForDomain(domainId: string): Promise<FactionId | null> {
   const supabase = createBrowserClient();

@@ -132,107 +132,33 @@ export async function addXpToSkill(
   userId: string = TEST_USER_ID,
   factionOverride?: FactionId
 ): Promise<AddXpResult> {
-  const supabase = createBrowserClient();
-
-  // Get or create user skill
-  const userSkill = await ensureUserSkill(skillId, userId);
-
-  // Calculate new level and XP
-  const result = addXp(userSkill.level, userSkill.current_xp, xpAmount);
-
-  // Update user skill
-  const { data: updatedSkill, error: skillError } = await supabase
-    .from('user_skills')
-    .update({
-      level: result.newLevel,
-      current_xp: result.newXp,
-      last_used: new Date().toISOString(),
-    })
-    .eq('id', userSkill.id)
-    .select()
-    .single();
-
-  if (skillError) {
-    console.error('Error updating user skill:', skillError);
-    throw skillError;
-  }
-
-  // Determine faction: use override if provided, otherwise get from domain
-  const factionId = factionOverride || await getFactionForSkill(skillId);
-  const usedOverride = factionOverride !== undefined && factionOverride !== null;
-
-  // Create experience entry with faction tracking
-  const { data: experience, error: expError } = await supabase
-    .from('experiences')
-    .insert({
-      user_id: userId,
-      skill_id: skillId,
+  // Use API route to bypass RLS
+  const response = await fetch("/api/skills/xp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      skillId,
+      xp: xpAmount,
       description,
-      xp_gained: xpAmount,
-      date: new Date().toISOString().split('T')[0],
-      faction_id: factionId,
-      faction_override: usedOverride,
-    })
-    .select()
-    .single();
+      userId,
+      factionOverride,
+    }),
+  });
 
-  if (expError) {
-    console.error('Error creating experience:', expError);
-    throw expError;
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to add XP");
   }
 
-  // Update user profile total XP
-  await updateUserTotalXp(userId, xpAmount);
-
-  // Update faction stats using weighted N:M distribution
-  let factionLeveledUp = false;
-  let xpDistribution: XpDistributionResult[] = [];
-
-  try {
-    // Get the skill's domain_id for N:M distribution
-    const { data: skillData } = await supabase
-      .from('skills')
-      .select('domain_id')
-      .eq('id', skillId)
-      .single();
-
-    if (skillData?.domain_id && !factionOverride) {
-      // Use N:M weighted distribution
-      xpDistribution = await distributeXpToFactions(skillData.domain_id, xpAmount, userId);
-    } else if (factionId) {
-      // Fallback: Single faction (legacy or override)
-      const beforeStats = await supabase
-        .from('user_faction_stats')
-        .select('level')
-        .eq('user_id', userId)
-        .eq('faction_id', factionId)
-        .single();
-
-      const beforeLevel = beforeStats.data?.level || 1;
-      const updatedFaction = await updateFactionStats(factionId, xpAmount, userId);
-      factionLeveledUp = updatedFaction.level > beforeLevel;
-
-      xpDistribution = [{ faction_id: factionId, xp_distributed: xpAmount }];
-    }
-  } catch (err) {
-    console.error('Error updating faction stats:', err);
-  }
-
-  // XP Propagation to parent skills (50% by default)
-  try {
-    await propagateXpToParent(skillId, xpAmount, userId);
-  } catch (err) {
-    // Don't fail XP logging if propagation fails
-    console.error('Error propagating XP to parent:', err);
-  }
-
+  const result = await response.json();
+  
   return {
-    userSkill: updatedSkill,
-    experience,
-    leveledUp: result.leveledUp,
-    factionId,
-    factionLeveledUp,
-    xpDistribution,
+    userSkill: result.data.userSkill,
+    experience: result.data.experience,
+    leveledUp: result.data.leveledUp,
+    factionId: result.data.factionId,
+    factionLeveledUp: result.data.factionLeveledUp,
+    xpDistribution: result.data.xpDistribution,
   };
 }
 

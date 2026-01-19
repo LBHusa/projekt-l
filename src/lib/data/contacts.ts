@@ -1,8 +1,10 @@
 // ============================================
 // Projekt L - Contacts Data Layer
+// Uses authenticated user from session
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type {
   Contact,
   ContactWithStats,
@@ -17,19 +19,18 @@ import {
   calculateXpForNextLevel,
 } from '@/lib/types/contacts';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
-
 // ============================================
 // CRUD Operations
 // ============================================
 
 export async function getContacts(filters?: ContactFilters): Promise<Contact[]> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   let query = supabase
     .from('contacts')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .order('is_favorite', { ascending: false })
     .order('last_interaction_at', { ascending: false, nullsFirst: false });
 
@@ -78,11 +79,12 @@ export async function getContacts(filters?: ContactFilters): Promise<Contact[]> 
 
 export async function getContactsWithStats(filters?: ContactFilters): Promise<ContactWithStats[]> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   let query = supabase
     .from('contacts_with_stats')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .order('is_favorite', { ascending: false })
     .order('last_interaction_at', { ascending: false, nullsFirst: false });
 
@@ -167,6 +169,7 @@ export async function getContactWithStatsById(id: string): Promise<ContactWithSt
 
 export async function createContact(formData: ContactFormData): Promise<Contact> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   // Bestimme automatisch die Kategorie und Domain
   const category = getCategoryFromType(formData.relationship_type);
@@ -175,7 +178,7 @@ export async function createContact(formData: ContactFormData): Promise<Contact>
   const { data, error } = await supabase
     .from('contacts')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: userId,
       first_name: formData.first_name,
       last_name: formData.last_name || null,
       nickname: formData.nickname || null,
@@ -212,7 +215,7 @@ export async function updateContact(
 ): Promise<Contact> {
   const supabase = createBrowserClient();
 
-  // Konvertiere leere Strings zu null für Datumsfelder (PostgreSQL akzeptiert keine leeren Strings)
+  // Konvertiere leere Strings zu null für Datumsfelder
   const sanitizedUpdates = { ...updates };
   const dateFields = ['birthday', 'anniversary', 'met_date'] as const;
   dateFields.forEach((field) => {
@@ -312,11 +315,12 @@ export async function getFavoriteContacts(): Promise<ContactWithStats[]> {
 
 export async function getUpcomingBirthdays(days: number = 30): Promise<ContactWithStats[]> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   const { data, error } = await supabase
     .from('contacts_upcoming_birthdays')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .lte('days_until_birthday', days);
 
   if (error) {
@@ -344,11 +348,12 @@ export async function getUpcomingBirthdays(days: number = 30): Promise<ContactWi
 
 export async function getContactsNeedingAttention(limit: number = 10): Promise<ContactWithStats[]> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   const { data, error } = await supabase
     .from('contacts_needing_attention')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .limit(limit);
 
   if (error) {
@@ -356,14 +361,13 @@ export async function getContactsNeedingAttention(limit: number = 10): Promise<C
     throw error;
   }
 
-  // Enriche mit Stats-Feldern
   return (data || []).map((contact) => ({
     ...contact,
     xp_for_next_level: calculateXpForNextLevel(contact.relationship_level),
     progress_percent: Math.round(
       (contact.current_xp / calculateXpForNextLevel(contact.relationship_level)) * 100
     ),
-    days_until_birthday: null, // Nicht in diesem View enthalten
+    days_until_birthday: null,
     needs_attention: true,
   }));
 }
@@ -379,11 +383,12 @@ export async function getContactsStats(): Promise<{
   needingAttention: number;
 }> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
 
   const { data, error } = await supabase
     .from('contacts')
     .select('relationship_category, is_favorite')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', userId)
     .eq('is_archived', false);
 
   if (error) {
@@ -408,7 +413,7 @@ export async function getContactsStats(): Promise<{
   const { count: needingAttentionCount } = await supabase
     .from('contacts_needing_attention')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', userId);
 
   return {
     total: contacts.length,
@@ -468,6 +473,8 @@ export async function bulkImportContacts(
   options: BulkImportOptions = {}
 ): Promise<BulkImportResult> {
   const supabase = createBrowserClient();
+  const userId = await getUserIdOrCurrent();
+  
   const result: BulkImportResult = {
     imported: 0,
     skipped: 0,
@@ -480,7 +487,7 @@ export async function bulkImportContacts(
     const { data: existing } = await supabase
       .from('contacts')
       .select('first_name, last_name')
-      .eq('user_id', TEST_USER_ID);
+      .eq('user_id', userId);
 
     if (existing) {
       existingNames = new Set(
@@ -516,11 +523,10 @@ export async function bulkImportContacts(
       });
 
       const { error } = await supabase.from('contacts').insert({
-        user_id: TEST_USER_ID,
+        user_id: userId,
         ...sanitizedData,
         relationship_category: category,
         domain_id: domainId,
-        // Defaults
         relationship_level: 1,
         trust_level: 50,
         current_xp: 0,
@@ -539,7 +545,7 @@ export async function bulkImportContacts(
         });
       } else {
         result.imported++;
-        existingNames.add(fullName); // Prevent duplicates within same import
+        existingNames.add(fullName);
       }
     } catch (err) {
       result.errors.push({

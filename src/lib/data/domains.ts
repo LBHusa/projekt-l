@@ -246,42 +246,42 @@ export async function createDomainWithFactions(
   factions: { faction_id: FactionId; weight: number; is_primary: boolean }[],
   userId: string = TEST_USER_ID
 ): Promise<SkillDomainWithFactions> {
-  const supabase = createBrowserClient();
+  // Transform factions to API format
+  const factionData = factions.map(f => ({
+    factionId: f.faction_id,
+    weight: f.weight,
+  }));
 
-  // Get max display_order
-  const { data: maxOrder } = await supabase
-    .from('skill_domains')
-    .select('display_order')
-    .order('display_order', { ascending: false })
-    .limit(1)
-    .single();
-
-  // Create domain
-  const { data: newDomain, error: domainError } = await supabase
-    .from('skill_domains')
-    .insert({
+  const response = await fetch('/api/domains/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       name: domain.name,
-      icon: domain.icon || '🎯',
-      color: domain.color || '#6366f1',
-      description: domain.description || null,
-      display_order: (maxOrder?.display_order || 0) + 1,
-      created_by: userId,
-      is_template: false,
-    })
-    .select()
-    .single();
+      icon: domain.icon,
+      color: domain.color,
+      description: domain.description,
+      factions: factionData,
+      userId,
+    }),
+  });
 
-  if (domainError) {
-    console.error('Error creating domain:', domainError);
-    throw domainError;
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error creating domain:', errorData);
+    throw new Error(errorData.error || 'Failed to create domain');
   }
 
-  // Create faction mappings
-  const domainFactions = await setDomainFactions(newDomain.id, factions);
-
+  const result = await response.json();
+  
+  // Return with factions in expected format
   return {
-    ...newDomain,
-    factions: domainFactions,
+    ...result.data,
+    factions: factions.map(f => ({
+      ...f,
+      domain_id: result.data.id,
+    })),
     created_by: userId,
     is_template: false,
   };

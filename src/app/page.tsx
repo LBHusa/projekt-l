@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import Orb from '@/components/Orb';
 import CharacterHeader from '@/components/CharacterHeader';
 import AttributesPanel from '@/components/AttributesPanel';
@@ -75,6 +76,7 @@ interface UserProfileState {
 
 export default function Dashboard() {
   const [domains, setDomains] = useState<DomainWithLevel[]>([]);
+  const { userId, loading: authLoading } = useAuth();
   const [factions, setFactions] = useState<FactionWithStats[]>([]);
   const [contactsStats, setContactsStats] = useState<{
     total: number;
@@ -108,13 +110,13 @@ export default function Dashboard() {
       // Load all data in parallel
       const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData] = await Promise.all([
         getAllDomains(),
-        getUserProfile(),
+        getUserProfile(userId!),
         getTotalSkillCount(),
         getContactsStats(),
         getUpcomingBirthdays(14),
         getContactsNeedingAttention(5),
-        getFactionsWithStats(),
-        getAccounts(),
+        getFactionsWithStats(userId!),
+        getAccounts(userId!),
       ]);
 
       // Filter out Familie domain (now replaced by Contacts button)
@@ -161,8 +163,9 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (authLoading || !userId) return;
     loadData();
-  }, []);
+  }, [userId, authLoading]);
 
   // Modal handlers
   const handleHabitsComplete = async (habitIds: string[]) => {

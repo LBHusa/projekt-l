@@ -25,21 +25,18 @@ const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 // ============================================
 
 export async function getHabits(userId: string = TEST_USER_ID): Promise<Habit[]> {
-  const supabase = createBrowserClient();
-
-  const { data, error } = await supabase
-    .from('habits')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  if (error) {
+  try {
+    const response = await fetch(`/api/habits/list?userId=${userId}`);
+    if (!response.ok) {
+      console.error('Error fetching habits:', await response.text());
+      return [];
+    }
+    const result = await response.json();
+    return result.data || [];
+  } catch (error) {
     console.error('Error fetching habits:', error);
-    throw error;
+    return [];
   }
-
-  return data || [];
 }
 
 export async function getHabit(habitId: string): Promise<Habit | null> {
@@ -154,59 +151,46 @@ export interface CreateHabitInput {
   factions?: { faction_id: FactionId; weight: number }[]; // Multi-faction support
 }
 
+/**
+ * Create a new habit via API (bypasses RLS)
+ */
 export async function createHabit(
   input: CreateHabitInput,
   userId: string = TEST_USER_ID
 ): Promise<Habit> {
-  const supabase = createBrowserClient();
+  // Transform factions to API format
+  const factions = input.factions?.map(f => ({
+    factionId: f.faction_id,
+    weight: f.weight,
+  })) || (input.faction_id ? [{ factionId: input.faction_id, weight: 100 }] : []);
 
-  console.log('[createHabit] Received input.factions:', input.factions);
-  console.log('[createHabit] Full input:', input);
-
-  // Determine primary faction_id for legacy column
-  // If multi-faction provided, use the one with highest weight
-  let primaryFactionId = input.faction_id || null;
-  if (input.factions && input.factions.length > 0) {
-    console.log('[createHabit] Will set multi-faction with', input.factions.length, 'factions');
-    const sorted = [...input.factions].sort((a, b) => b.weight - a.weight);
-    primaryFactionId = sorted[0].faction_id;
-  }
-
-  const { data, error } = await supabase
-    .from('habits')
-    .insert({
-      user_id: userId,
+  const response = await fetch('/api/habits/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       name: input.name,
-      description: input.description || null,
-      icon: input.icon || '✅',
-      color: input.color || '#10B981',
-      habit_type: input.habit_type || 'positive',
-      frequency: input.frequency || 'daily',
-      target_days: input.target_days || [],
-      xp_per_completion: input.xp_per_completion || 10,
-      faction_id: primaryFactionId,
-    })
-    .select()
-    .single();
+      description: input.description,
+      icon: input.icon,
+      color: input.color,
+      isNegative: input.habit_type === 'negative',
+      frequency: input.frequency,
+      frequencyDays: input.target_days,
+      xpReward: input.xp_per_completion,
+      factions,
+      userId,
+    }),
+  });
 
-  if (error) {
-    console.error('Error creating habit:', error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error creating habit:', errorData);
+    throw new Error(errorData.error || 'Failed to create habit');
   }
 
-  // Set multi-faction assignments after habit creation
-  if (input.factions && input.factions.length > 0) {
-    console.log('[createHabit] Calling setHabitFactions with:', input.factions);
-    await setHabitFactions(data.id, input.factions);
-  } else if (input.faction_id) {
-    console.log('[createHabit] Using legacy single faction:', input.faction_id);
-    // Legacy: single faction with 100% weight
-    await setHabitFactions(data.id, [{ faction_id: input.faction_id, weight: 100 }]);
-  } else {
-    console.log('[createHabit] No factions provided');
-  }
-
-  return data;
+  const result = await response.json();
+  return result.data;
 }
 
 export async function updateHabit(
@@ -297,113 +281,26 @@ export async function logHabitCompletion(
   notes?: string,
   userId: string = TEST_USER_ID
 ): Promise<LogHabitResult> {
-  const supabase = createBrowserClient();
+  const response = await fetch('/api/habits/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ habitId, completed, notes, userId }),
+  });
 
-  // Get habit
-  const habit = await getHabit(habitId);
-  if (!habit) {
-    throw new Error('Habit not found');
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to complete habit');
   }
 
-  // Create log
-  const { data: log, error } = await supabase
-    .from('habit_logs')
-    .insert({
-      habit_id: habitId,
-      user_id: userId,
-      completed,
-      notes: notes || null,
-      logged_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error logging habit:', error);
-    throw error;
-  }
-
-  // Get updated habit (streak is updated by trigger)
-  const updatedHabit = await getHabit(habitId);
-  if (!updatedHabit) {
-    throw new Error('Failed to get updated habit');
-  }
-
-  // Calculate XP with streak bonus (only for completed positive habits or avoided negative habits)
-  let xpGained = 0;
-  let streakBonus = 0;
-
-  if (completed && habit.habit_type === 'positive') {
-    const baseXp = habit.xp_per_completion;
-    streakBonus = calculateStreakBonus(updatedHabit.current_streak);
-    xpGained = baseXp + streakBonus;
-  } else if (!completed && habit.habit_type === 'negative') {
-    // For negative habits, not doing them is good (but we track differently)
-    xpGained = 0; // Could add XP for avoiding bad habits
-  }
-
-  // Update faction stats if XP was gained
-  if (xpGained > 0 && habit.faction_id) {
-    try {
-      await updateFactionStats(habit.faction_id, xpGained, userId);
-    } catch (err) {
-      console.error('Error updating faction stats:', err);
-    }
-  }
-
-  // Log activity
-  if (completed && habit.habit_type === 'positive') {
-    try {
-      await logActivity({
-        userId,
-        activityType: 'habit_completed',
-        factionId: habit.faction_id,
-        title: streakBonus > 0
-          ? `${habit.icon} ${habit.name} abgeschlossen (${updatedHabit.current_streak} Tage Streak! +${streakBonus} Bonus XP)`
-          : `${habit.icon} ${habit.name} abgeschlossen`,
-        description: updatedHabit.current_streak > 1 && streakBonus === 0
-          ? `${updatedHabit.current_streak} Tage Streak!`
-          : undefined,
-        xpAmount: xpGained,
-        relatedEntityType: 'habit',
-        relatedEntityId: habitId,
-        metadata: {
-          streak: updatedHabit.current_streak,
-          streakBonus: streakBonus,
-          baseXp: habit.xp_per_completion,
-          totalXp: xpGained,
-        },
-      });
-    } catch (err) {
-      console.error('Error logging activity:', err);
-    }
-  }
-
-  // Check and award achievements
-  if (completed && habit.habit_type === 'positive') {
-    try {
-      // Get total completed habits count for user
-      const supabase = createBrowserClient();
-      const { count } = await supabase
-        .from('habit_logs')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .eq('completed', true);
-
-      const totalCompleted = count || 0;
-      await checkHabitAchievements(userId, totalCompleted, updatedHabit.current_streak);
-    } catch (err) {
-      console.error('Error checking habit achievements:', err);
-    }
-  }
-
+  const result = await response.json();
   return {
-    log,
-    habit: updatedHabit,
-    xpGained,
-    newStreak: updatedHabit.current_streak,
+    log: result.log,
+    habit: result.habit,
+    xpGained: result.xpGained,
+    newStreak: result.newStreak,
   };
 }
+
 
 export async function getHabitLogs(
   habitId: string,

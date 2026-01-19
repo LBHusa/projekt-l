@@ -28,49 +28,20 @@ export async function saveMoodLog(
   note?: string,
   userId: string = TEST_USER_ID
 ): Promise<MoodLog> {
-  const supabase = createBrowserClient();
+  const response = await fetch("/api/geist/mood", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mood, note, userId }),
+  });
 
-  const { data, error } = await supabase
-    .from('mood_logs')
-    .insert({
-      user_id: userId,
-      mood,
-      note: note || null,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error saving mood log:', error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Error saving mood log:", errorData);
+    throw new Error(errorData.error || "Failed to save mood log");
   }
 
-  // Update geist faction stats with XP
-  const xpGained = data.xp_gained || 2;
-  try {
-    await updateFactionStats('geist', xpGained, userId);
-  } catch (err) {
-    console.error('Error updating geist faction stats:', err);
-  }
-
-  // Log activity
-  try {
-    const moodEmoji = getMoodEmoji(mood);
-    await logActivity({
-      userId,
-      activityType: 'xp_gained',
-      factionId: 'geist',
-      title: `${moodEmoji} Stimmung geloggt`,
-      description: getMoodLabel(mood),
-      xpAmount: xpGained,
-      relatedEntityType: 'mood_log',
-      relatedEntityId: data.id,
-    });
-  } catch (err) {
-    console.error('Error logging mood activity:', err);
-  }
-
-  return data;
+  const result = await response.json();
+  return result.data;
 }
 
 /**
@@ -81,25 +52,18 @@ export async function getMoodHistory(
   daysBack: number = 30,
   userId: string = TEST_USER_ID
 ): Promise<MoodLog[]> {
-  const supabase = createBrowserClient();
-
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - daysBack);
-
-  const { data, error } = await supabase
-    .from('mood_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .gte('created_at', startDate.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching mood history:', error);
-    throw error;
+  try {
+    const response = await fetch(`/api/geist/mood?userId=${userId}&limit=${limit}&daysBack=${daysBack}`);
+    if (!response.ok) {
+      console.error("Error fetching mood history:", await response.text());
+      return [];
+    }
+    const result = await response.json();
+    return result.data || [];
+  } catch (error) {
+    console.error("Error fetching mood history:", error);
+    return [];
   }
-
-  return data || [];
 }
 
 /**
@@ -108,27 +72,25 @@ export async function getMoodHistory(
 export async function getTodaysMood(
   userId: string = TEST_USER_ID
 ): Promise<MoodLog | null> {
-  const supabase = createBrowserClient();
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const { data, error } = await supabase
-    .from('mood_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .gte('created_at', today.toISOString())
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    console.error('Error fetching today\'s mood:', error);
+  try {
+    // Use getMoodHistory with 1 day back, limit 1
+    const history = await getMoodHistory(1, 1, userId);
+    if (history.length > 0) {
+      // Check if the mood was logged today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const moodDate = new Date(history[0].created_at);
+      if (moodDate >= today) {
+        return history[0];
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching today's mood:", error);
     return null;
   }
-
-  return data;
 }
+
 
 /**
  * Get mood statistics
@@ -137,22 +99,18 @@ export async function getMoodStats(
   daysBack: number = 30,
   userId: string = TEST_USER_ID
 ): Promise<MoodStats | null> {
-  const supabase = createBrowserClient();
-
-  const { data, error } = await supabase
-    .rpc('get_mood_stats', {
-      p_user_id: userId,
-      p_days: daysBack,
-    });
-
-  if (error) {
-    console.error('Error fetching mood stats:', error);
+  try {
+    const response = await fetch(`/api/geist/stats?userId=${userId}&days=${daysBack}`);
+    if (!response.ok) {
+      console.error("Error fetching mood stats:", await response.text());
+      return null;
+    }
+    const result = await response.json();
+    return result.data || null;
+  } catch (error) {
+    console.error("Error fetching mood stats:", error);
     return null;
   }
-
-  if (!data || data.length === 0) return null;
-
-  return data[0] as MoodStats;
 }
 
 // ============================================
