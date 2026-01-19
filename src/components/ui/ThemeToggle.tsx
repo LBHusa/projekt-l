@@ -31,7 +31,7 @@ export function ThemeToggle() {
       title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
     >
       {theme === 'dark' ? (
-        <Sun className="w-5 h-5 text-white/60 hover:text-yellow-400 transition-colors" />
+        <Sun className="w-5 h-5 text-adaptive-muted hover:text-yellow-400 transition-colors" />
       ) : (
         <Moon className="w-5 h-5 text-gray-600 hover:text-indigo-600 transition-colors" />
       )}

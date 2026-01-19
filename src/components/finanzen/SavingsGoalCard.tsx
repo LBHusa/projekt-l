@@ -38,7 +38,7 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
         <div className="flex-1 min-w-0">
           <h3 className="font-medium truncate">{goal.name}</h3>
           {goal.description && (
-            <p className="text-xs text-white/40 truncate">{goal.description}</p>
+            <p className="text-xs text-adaptive-dim truncate">{goal.description}</p>
           )}
         </div>
       </div>
@@ -47,8 +47,8 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
         {/* Progress */}
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-white/60">{formatCurrency(goal.current_amount)}</span>
-            <span className="text-white/40">{formatCurrency(goal.target_amount)}</span>
+            <span className="text-adaptive-muted">{formatCurrency(goal.current_amount)}</span>
+            <span className="text-adaptive-dim">{formatCurrency(goal.target_amount)}</span>
           </div>
           <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
             <div
@@ -59,7 +59,7 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
               }}
             />
           </div>
-          <p className="text-xs text-white/40 mt-1 text-right">
+          <p className="text-xs text-adaptive-dim mt-1 text-right">
             {progressPercent.toFixed(1)}% erreicht
           </p>
         </div>
@@ -67,7 +67,7 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
         {/* Stats */}
         <div className="grid grid-cols-2 gap-2 text-xs">
           {goal.monthly_contribution > 0 && (
-            <div className="flex items-center gap-1 text-white/50">
+            <div className="flex items-center gap-1 text-adaptive-muted">
               <TrendingUp className="w-3 h-3" />
               <span>{formatCurrency(goal.monthly_contribution)}/Monat</span>
             </div>
@@ -78,7 +78,7 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
             </div>
           )}
           {goal.target_date && goal.days_remaining !== null && (
-            <div className="flex items-center gap-1 text-white/50">
+            <div className="flex items-center gap-1 text-adaptive-muted">
               <Calendar className="w-3 h-3" />
               <span>
                 {goal.days_remaining > 0
@@ -141,7 +141,7 @@ export function SavingsGoalsList({ goals, onGoalClick }: SavingsGoalsListProps) 
       )}
 
       {goals.length === 0 && (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <Target className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Sparziele</p>
           <p className="text-sm mt-1">Erstelle dein erstes Ziel!</p>

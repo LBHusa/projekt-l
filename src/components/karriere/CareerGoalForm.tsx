@@ -112,7 +112,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
 
           {/* Title */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Titel *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Titel *</label>
             <input
               type="text"
               value={formData.title}
@@ -125,7 +125,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
 
           {/* Description */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Beschreibung</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Beschreibung</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value || null }))}
@@ -137,7 +137,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
 
           {/* Progress Slider */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">
+            <label className="block text-sm text-adaptive-muted mb-1">
               Fortschritt: {formData.progress}%
             </label>
             <input
@@ -148,7 +148,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
               onChange={(e) => setFormData(prev => ({ ...prev, progress: parseInt(e.target.value) }))}
               className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
             />
-            <div className="flex justify-between text-xs text-white/40 mt-1">
+            <div className="flex justify-between text-xs text-adaptive-dim mt-1">
               <span>0%</span>
               <span>50%</span>
               <span>100%</span>
@@ -157,7 +157,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
 
           {/* Target Date */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Zieldatum</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Zieldatum</label>
             <input
               type="date"
               value={formData.target_date || ''}
@@ -169,7 +169,7 @@ export default function CareerGoalForm({ goal, isOpen, onClose, onSubmit }: Care
           {/* Status (only in edit mode) */}
           {goal && (
             <div>
-              <label className="block text-sm text-white/60 mb-1">Status</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Status</label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as CareerGoalStatus }))}

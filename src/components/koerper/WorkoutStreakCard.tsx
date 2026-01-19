@@ -111,7 +111,7 @@ export default function WorkoutStreakCard() {
           <Flame className="w-5 h-5 text-orange-400" />
           <h2 className="font-semibold">Workout Streak</h2>
         </div>
-        <div className="text-center py-6 text-white/40">Laden...</div>
+        <div className="text-center py-6 text-adaptive-dim">Laden...</div>
       </div>
     );
   }
@@ -126,12 +126,12 @@ export default function WorkoutStreakCard() {
       {/* Current Streak - Main Focus */}
       <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Flame className={`w-8 h-8 ${streak > 0 ? 'text-orange-400' : 'text-white/20'}`} />
+          <Flame className={`w-8 h-8 ${streak > 0 ? 'text-orange-400' : 'text-adaptive-dim'}`} />
           <div className="text-5xl font-bold text-orange-400">
             {streak}
           </div>
         </div>
-        <p className="text-sm text-white/60">
+        <p className="text-sm text-adaptive-muted">
           {streak === 0
             ? 'Kein aktiver Streak'
             : streak === 1
@@ -145,19 +145,19 @@ export default function WorkoutStreakCard() {
         <div className="bg-white/5 rounded-lg p-3 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
             <Calendar className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-white/50">Diese Woche</span>
+            <span className="text-xs text-adaptive-muted">Diese Woche</span>
           </div>
           <div className="text-2xl font-bold text-blue-400">{thisWeek}</div>
-          <div className="text-xs text-white/40 mt-1">Workouts</div>
+          <div className="text-xs text-adaptive-dim mt-1">Workouts</div>
         </div>
 
         <div className="bg-white/5 rounded-lg p-3 text-center">
           <div className="flex items-center justify-center gap-1 mb-1">
             <Award className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs text-white/50">Bester Streak</span>
+            <span className="text-xs text-adaptive-muted">Bester Streak</span>
           </div>
           <div className="text-2xl font-bold text-yellow-400">{longestStreak}</div>
-          <div className="text-xs text-white/40 mt-1">Tage</div>
+          <div className="text-xs text-adaptive-dim mt-1">Tage</div>
         </div>
       </div>
 

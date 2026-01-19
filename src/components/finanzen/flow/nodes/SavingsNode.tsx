@@ -92,7 +92,7 @@ function SavingsNode({ data }: { data: SavingsNodeData }) {
             {isAchieved ? (
               <p className="text-xs text-green-400">Erreicht!</p>
             ) : (
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-adaptive-dim">
                 {monthlyContribution > 0 ? `${formatCurrency(monthlyContribution)}/Monat` : 'Sparziel'}
               </p>
             )}
@@ -123,13 +123,13 @@ function SavingsNode({ data }: { data: SavingsNodeData }) {
           {/* Progress Text */}
           <div className="flex justify-between text-xs">
             <span style={{ color }}>{progress.toFixed(0)}%</span>
-            <span className="text-white/40">/ {formatCurrency(targetAmount)}</span>
+            <span className="text-adaptive-dim">/ {formatCurrency(targetAmount)}</span>
           </div>
 
           {/* Remaining */}
           {!isAchieved && remaining > 0 && (
             <div className="text-center">
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-adaptive-dim">
                 Noch {formatCurrency(remaining)}
               </span>
             </div>

@@ -64,7 +64,7 @@ export default function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutForm
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -101,7 +101,7 @@ export default function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutForm
                   }`}
                 >
                   <span className="text-xl block mb-0.5">{config.icon}</span>
-                  <span className={`text-xs ${formData.workout_type === type ? config.color : 'text-white/60'}`}>
+                  <span className={`text-xs ${formData.workout_type === type ? config.color : 'text-adaptive-muted'}`}>
                     {config.label}
                   </span>
                 </button>
@@ -158,7 +158,7 @@ export default function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutForm
                   className={`flex-1 py-2 px-3 rounded-lg border transition-all ${
                     formData.intensity === option.value
                       ? `bg-white/10 border-white/30 ${option.color}`
-                      : 'border-white/10 text-white/60 hover:bg-white/5'
+                      : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                   }`}
                 >
                   {option.label}
@@ -193,12 +193,12 @@ export default function WorkoutForm({ workout, onSubmit, onCancel }: WorkoutForm
           {/* XP Preview */}
           <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/60">Geschätzte XP</span>
+              <span className="text-sm text-adaptive-muted">Geschätzte XP</span>
               <span className="text-green-400 font-bold">
                 +{calculatePreviewXP(formData)} XP
               </span>
             </div>
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-adaptive-dim mt-1">
               Basierend auf Dauer und Intensität
             </p>
           </div>

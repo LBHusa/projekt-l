@@ -30,7 +30,7 @@ export default function SettingsPage() {
           href="/"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+          <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
         </Link>
         <div>
           <h1 className="text-xl font-bold text-adaptive">Einstellungen</h1>
@@ -69,7 +69,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-white/40 group-hover:text-white/60 transition-colors" />
+                <ChevronRight className="w-5 h-5 text-adaptive-dim group-hover:text-adaptive-muted transition-colors" />
               </div>
             </Link>
           </motion.div>

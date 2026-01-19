@@ -57,7 +57,7 @@ export default function HabitCard({
             isCompleted
               ? 'bg-green-500 text-white'
               : isPositive
-              ? 'bg-white/10 text-white/60 hover:bg-white/20'
+              ? 'bg-white/10 text-adaptive-muted hover:bg-white/20'
               : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
           } ${isLoading ? 'opacity-50' : ''}`}
         >
@@ -71,7 +71,7 @@ export default function HabitCard({
         </button>
 
         <div className="flex-1 min-w-0">
-          <span className={`font-medium ${isCompleted ? 'line-through text-white/50' : ''}`}>
+          <span className={`font-medium ${isCompleted ? 'line-through text-adaptive-muted' : ''}`}>
             {habit.name}
           </span>
         </div>
@@ -103,11 +103,11 @@ export default function HabitCard({
             {habit.icon}
           </div>
           <div>
-            <h3 className={`font-semibold ${isCompleted ? 'line-through text-white/50' : ''}`}>
+            <h3 className={`font-semibold ${isCompleted ? 'line-through text-adaptive-muted' : ''}`}>
               {habit.name}
             </h3>
             {habit.description && (
-              <p className="text-sm text-white/50 line-clamp-1">{habit.description}</p>
+              <p className="text-sm text-adaptive-muted line-clamp-1">{habit.description}</p>
             )}
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function HabitCard({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1 rounded-lg hover:bg-white/10 text-white/40 hover:text-white/60"
+            className="p-1 rounded-lg hover:bg-white/10 text-adaptive-dim hover:text-adaptive-muted"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -169,7 +169,7 @@ export default function HabitCard({
 
       {/* Stats Row */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4 text-sm text-white/50">
+        <div className="flex items-center gap-4 text-sm text-adaptive-muted">
           <span>{habit.total_completions} mal erledigt</span>
           {habit.faction_id && (
             <span className="px-2 py-0.5 rounded bg-white/10 text-xs capitalize">

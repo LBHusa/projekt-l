@@ -370,7 +370,7 @@ function SkillGraphInner({
             className={`p-2 rounded-lg border transition-colors ${
               direction === 'TB'
                 ? 'bg-white/20 border-white/40 text-white'
-                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-white/50 hover:text-white'
+                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-adaptive-muted hover:text-white'
             }`}
             title="Vertikal (Top → Bottom)"
           >
@@ -381,7 +381,7 @@ function SkillGraphInner({
             className={`p-2 rounded-lg border transition-colors ${
               direction === 'LR'
                 ? 'bg-white/20 border-white/40 text-white'
-                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-white/50 hover:text-white'
+                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-adaptive-muted hover:text-white'
             }`}
             title="Horizontal (Left → Right)"
           >
@@ -400,19 +400,19 @@ function SkillGraphInner({
                   boxShadow: `0 0 6px ${domainColor}`,
                 }}
               />
-              <span className="text-white/60">Struktur</span>
+              <span className="text-adaptive-muted">Struktur</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 opacity-50" style={{ backgroundColor: edgeColors.synergy }} />
-              <span className="text-white/60">Synergie</span>
+              <span className="text-adaptive-muted">Synergie</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 opacity-50" style={{ backgroundColor: edgeColors.prerequisite }} />
-              <span className="text-white/60">Voraussetzung</span>
+              <span className="text-adaptive-muted">Voraussetzung</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-6 h-0.5 opacity-50 border-t border-dashed" style={{ borderColor: edgeColors.related }} />
-              <span className="text-white/60">Verwandt</span>
+              <span className="text-adaptive-muted">Verwandt</span>
             </div>
           </div>
         </Panel>

@@ -107,7 +107,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Account */}
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            <label className="block text-sm font-medium text-adaptive mb-2">
               Konto *
             </label>
             <select
@@ -132,7 +132,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
           {/* Symbol & Asset Type */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">
+              <label className="block text-sm font-medium text-adaptive mb-2">
                 Symbol *
               </label>
               <input
@@ -142,7 +142,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
                 placeholder="z.B. AAPL, BTC"
                 className={`w-full bg-white/5 border ${
                   errors.symbol ? 'border-red-500/50' : 'border-white/10'
-                } rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50`}
+                } rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50`}
               />
               {errors.symbol && (
                 <p className="text-red-400 text-xs mt-1">{errors.symbol}</p>
@@ -150,7 +150,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">
+              <label className="block text-sm font-medium text-adaptive mb-2">
                 Asset-Typ *
               </label>
               <select
@@ -171,7 +171,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            <label className="block text-sm font-medium text-adaptive mb-2">
               Name *
             </label>
             <input
@@ -181,7 +181,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
               placeholder="z.B. Apple Inc., Bitcoin"
               className={`w-full bg-white/5 border ${
                 errors.name ? 'border-red-500/50' : 'border-white/10'
-              } rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50`}
+              } rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50`}
             />
             {errors.name && (
               <p className="text-red-400 text-xs mt-1">{errors.name}</p>
@@ -191,7 +191,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
           {/* Quantity, Average Cost, Current Price */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">
+              <label className="block text-sm font-medium text-adaptive mb-2">
                 Menge *
               </label>
               <input
@@ -202,7 +202,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
                 placeholder="0"
                 className={`w-full bg-white/5 border ${
                   errors.quantity ? 'border-red-500/50' : 'border-white/10'
-                } rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50`}
+                } rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50`}
               />
               {errors.quantity && (
                 <p className="text-red-400 text-xs mt-1">{errors.quantity}</p>
@@ -210,7 +210,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">
+              <label className="block text-sm font-medium text-adaptive mb-2">
                 Ø Kaufpreis (€) *
               </label>
               <input
@@ -221,7 +221,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
                 placeholder="0.00"
                 className={`w-full bg-white/5 border ${
                   errors.average_cost ? 'border-red-500/50' : 'border-white/10'
-                } rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50`}
+                } rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50`}
               />
               {errors.average_cost && (
                 <p className="text-red-400 text-xs mt-1">{errors.average_cost}</p>
@@ -229,7 +229,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">
+              <label className="block text-sm font-medium text-adaptive mb-2">
                 Aktueller Preis (€)
               </label>
               <input
@@ -240,7 +240,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
                 placeholder="0.00"
                 className={`w-full bg-white/5 border ${
                   errors.current_price ? 'border-red-500/50' : 'border-white/10'
-                } rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50`}
+                } rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50`}
               />
               {errors.current_price && (
                 <p className="text-red-400 text-xs mt-1">{errors.current_price}</p>
@@ -250,7 +250,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
 
           {/* Purchased At */}
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            <label className="block text-sm font-medium text-adaptive mb-2">
               Kaufdatum
             </label>
             <input
@@ -263,7 +263,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-white/70 mb-2">
+            <label className="block text-sm font-medium text-adaptive mb-2">
               Notizen
             </label>
             <textarea
@@ -271,7 +271,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
               onChange={(e) => handleChange('notes', e.target.value)}
               placeholder="Optional: Zusätzliche Informationen..."
               rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 resize-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder:text-adaptive-dim focus:outline-none focus:border-purple-500/50 resize-none"
             />
           </div>
 
@@ -280,7 +280,7 @@ export function InvestmentForm({ accounts, investment, onSubmit, onCancel }: Inv
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/80 transition-colors"
+              className="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-adaptive transition-colors"
             >
               Abbrechen
             </button>

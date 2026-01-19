@@ -17,7 +17,7 @@ export default function IntegrationsPage() {
           href="/"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+          <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
         </Link>
         <div>
           <h1 className="text-xl font-bold text-adaptive">Integrationen</h1>

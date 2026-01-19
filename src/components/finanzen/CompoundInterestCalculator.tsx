@@ -79,9 +79,9 @@ export function CompoundInterestCalculator({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div>
-          <label className="block text-xs text-white/50 mb-1">Startkapital</label>
+          <label className="block text-xs text-adaptive-muted mb-1">Startkapital</label>
           <div className="relative">
-            <PiggyBank className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <PiggyBank className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim" />
             <input
               type="number"
               value={principal}
@@ -94,9 +94,9 @@ export function CompoundInterestCalculator({
         </div>
 
         <div>
-          <label className="block text-xs text-white/50 mb-1">Monatlich</label>
+          <label className="block text-xs text-adaptive-muted mb-1">Monatlich</label>
           <div className="relative">
-            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <TrendingUp className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim" />
             <input
               type="number"
               value={monthly}
@@ -109,9 +109,9 @@ export function CompoundInterestCalculator({
         </div>
 
         <div>
-          <label className="block text-xs text-white/50 mb-1">Rendite p.a.</label>
+          <label className="block text-xs text-adaptive-muted mb-1">Rendite p.a.</label>
           <div className="relative">
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 text-sm">%</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-adaptive-dim text-sm">%</span>
             <input
               type="number"
               value={rate}
@@ -125,9 +125,9 @@ export function CompoundInterestCalculator({
         </div>
 
         <div>
-          <label className="block text-xs text-white/50 mb-1">Laufzeit</label>
+          <label className="block text-xs text-adaptive-muted mb-1">Laufzeit</label>
           <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim" />
             <input
               type="number"
               value={years}
@@ -136,7 +136,7 @@ export function CompoundInterestCalculator({
               min={1}
               max={50}
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 text-xs">Jahre</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-adaptive-dim text-xs">Jahre</span>
           </div>
         </div>
       </div>
@@ -145,15 +145,15 @@ export function CompoundInterestCalculator({
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-emerald-400">{formatCurrency(finalAmount)}</p>
-          <p className="text-xs text-white/50">Endwert</p>
+          <p className="text-xs text-adaptive-muted">Endwert</p>
         </div>
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-blue-400">{formatCurrency(totalContributions)}</p>
-          <p className="text-xs text-white/50">Eingezahlt</p>
+          <p className="text-xs text-adaptive-muted">Eingezahlt</p>
         </div>
         <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-purple-400">{formatCurrency(totalInterest)}</p>
-          <p className="text-xs text-white/50">Zinsen</p>
+          <p className="text-xs text-adaptive-muted">Zinsen</p>
         </div>
       </div>
 
@@ -217,11 +217,11 @@ export function CompoundInterestCalculator({
       <div className="flex justify-center gap-6 mt-4 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span className="text-white/50">Gesamtwert</span>
+          <span className="text-adaptive-muted">Gesamtwert</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-blue-500" />
-          <span className="text-white/50">Eingezahlt</span>
+          <span className="text-adaptive-muted">Eingezahlt</span>
         </div>
       </div>
     </div>

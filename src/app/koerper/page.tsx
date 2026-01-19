@@ -90,7 +90,7 @@ export default function KoerperPage() {
           <div className="w-16 h-16 rounded-full bg-green-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Dumbbell className="w-8 h-8 text-green-400" />
           </div>
-          <p className="text-white/50">Lade Koerper-Daten...</p>
+          <p className="text-adaptive-muted">Lade Koerper-Daten...</p>
         </div>
       </div>
     );
@@ -159,24 +159,24 @@ export default function KoerperPage() {
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
             <Dumbbell className="w-6 h-6 text-green-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-green-400">{thisMonth}</div>
-            <div className="text-sm text-white/50">Workouts</div>
+            <div className="text-sm text-adaptive-muted">Workouts</div>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
             <Timer className="w-6 h-6 text-blue-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-blue-400">{totalMinutes}</div>
-            <div className="text-sm text-white/50">Minuten</div>
+            <div className="text-sm text-adaptive-muted">Minuten</div>
           </div>
           <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 text-center">
             <Flame className="w-6 h-6 text-orange-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-orange-400">{totalCalories}</div>
-            <div className="text-sm text-white/50">Kalorien</div>
+            <div className="text-sm text-adaptive-muted">Kalorien</div>
           </div>
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
             <Scale className="w-6 h-6 text-purple-400 mx-auto mb-2" />
             <div className="text-2xl font-bold text-purple-400">
               {latestWeight ? `${latestWeight.value} ${latestWeight.unit}` : '-'}
             </div>
-            <div className="text-sm text-white/50">Gewicht</div>
+            <div className="text-sm text-adaptive-muted">Gewicht</div>
           </div>
         </motion.div>
 
@@ -227,7 +227,7 @@ export default function KoerperPage() {
                           <span className={`text-xs ${config.color}`}>{config.label}</span>
                         </div>
                       </div>
-                      <div className="text-right text-sm text-white/40">
+                      <div className="text-right text-sm text-adaptive-dim">
                         {new Date(workout.occurred_at).toLocaleDateString('de-DE', {
                           day: '2-digit',
                           month: '2-digit',
@@ -235,7 +235,7 @@ export default function KoerperPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 mt-3 text-sm text-white/50">
+                    <div className="flex items-center gap-4 mt-3 text-sm text-adaptive-muted">
                       {workout.duration_minutes && (
                         <span className="flex items-center gap-1">
                           <Timer className="w-3 h-3" />
@@ -257,7 +257,7 @@ export default function KoerperPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <Dumbbell className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Noch keine Workouts geloggt</p>
               <p className="text-sm mt-1">Starte dein erstes Training!</p>
@@ -305,8 +305,8 @@ export default function KoerperPage() {
                     <div className="text-lg font-bold">
                       {metric.value} {metric.unit}
                     </div>
-                    <div className="text-xs text-white/40">{labels[type]}</div>
-                    <div className="text-xs text-white/30 mt-1">
+                    <div className="text-xs text-adaptive-dim">{labels[type]}</div>
+                    <div className="text-xs text-adaptive-dim mt-1">
                       {new Date(metric.measured_at).toLocaleDateString('de-DE')}
                     </div>
                   </div>
@@ -314,7 +314,7 @@ export default function KoerperPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-6 text-white/40">
+            <div className="text-center py-6 text-adaptive-dim">
               <Scale className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p>Noch keine Korperwerte erfasst</p>
             </div>

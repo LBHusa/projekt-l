@@ -217,7 +217,7 @@ export default function HabitsPage() {
             animate={{ opacity: 1 }}
           >
             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-              <Flame className="w-10 h-10 text-white/20" />
+              <Flame className="w-10 h-10 text-adaptive-dim" />
             </div>
             <h3 className="text-lg font-medium mb-2">Noch keine Habits</h3>
             <p className="text-adaptive-muted mb-6">

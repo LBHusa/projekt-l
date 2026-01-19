@@ -91,7 +91,7 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
           {status.isConnected ? (
             <CheckCircle className="w-5 h-5 text-green-400" />
           ) : (
-            <XCircle className="w-5 h-5 text-white/40" />
+            <XCircle className="w-5 h-5 text-adaptive-dim" />
           )}
         </div>
       </div>
@@ -101,8 +101,8 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
         {/* Last Sync */}
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
-            <Clock className="w-4 h-4 text-white/60" />
-            <span className="text-xs text-white/60">Letzter Sync</span>
+            <Clock className="w-4 h-4 text-adaptive-muted" />
+            <span className="text-xs text-adaptive-muted">Letzter Sync</span>
           </div>
           <p className="text-sm font-medium text-adaptive">
             {formatLastSync(status.lastSync)}
@@ -113,7 +113,7 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
             <Zap className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs text-white/60">Gesamt XP</span>
+            <span className="text-xs text-adaptive-muted">Gesamt XP</span>
           </div>
           <p className="text-sm font-medium text-adaptive">
             {status.totalXpEarned.toLocaleString()} XP
@@ -124,7 +124,7 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-white/60">Schlaf-Daten</span>
+            <span className="text-xs text-adaptive-muted">Schlaf-Daten</span>
           </div>
           <p className="text-sm font-medium text-adaptive">
             {status.sleepDataCount} Einträge
@@ -135,7 +135,7 @@ export default function HealthImportCard({ userId }: HealthImportCardProps) {
         <div className="bg-white/5 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-white/60">Aktivitäten</span>
+            <span className="text-xs text-adaptive-muted">Aktivitäten</span>
           </div>
           <p className="text-sm font-medium text-adaptive">
             {status.activityDataCount} Einträge

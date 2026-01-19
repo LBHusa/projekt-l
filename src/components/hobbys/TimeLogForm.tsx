@@ -74,7 +74,7 @@ export default function TimeLogForm({ projects, selectedProjectId, onSubmit, onC
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -86,7 +86,7 @@ export default function TimeLogForm({ projects, selectedProjectId, onSubmit, onC
           <div>
             <label className="block text-sm font-medium mb-1.5">Projekt *</label>
             {projects.length === 0 ? (
-              <p className="text-white/40 text-sm py-2">Keine aktiven Projekte vorhanden</p>
+              <p className="text-adaptive-dim text-sm py-2">Keine aktiven Projekte vorhanden</p>
             ) : (
               <select
                 value={formData.project_id}
@@ -102,7 +102,7 @@ export default function TimeLogForm({ projects, selectedProjectId, onSubmit, onC
               </select>
             )}
             {selectedProject && (
-              <p className="text-xs text-white/40 mt-1">
+              <p className="text-xs text-adaptive-dim mt-1">
                 Bisherige Zeit: {selectedProject.total_hours} Std
               </p>
             )}
@@ -122,7 +122,7 @@ export default function TimeLogForm({ projects, selectedProjectId, onSubmit, onC
                   className={`py-2 px-2 rounded-lg text-xs transition-all ${
                     formData.duration_minutes === minutes
                       ? 'bg-purple-500/30 text-purple-300 ring-1 ring-purple-500/50'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
+                      : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                   }`}
                 >
                   {label}
@@ -138,7 +138,7 @@ export default function TimeLogForm({ projects, selectedProjectId, onSubmit, onC
               onChange={e => setFormData(prev => ({ ...prev, duration_minutes: parseInt(e.target.value) }))}
               className="w-full accent-purple-500"
             />
-            <div className="flex justify-between text-xs text-white/40 mt-1">
+            <div className="flex justify-between text-xs text-adaptive-dim mt-1">
               <span>5 Min</span>
               <span>4 Std</span>
               <span>8 Std</span>

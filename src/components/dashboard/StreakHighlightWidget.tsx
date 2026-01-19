@@ -68,11 +68,11 @@ export default function StreakHighlightWidget() {
       {/* Empty State */}
       {!loading && habits.length === 0 && (
         <div className="text-center py-8">
-          <Flame className="w-12 h-12 mx-auto mb-3 text-white/40" />
+          <Flame className="w-12 h-12 mx-auto mb-3 text-adaptive-dim" />
           <h3 className="text-base font-semibold text-white mb-1">
             Starte einen Streak! 🔥
           </h3>
-          <p className="text-sm text-white/60 mb-3">
+          <p className="text-sm text-adaptive-muted mb-3">
             Erledige Habits 3 Tage hintereinander
           </p>
           <Link href="/habits">
@@ -107,7 +107,7 @@ export default function StreakHighlightWidget() {
                     <div className="font-medium text-white truncate">
                       {habit.name}
                     </div>
-                    <div className="text-xs text-white/60">
+                    <div className="text-xs text-adaptive-muted">
                       +{habit.xp_per_completion} XP
                     </div>
                   </div>
@@ -153,7 +153,7 @@ export default function StreakHighlightWidget() {
       {/* Show count if more habits exist */}
       {!loading && habits.length === 6 && (
         <Link href="/habits">
-          <div className="mt-3 text-center text-xs text-white/60 hover:text-purple-400 transition cursor-pointer">
+          <div className="mt-3 text-center text-xs text-adaptive-muted hover:text-purple-400 transition cursor-pointer">
             Weitere Streaks anzeigen →
           </div>
         </Link>

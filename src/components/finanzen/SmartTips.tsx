@@ -59,7 +59,7 @@ export function SmartTips({ tips }: SmartTipsProps) {
                 <span className="text-2xl">{tip.icon}</span>
                 <div className="flex-1 min-w-0">
                   <h3 className={`font-medium ${config.color}`}>{tip.title}</h3>
-                  <p className="text-sm text-white/60 mt-1">{tip.description}</p>
+                  <p className="text-sm text-adaptive-muted mt-1">{tip.description}</p>
                   {tip.action && (
                     <Link
                       href={tip.action.href}

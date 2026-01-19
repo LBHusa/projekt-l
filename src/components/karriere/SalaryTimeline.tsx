@@ -146,25 +146,25 @@ export default function SalaryTimeline({
         <div className="flex items-center gap-4 mb-6 px-4 py-3 bg-white/5 rounded-lg text-sm">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-400" />
-            <span className="text-white/60">
+            <span className="text-adaptive-muted">
               {stats.totalGrowth >= 0 ? '+' : ''}
               {stats.totalGrowth}% Wachstum
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-amber-400" />
-            <span className="text-white/60">{stats.yearsTracked} Jahre</span>
+            <span className="text-adaptive-muted">{stats.yearsTracked} Jahre</span>
           </div>
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-cyan-400" />
-            <span className="text-white/60">{stats.entryCount} Einträge</span>
+            <span className="text-adaptive-muted">{stats.entryCount} Einträge</span>
           </div>
         </div>
       )}
 
       {/* Empty State */}
       {salaries.length === 0 && (
-        <div className="text-center py-12 text-white/40">
+        <div className="text-center py-12 text-adaptive-dim">
           <TrendingUp className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p className="text-lg mb-1">Noch keine Gehaltseinträge</p>
           <p className="text-sm mb-4">Dokumentiere deine Gehaltsentwicklung</p>
@@ -223,7 +223,7 @@ export default function SalaryTimeline({
                       <span className="text-2xl font-bold text-amber-400">
                         {formatCurrency(entry.amount)}
                       </span>
-                      <span className="text-xs px-2 py-0.5 bg-white/10 rounded text-white/50">
+                      <span className="text-xs px-2 py-0.5 bg-white/10 rounded text-adaptive-muted">
                         / {periodLabel(entry.period)}
                       </span>
                     </div>
@@ -246,7 +246,7 @@ export default function SalaryTimeline({
 
                   {/* Job info */}
                   {entry.job && (
-                    <div className="flex items-center gap-2 text-sm text-white/60 mb-1">
+                    <div className="flex items-center gap-2 text-sm text-adaptive-muted mb-1">
                       <Building2 className="w-4 h-4" />
                       <span>
                         {entry.job.position} @ {entry.job.company}
@@ -255,7 +255,7 @@ export default function SalaryTimeline({
                   )}
 
                   {/* Date */}
-                  <div className="flex items-center gap-2 text-sm text-white/50">
+                  <div className="flex items-center gap-2 text-sm text-adaptive-muted">
                     <Calendar className="w-4 h-4" />
                     <span>
                       {new Date(entry.effective_date).toLocaleDateString('de-DE', {
@@ -287,7 +287,7 @@ export default function SalaryTimeline({
                       className="mt-4 pt-4 border-t border-white/10"
                     >
                       {entry.notes && (
-                        <p className="text-sm text-white/60 mb-3">{entry.notes}</p>
+                        <p className="text-sm text-adaptive-muted mb-3">{entry.notes}</p>
                       )}
                       {onEditSalary && (
                         <button

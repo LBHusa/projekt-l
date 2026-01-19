@@ -154,7 +154,7 @@ export default function KarrierePage() {
           <div className="w-16 h-16 rounded-full bg-amber-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Briefcase className="w-8 h-8 text-amber-400" />
           </div>
-          <p className="text-white/50">Lade Karriere-Daten...</p>
+          <p className="text-adaptive-muted">Lade Karriere-Daten...</p>
         </div>
       </div>
     );
@@ -221,12 +221,12 @@ export default function KarrierePage() {
             transition={{ delay: 0.2 }}
             className="mb-8 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-4 md:p-6"
           >
-            <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
+            <div className="flex items-center gap-2 text-adaptive-muted text-sm mb-2">
               <Briefcase className="w-4 h-4" />
               Aktueller Job
             </div>
             <h2 className="text-xl font-bold mb-1">{stats.currentJob.position}</h2>
-            <p className="text-white/70">{stats.currentJob.company}</p>
+            <p className="text-adaptive">{stats.currentJob.company}</p>
             {stats.currentSalary && (
               <div className="mt-3 text-sm text-amber-400">
                 {new Intl.NumberFormat('de-DE', {

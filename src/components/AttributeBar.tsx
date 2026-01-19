@@ -29,7 +29,7 @@ export default function AttributeBar({
           >
             {label}
           </span>
-          <span className="text-xs text-white/40 hidden group-hover:inline transition-opacity">
+          <span className="text-xs text-adaptive-dim hidden group-hover:inline transition-opacity">
             {fullName}
           </span>
         </div>

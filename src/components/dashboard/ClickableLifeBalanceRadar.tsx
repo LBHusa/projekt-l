@@ -67,7 +67,7 @@ export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBal
       className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
     >
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
           Lebensbalance
         </h3>
         <div className="flex items-center gap-2">
@@ -159,13 +159,13 @@ export default function ClickableLifeBalanceRadar({ factions }: ClickableLifeBal
             style={{ color: item.color }}
           >
             <span>{item.icon}</span>
-            <span className="text-white/60">Lvl {item.level}</span>
+            <span className="text-adaptive-muted">Lvl {item.level}</span>
           </button>
         ))}
       </div>
 
       {/* Total XP Display */}
-      <div className="text-center mt-2 text-white/40 text-xs">
+      <div className="text-center mt-2 text-adaptive-dim text-xs">
         Gesamt: {totalXp.toLocaleString()} XP
       </div>
     </motion.div>

@@ -29,11 +29,11 @@ export default function UpcomingBirthdays({ contacts, maxDisplay = 5 }: Upcoming
 
   // Farbe basierend auf Dringlichkeit
   const getDaysColor = (days: number | null): string => {
-    if (days === null) return 'text-white/40';
+    if (days === null) return 'text-adaptive-dim';
     if (days === 0) return 'text-pink-400';
     if (days === 1) return 'text-orange-400';
     if (days <= 7) return 'text-yellow-400';
-    return 'text-white/60';
+    return 'text-adaptive-muted';
   };
 
   return (
@@ -45,7 +45,7 @@ export default function UpcomingBirthdays({ contacts, maxDisplay = 5 }: Upcoming
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Cake className="w-4 h-4 text-pink-400" />
-          <h3 className="text-sm font-medium text-white/80">Geburtstage</h3>
+          <h3 className="text-sm font-medium text-adaptive">Geburtstage</h3>
         </div>
         {contacts.length > maxDisplay && (
           <Link
@@ -87,7 +87,7 @@ export default function UpcomingBirthdays({ contacts, maxDisplay = 5 }: Upcoming
                 <p className="text-sm text-white font-medium truncate group-hover:text-pink-300 transition-colors">
                   {displayName}
                 </p>
-                <p className="text-xs text-white/40">{typeMeta.labelDe}</p>
+                <p className="text-xs text-adaptive-dim">{typeMeta.labelDe}</p>
               </div>
 
               {/* Days Until */}

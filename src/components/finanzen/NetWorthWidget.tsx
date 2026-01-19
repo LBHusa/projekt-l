@@ -18,8 +18,8 @@ export function NetWorthWidget({ netWorth, previousNetWorth }: NetWorthWidgetPro
             <Wallet className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm text-white/50">Vermogen</p>
-            <p className="text-white/40">Keine Daten</p>
+            <p className="text-sm text-adaptive-muted">Vermogen</p>
+            <p className="text-adaptive-dim">Keine Daten</p>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export function NetWorthWidget({ netWorth, previousNetWorth }: NetWorthWidgetPro
             <Wallet className="w-6 h-6 text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm text-white/50">Vermogen</p>
+            <p className="text-sm text-adaptive-muted">Vermogen</p>
             <p className="text-3xl font-bold text-emerald-400">
               {formatCurrency(netWorth.net_worth)}
             </p>
@@ -68,7 +68,7 @@ export function NetWorthWidget({ netWorth, previousNetWorth }: NetWorthWidgetPro
           <span className="text-sm">
             {isPositive ? '+' : ''}{formatCurrency(change)} ({changePercent}%)
           </span>
-          <span className="text-xs text-white/40">vs. letzter Monat</span>
+          <span className="text-xs text-adaptive-dim">vs. letzter Monat</span>
         </div>
       )}
 
@@ -77,25 +77,25 @@ export function NetWorthWidget({ netWorth, previousNetWorth }: NetWorthWidgetPro
           <p className="text-lg font-semibold text-blue-400">
             {formatCurrency(netWorth.cash_total)}
           </p>
-          <p className="text-xs text-white/40">Bargeld</p>
+          <p className="text-xs text-adaptive-dim">Bargeld</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-purple-400">
             {formatCurrency(netWorth.investments_total)}
           </p>
-          <p className="text-xs text-white/40">Investments</p>
+          <p className="text-xs text-adaptive-dim">Investments</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-orange-400">
             {formatCurrency(netWorth.crypto_total)}
           </p>
-          <p className="text-xs text-white/40">Crypto</p>
+          <p className="text-xs text-adaptive-dim">Crypto</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-red-400">
             {formatCurrency(Math.abs(netWorth.debt_total))}
           </p>
-          <p className="text-xs text-white/40">Schulden</p>
+          <p className="text-xs text-adaptive-dim">Schulden</p>
         </div>
       </div>
     </div>

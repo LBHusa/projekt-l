@@ -54,13 +54,13 @@ export default function ContactCard({
         {/* Name und Typ */}
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-white truncate">{displayName}</h3>
-          <p className="text-sm text-white/60">{typeMeta.labelDe}</p>
+          <p className="text-sm text-adaptive-muted">{typeMeta.labelDe}</p>
         </div>
 
         {/* Favorite */}
         <button
           className={`p-1 rounded-full transition-colors ${
-            contact.is_favorite ? 'text-red-500' : 'text-white/30 hover:text-red-500'
+            contact.is_favorite ? 'text-red-500' : 'text-adaptive-dim hover:text-red-500'
           }`}
           onClick={(e) => {
             e.stopPropagation();
@@ -74,8 +74,8 @@ export default function ContactCard({
       {/* Level-Bar */}
       <div className="mt-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span className="text-white/60">Level {contact.relationship_level}</span>
-          <span className="text-white/40">{contact.progress_percent}%</span>
+          <span className="text-adaptive-muted">Level {contact.relationship_level}</span>
+          <span className="text-adaptive-dim">{contact.progress_percent}%</span>
         </div>
         <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
           <motion.div
@@ -89,7 +89,7 @@ export default function ContactCard({
 
       {/* Letzte Interaktion */}
       <div className="mt-3 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1 text-white/40">
+        <div className="flex items-center gap-1 text-adaptive-dim">
           <Clock className="w-3 h-3" />
           <span>{formatDaysAgo(contact.days_since_interaction)}</span>
         </div>
@@ -105,7 +105,7 @@ export default function ContactCard({
       {/* Quick Actions */}
       <div className="mt-3 flex gap-2">
         <button
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white text-sm transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-adaptive-muted hover:text-white text-sm transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             onQuickInteraction?.();

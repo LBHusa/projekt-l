@@ -211,7 +211,7 @@ export default function HabitReminderSettings({ habitId }: HabitReminderSettings
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     newReminder.days_of_week.includes(day.value)
                       ? 'bg-[var(--accent-primary)] text-white'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                      : 'bg-white/5 text-adaptive hover:bg-white/10'
                   }`}
                 >
                   {day.label}

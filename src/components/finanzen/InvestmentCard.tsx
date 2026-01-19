@@ -75,7 +75,7 @@ export function InvestmentCard({ investment, onEdit, onDelete }: InvestmentCardP
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-mono text-white/60">{investment.symbol}</span>
+            <span className="text-sm font-mono text-adaptive-muted">{investment.symbol}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs border ${getAssetTypeColor(investment.asset_type)}`}>
               {getAssetTypeLabel(investment.asset_type)}
             </span>
@@ -89,7 +89,7 @@ export function InvestmentCard({ investment, onEdit, onDelete }: InvestmentCardP
               className="p-2 rounded-lg hover:bg-white/10 transition-colors"
               aria-label="Bearbeiten"
             >
-              <Edit className="w-4 h-4 text-white/60" />
+              <Edit className="w-4 h-4 text-adaptive-muted" />
             </button>
           )}
           {onDelete && (
@@ -122,8 +122,8 @@ export function InvestmentCard({ investment, onEdit, onDelete }: InvestmentCardP
       {/* Investment Details */}
       <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
         <div>
-          <p className="text-xs text-white/40 mb-1">Menge</p>
-          <p className="text-sm font-semibold text-white/80">
+          <p className="text-xs text-adaptive-dim mb-1">Menge</p>
+          <p className="text-sm font-semibold text-adaptive">
             {investment.quantity.toLocaleString('de-DE', {
               minimumFractionDigits: 0,
               maximumFractionDigits: 4,
@@ -131,23 +131,23 @@ export function InvestmentCard({ investment, onEdit, onDelete }: InvestmentCardP
           </p>
         </div>
         <div>
-          <p className="text-xs text-white/40 mb-1">Gesamtwert</p>
-          <p className="text-sm font-semibold text-white/80">{formatCurrency(totalValue)}</p>
+          <p className="text-xs text-adaptive-dim mb-1">Gesamtwert</p>
+          <p className="text-sm font-semibold text-adaptive">{formatCurrency(totalValue)}</p>
         </div>
         <div>
-          <p className="text-xs text-white/40 mb-1">Ø Kaufpreis</p>
-          <p className="text-sm font-semibold text-white/80">{formatCurrency(avgCost)}</p>
+          <p className="text-xs text-adaptive-dim mb-1">Ø Kaufpreis</p>
+          <p className="text-sm font-semibold text-adaptive">{formatCurrency(avgCost)}</p>
         </div>
         <div>
-          <p className="text-xs text-white/40 mb-1">Aktueller Preis</p>
-          <p className="text-sm font-semibold text-white/80">{formatCurrency(currentPrice)}</p>
+          <p className="text-xs text-adaptive-dim mb-1">Aktueller Preis</p>
+          <p className="text-sm font-semibold text-adaptive">{formatCurrency(currentPrice)}</p>
         </div>
       </div>
 
       {/* Notes */}
       {investment.notes && (
         <div className="mt-3 pt-3 border-t border-white/10">
-          <p className="text-xs text-white/50">{investment.notes}</p>
+          <p className="text-xs text-adaptive-muted">{investment.notes}</p>
         </div>
       )}
     </div>

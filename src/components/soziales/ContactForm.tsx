@@ -129,7 +129,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
 
           {/* First Name */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Vorname *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Vorname *</label>
             <input
               type="text"
               value={formData.first_name}
@@ -142,7 +142,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
 
           {/* Last Name */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Nachname</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Nachname</label>
             <input
               type="text"
               value={formData.last_name}
@@ -154,7 +154,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
 
           {/* Relationship Category Toggle */}
           <div>
-            <label className="block text-sm text-white/60 mb-2">Beziehung *</label>
+            <label className="block text-sm text-adaptive-muted mb-2">Beziehung *</label>
             <div className="flex gap-3">
               <button
                 type="button"
@@ -162,7 +162,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
                 className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
                   selectedCategory === 'family'
                     ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
               >
                 👨‍👩‍👧‍👦 Familie
@@ -173,7 +173,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
                 className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
                   selectedCategory === 'friend'
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
               >
                 🤝 Freund
@@ -184,7 +184,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
           {/* Email & Phone */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Email</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Email</label>
               <input
                 type="email"
                 value={formData.email}
@@ -194,7 +194,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Telefon</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Telefon</label>
               <input
                 type="tel"
                 value={formData.phone}
@@ -207,7 +207,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
 
           {/* Birthday */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Geburtstag</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Geburtstag</label>
             <input
               type="date"
               value={formData.birthday}
@@ -218,7 +218,7 @@ export default function ContactForm({ contact, category, isOpen, onClose, onSubm
 
           {/* Notes */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Notizen</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Notizen</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}

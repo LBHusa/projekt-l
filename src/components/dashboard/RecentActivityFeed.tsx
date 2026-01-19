@@ -208,7 +208,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
       {/* Activity List */}
       {filteredActivities.length === 0 ? (
         <div className="text-center py-8">
-          <Activity className="w-10 h-10 text-white/20 mx-auto mb-2" />
+          <Activity className="w-10 h-10 text-adaptive-dim mx-auto mb-2" />
           <p className="text-adaptive-dim text-sm">Noch keine Aktivitäten</p>
         </div>
       ) : (
@@ -260,7 +260,7 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                             ACTIVITY_COLORS[activity.activity_type] ||
-                            'text-white/60 bg-white/10'
+                            'text-adaptive-muted bg-white/10'
                           }`}
                         >
                           {ACTIVITY_TYPE_ICONS[activity.activity_type] || (

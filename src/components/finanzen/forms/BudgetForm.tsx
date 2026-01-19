@@ -113,7 +113,7 @@ export default function BudgetForm({ budget, onSubmit, onCancel }: BudgetFormPro
 
           {/* Category Grid */}
           <div>
-            <label className="block text-sm text-white/60 mb-2">Kategorie *</label>
+            <label className="block text-sm text-adaptive-muted mb-2">Kategorie *</label>
             <div className="grid grid-cols-2 gap-2">
               {BUDGET_CATEGORIES.map(cat => (
                 <button
@@ -135,7 +135,7 @@ export default function BudgetForm({ budget, onSubmit, onCancel }: BudgetFormPro
 
           {/* Amount */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Budget-Betrag *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Budget-Betrag *</label>
             <div className="relative">
               <input
                 type="number"
@@ -147,13 +147,13 @@ export default function BudgetForm({ budget, onSubmit, onCancel }: BudgetFormPro
                 placeholder="100.00"
                 required
               />
-              <span className="absolute right-3 top-2.5 text-white/40">€</span>
+              <span className="absolute right-3 top-2.5 text-adaptive-dim">€</span>
             </div>
           </div>
 
           {/* Period */}
           <div>
-            <label className="block text-sm text-white/60 mb-2">Zeitraum *</label>
+            <label className="block text-sm text-adaptive-muted mb-2">Zeitraum *</label>
             <div className="grid grid-cols-3 gap-2">
               {(['weekly', 'monthly', 'yearly'] as const).map(period => (
                 <button

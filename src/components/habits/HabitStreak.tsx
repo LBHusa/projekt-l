@@ -51,7 +51,7 @@ export default function HabitStreak({
       </motion.div>
 
       {showLongest && longestStreak > currentStreak && (
-        <span className="text-white/40">
+        <span className="text-adaptive-dim">
           (Rekord: {longestStreak})
         </span>
       )}

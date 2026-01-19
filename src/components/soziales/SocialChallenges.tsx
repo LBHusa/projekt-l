@@ -192,7 +192,7 @@ export default function SocialChallenges({ events }: SocialChallengesProps) {
       <div className="flex items-center gap-2 mb-4">
         <Target className="w-5 h-5 text-indigo-400" />
         <h2 className="font-semibold text-indigo-300">Soziale Challenges</h2>
-        <span className="text-sm text-white/40">Wöchentliche & monatliche Ziele</span>
+        <span className="text-sm text-adaptive-dim">Wöchentliche & monatliche Ziele</span>
       </div>
 
       {/* Challenges Grid */}
@@ -221,7 +221,7 @@ export default function SocialChallenges({ events }: SocialChallengesProps) {
                       <h3 className={`font-semibold text-sm ${challenge.color.text}`}>
                         {challenge.title}
                       </h3>
-                      <p className="text-xs text-white/60 mt-0.5">
+                      <p className="text-xs text-adaptive-muted mt-0.5">
                         {challenge.period === 'week' ? '📅 Diese Woche' : '📆 Dieser Monat'}
                       </p>
                     </div>
@@ -233,14 +233,14 @@ export default function SocialChallenges({ events }: SocialChallengesProps) {
                 </div>
 
                 {/* Description */}
-                <p className="text-sm text-white/70 mb-3">
+                <p className="text-sm text-adaptive mb-3">
                   {challenge.description}
                 </p>
 
                 {/* Progress Bar */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/60">Fortschritt</span>
+                    <span className="text-adaptive-muted">Fortschritt</span>
                     <span className={challenge.color.text}>
                       {challenge.current} / {challenge.target}
                     </span>
@@ -266,7 +266,7 @@ export default function SocialChallenges({ events }: SocialChallengesProps) {
           })}
         </div>
       ) : (
-        <div className="text-center py-8 text-white/60">
+        <div className="text-center py-8 text-adaptive-muted">
           <Award className="w-10 h-10 mx-auto mb-2 opacity-50 text-indigo-400" />
           <p className="text-indigo-300 font-medium">Alle Challenges abgeschlossen! 🎉</p>
           <p className="text-sm mt-1">Fantastische soziale Woche/Monat!</p>
@@ -274,7 +274,7 @@ export default function SocialChallenges({ events }: SocialChallengesProps) {
       )}
 
       {/* Footer */}
-      <div className="mt-4 text-center text-xs text-white/40">
+      <div className="mt-4 text-center text-xs text-adaptive-dim">
         💪 Tipp: Events tracken um Challenges abzuschließen und XP zu verdienen
       </div>
     </motion.div>

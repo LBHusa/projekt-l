@@ -29,7 +29,7 @@ export default function AttributesPanel({ attributes }: AttributesPanelProps) {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
     >
-      <h3 className="text-sm font-medium text-white/60 mb-4 uppercase tracking-wider">
+      <h3 className="text-sm font-medium text-adaptive-muted mb-4 uppercase tracking-wider">
         Attribute
       </h3>
 

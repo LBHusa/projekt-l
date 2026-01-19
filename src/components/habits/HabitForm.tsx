@@ -208,7 +208,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
           </h2>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -221,7 +221,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
             <button
               type="button"
               onClick={() => setShowTemplateSelector(true)}
-              className="w-full py-2.5 mb-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center gap-2 text-white/70"
+              className="w-full py-2.5 mb-4 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors flex items-center justify-center gap-2 text-adaptive"
             >
               <Sparkles className="w-4 h-4" />
               Aus Vorlage erstellen
@@ -263,7 +263,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                 className={`flex-1 py-2 px-3 rounded-lg border transition-all ${
                   formData.habit_type === 'positive'
                     ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 Positiv (aufbauen)
@@ -274,7 +274,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                 className={`flex-1 py-2 px-3 rounded-lg border transition-all ${
                   formData.habit_type === 'negative'
                     ? 'bg-red-500/20 border-red-500/50 text-red-400'
-                    : 'border-white/10 text-white/60 hover:bg-white/5'
+                    : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                 }`}
               >
                 Negativ (vermeiden)
@@ -308,7 +308,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-white/40 mt-1">
+                <p className="text-xs text-adaptive-dim mt-1">
                   Kategorisiere diese Aktivität für Zeit-Tracking Statistiken
                 </p>
               </div>
@@ -332,7 +332,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                     Beeinflusst Mental Stats
                   </span>
                 </label>
-                <p className="text-xs text-white/40 mt-1">
+                <p className="text-xs text-adaptive-dim mt-1">
                   Aktiviere dies wenn diese Aktivität Stress oder Fokus beeinflusst
                 </p>
               </div>
@@ -357,7 +357,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                       }))}
                       className="w-full accent-red-500"
                     />
-                    <div className="flex justify-between text-xs text-white/40 mt-1">
+                    <div className="flex justify-between text-xs text-adaptive-dim mt-1">
                       <span>Beruhigend (-10)</span>
                       <span>Stressig (+10)</span>
                     </div>
@@ -380,7 +380,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                       }))}
                       className="w-full accent-blue-500"
                     />
-                    <div className="flex justify-between text-xs text-white/40 mt-1">
+                    <div className="flex justify-between text-xs text-adaptive-dim mt-1">
                       <span>Ablenkend (-10)</span>
                       <span>Fokussierend (+10)</span>
                     </div>
@@ -456,7 +456,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                     className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
                       formData.target_days.includes(day.key)
                         ? 'bg-[var(--accent-primary)] text-white'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                     }`}
                   >
                     {day.label}
@@ -484,7 +484,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                     className={`py-2 px-2 rounded-lg text-xs transition-all ${
                       isSelected
                         ? 'bg-white/20 ring-1 ring-white/50'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                     }`}
                   >
                     {faction.icon} {faction.name}
@@ -496,7 +496,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
             {/* Weight Sliders (nur wenn Factions selected) */}
             {selectedFactions.size > 0 && (
               <div className="space-y-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                <div className="flex items-center justify-between text-xs text-white/60 mb-2">
+                <div className="flex items-center justify-between text-xs text-adaptive-muted mb-2">
                   <span>Gewichtung pro Bereich</span>
                   <span className={getTotalWeight() === 100 ? 'text-green-400' : 'text-red-400'}>
                     Gesamt: {getTotalWeight()}%
@@ -536,7 +536,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
               </div>
             )}
 
-            <p className="text-xs text-white/40 mt-2">
+            <p className="text-xs text-adaptive-dim mt-2">
               {selectedFactions.size === 0
                 ? 'Optional: Ordne den Habit einem oder mehreren Lebensbereichen zu'
                 : 'XP wird nach Gewichtung auf die Bereiche verteilt'}
@@ -558,7 +558,7 @@ export default function HabitForm({ habit, onSubmit, onCancel }: HabitFormProps)
                 onChange={e => setFormData(prev => ({ ...prev, xp_per_completion: parseInt(e.target.value) }))}
                 className="w-full accent-[var(--accent-primary)]"
               />
-              <div className="flex justify-between text-xs text-white/40 mt-1">
+              <div className="flex justify-between text-xs text-adaptive-dim mt-1">
                 <span>5 XP</span>
                 <span>50 XP</span>
               </div>

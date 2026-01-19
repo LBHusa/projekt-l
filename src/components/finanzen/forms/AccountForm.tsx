@@ -88,7 +88,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
           </h2>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,7 +121,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
                   className={`flex items-center gap-2 py-2 px-3 rounded-lg border text-sm transition-all ${
                     formData.account_type === type.value
                       ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
-                      : 'border-white/10 text-white/60 hover:bg-white/5'
+                      : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                   }`}
                 >
                   {type.icon}
@@ -249,7 +249,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
               onChange={e => setFormData(prev => ({ ...prev, is_excluded_from_net_worth: e.target.checked }))}
               className="w-4 h-4 rounded accent-emerald-500"
             />
-            <label htmlFor="exclude-networth" className="text-sm text-white/70">
+            <label htmlFor="exclude-networth" className="text-sm text-adaptive">
               Vom Gesamtvermogen ausschliessen (z.B. Notgroschen)
             </label>
           </div>

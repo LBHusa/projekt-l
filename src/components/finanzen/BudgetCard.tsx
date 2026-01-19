@@ -85,15 +85,15 @@ export default function BudgetCard({ budget, onClick }: BudgetCardProps) {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2 text-xs">
         <div>
-          <div className="text-white/40">Budgeted</div>
+          <div className="text-adaptive-dim">Budgeted</div>
           <div className="font-medium">{budget.budget}€</div>
         </div>
         <div>
-          <div className="text-white/40">Spent</div>
+          <div className="text-adaptive-dim">Spent</div>
           <div className={`font-medium ${status.color}`}>{budget.spent}€</div>
         </div>
         <div>
-          <div className="text-white/40">Remaining</div>
+          <div className="text-adaptive-dim">Remaining</div>
           <div className={`font-medium ${isOverBudget ? 'text-red-400' : ''}`}>
             {budget.remaining}€
           </div>
@@ -147,7 +147,7 @@ export function BudgetsList({
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <Wallet className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Budgets</p>
           <p className="text-sm mt-1">Erstelle dein erstes Budget!</p>

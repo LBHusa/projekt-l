@@ -83,7 +83,7 @@ export default function FactionSkillsSection({ factionId, factionColor }: Factio
 
   if (domains.length === 0) {
     return (
-      <div className="text-center py-8 text-white/40">
+      <div className="text-center py-8 text-adaptive-dim">
         <Sparkles className="w-10 h-10 mx-auto mb-2 opacity-50" />
         <p>Noch keine Skills in diesem Lebensbereich</p>
       </div>
@@ -103,7 +103,7 @@ export default function FactionSkillsSection({ factionId, factionColor }: Factio
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Sparkles className="w-5 h-5" style={{ color: factionColor }} />
           Zugehörige Skills
-          <span className="text-sm font-normal text-white/40">({totalSkills})</span>
+          <span className="text-sm font-normal text-adaptive-dim">({totalSkills})</span>
         </h2>
       </div>
 
@@ -121,11 +121,11 @@ export default function FactionSkillsSection({ factionId, factionColor }: Factio
               className="flex items-center gap-2 mb-3 group"
             >
               <span className="text-xl">{domain.icon}</span>
-              <span className="font-medium group-hover:text-white/80 transition-colors">
+              <span className="font-medium group-hover:text-adaptive transition-colors">
                 {domain.name}
               </span>
-              <span className="text-sm text-white/40">({domain.skills.length})</span>
-              <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+              <span className="text-sm text-adaptive-dim">({domain.skills.length})</span>
+              <ChevronRight className="w-4 h-4 text-adaptive-dim group-hover:text-adaptive-muted transition-colors" />
             </Link>
 
             {domain.skills.length > 0 ? (
@@ -142,7 +142,7 @@ export default function FactionSkillsSection({ factionId, factionColor }: Factio
                         {skill.name}
                       </span>
                     </div>
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-adaptive-dim">
                       Skill
                     </div>
                   </Link>
@@ -150,14 +150,14 @@ export default function FactionSkillsSection({ factionId, factionColor }: Factio
                 {domain.skills.length > 8 && (
                   <Link
                     href={`/domain/${domain.id}`}
-                    className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 flex items-center justify-center text-white/50 hover:text-white/70 transition-colors"
+                    className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg p-3 flex items-center justify-center text-adaptive-muted hover:text-adaptive transition-colors"
                   >
                     +{domain.skills.length - 8} weitere
                   </Link>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-white/30 italic">Noch keine Skills</p>
+              <p className="text-sm text-adaptive-dim italic">Noch keine Skills</p>
             )}
           </motion.div>
         ))}

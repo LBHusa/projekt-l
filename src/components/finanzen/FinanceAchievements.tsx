@@ -133,7 +133,7 @@ export function FinanceAchievements({ achievements, netWorth = 0 }: FinanceAchie
       {/* Locked - Show next few */}
       {lockedAchievements.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-white/40 mb-2">Nachste Ziele</h3>
+          <h3 className="text-sm font-medium text-adaptive-dim mb-2">Nachste Ziele</h3>
           <div className="flex flex-wrap gap-2">
             {lockedAchievements.slice(0, 6).map(a => (
               <div
@@ -141,15 +141,15 @@ export function FinanceAchievements({ achievements, netWorth = 0 }: FinanceAchie
                 className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2 opacity-50"
                 title={a.description}
               >
-                <Lock className="w-4 h-4 text-white/30" />
+                <Lock className="w-4 h-4 text-adaptive-dim" />
                 <div>
-                  <p className="text-sm text-white/50">{a.title}</p>
-                  <p className="text-xs text-white/30">+{a.xp_reward} XP</p>
+                  <p className="text-sm text-adaptive-muted">{a.title}</p>
+                  <p className="text-xs text-adaptive-dim">+{a.xp_reward} XP</p>
                 </div>
               </div>
             ))}
             {lockedAchievements.length > 6 && (
-              <div className="flex items-center text-xs text-white/30 px-2">
+              <div className="flex items-center text-xs text-adaptive-dim px-2">
                 +{lockedAchievements.length - 6} weitere
               </div>
             )}

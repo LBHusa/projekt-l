@@ -53,11 +53,11 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
               <Clock className="w-5 h-5 text-red-400" />
               Zeit loggen
             </h2>
-            <p className="text-sm text-white/50 mt-0.5">{habit.name}</p>
+            <p className="text-sm text-adaptive-muted mt-0.5">{habit.name}</p>
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
             </label>
             <div className="flex gap-3">
               <div className="flex-1">
-                <label className="block text-xs text-white/50 mb-1">Stunden</label>
+                <label className="block text-xs text-adaptive-muted mb-1">Stunden</label>
                 <input
                   type="number"
                   min="0"
@@ -83,9 +83,9 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
                   className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] text-center text-2xl font-bold"
                 />
               </div>
-              <div className="flex items-center text-2xl font-bold text-white/50 pt-6">:</div>
+              <div className="flex items-center text-2xl font-bold text-adaptive-muted pt-6">:</div>
               <div className="flex-1">
-                <label className="block text-xs text-white/50 mb-1">Minuten</label>
+                <label className="block text-xs text-adaptive-muted mb-1">Minuten</label>
                 <input
                   type="number"
                   min="0"
@@ -97,7 +97,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
                 />
               </div>
             </div>
-            <div className="mt-2 text-sm text-white/50 text-center">
+            <div className="mt-2 text-sm text-adaptive-muted text-center">
               Gesamt: <span className="font-medium text-white">{totalMinutes}</span> Minuten
             </div>
 
@@ -133,7 +133,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]"
               maxLength={100}
             />
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-adaptive-dim mt-1">
               Was hat diese Aktivität ausgelöst?
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
               className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] resize-none"
               maxLength={200}
             />
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-adaptive-dim mt-1">
               Wo/Wann ist es passiert?
             </p>
           </div>

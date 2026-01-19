@@ -42,7 +42,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
           <Calendar className="w-5 h-5 text-blue-400" />
           <h2 className="font-semibold">Trainingsplan</h2>
         </div>
-        <div className="text-center py-6 text-white/40">Laden...</div>
+        <div className="text-center py-6 text-adaptive-dim">Laden...</div>
       </div>
     );
   }
@@ -56,9 +56,9 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
         </div>
 
         <div className="text-center py-8">
-          <Calendar className="w-12 h-12 mx-auto mb-3 text-white/20" />
-          <p className="text-white/60 mb-1">Kein aktiver Trainingsplan</p>
-          <p className="text-sm text-white/40 mb-4">
+          <Calendar className="w-12 h-12 mx-auto mb-3 text-adaptive-dim" />
+          <p className="text-adaptive-muted mb-1">Kein aktiver Trainingsplan</p>
+          <p className="text-sm text-adaptive-dim mb-4">
             Erstelle einen Plan oder wähle ein Template
           </p>
           <button
@@ -96,7 +96,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
         </div>
         <button
           onClick={onCreatePlan}
-          className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+          className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
         >
           <Edit2 className="w-4 h-4" />
         </button>
@@ -110,7 +110,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
             <div key={idx} className="font-medium">
               {workout.name}
               {workout.duration && (
-                <span className="text-sm text-white/50 ml-2">
+                <span className="text-sm text-adaptive-muted ml-2">
                   {workout.duration} Min
                 </span>
               )}
@@ -134,7 +134,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
             >
               <div
                 className={`text-xs font-medium w-6 pt-1 ${
-                  isToday ? 'text-blue-400' : 'text-white/50'
+                  isToday ? 'text-blue-400' : 'text-adaptive-muted'
                 }`}
               >
                 {DAY_OF_WEEK_CONFIG[dayKey].short}
@@ -145,11 +145,11 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
                   <div className="space-y-1">
                     {dayWorkouts.map((workout, idx) => (
                       <div key={idx} className="text-sm">
-                        <span className={isToday ? 'text-white' : 'text-white/70'}>
+                        <span className={isToday ? 'text-white' : 'text-adaptive'}>
                           {workout.name}
                         </span>
                         {workout.duration && (
-                          <span className="text-xs text-white/40 ml-2">
+                          <span className="text-xs text-adaptive-dim ml-2">
                             {workout.duration}min
                           </span>
                         )}
@@ -157,7 +157,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
                     ))}
                   </div>
                 ) : (
-                  <span className="text-xs text-white/30">Ruhetag</span>
+                  <span className="text-xs text-adaptive-dim">Ruhetag</span>
                 )}
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function TrainingPlanCard({ onCreatePlan }: TrainingPlanCardProps
 
       {plan.description && (
         <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-white/50">{plan.description}</p>
+          <p className="text-xs text-adaptive-muted">{plan.description}</p>
         </div>
       )}
     </div>

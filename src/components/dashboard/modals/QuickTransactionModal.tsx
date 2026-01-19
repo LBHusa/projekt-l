@@ -113,11 +113,11 @@ export default function QuickTransactionModal({
     return (
       <Modal isOpen={isOpen} onClose={onClose} title="Transaktion" size="md">
         <div className="text-center py-8">
-          <DollarSign className="w-12 h-12 mx-auto mb-4 text-white/40" />
+          <DollarSign className="w-12 h-12 mx-auto mb-4 text-adaptive-dim" />
           <h3 className="text-lg font-semibold text-white mb-2">
             Kein Konto vorhanden
           </h3>
-          <p className="text-white/60 mb-4">
+          <p className="text-adaptive-muted mb-4">
             Du hast noch keine Konten eingerichtet. Erstelle zuerst ein Konto.
           </p>
           <Link href="/finanzen">
@@ -135,7 +135,7 @@ export default function QuickTransactionModal({
       <div className="space-y-4">
         {/* Transaction Type Toggle */}
         <div className="space-y-2">
-          <label className="text-sm text-white/80 font-medium block">
+          <label className="text-sm text-adaptive font-medium block">
             Typ
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -147,7 +147,7 @@ export default function QuickTransactionModal({
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition ${
                 transactionType === 'income'
                   ? 'bg-green-500/20 border-green-500 text-green-400'
-                  : 'bg-white/5 border-[var(--orb-border)] text-white/60 hover:bg-white/10'
+                  : 'bg-white/5 border-[var(--orb-border)] text-adaptive-muted hover:bg-white/10'
               }`}
             >
               <TrendingUp className="w-5 h-5" />
@@ -161,7 +161,7 @@ export default function QuickTransactionModal({
               className={`flex items-center justify-center gap-2 p-3 rounded-lg border transition ${
                 transactionType === 'expense'
                   ? 'bg-red-500/20 border-red-500 text-red-400'
-                  : 'bg-white/5 border-[var(--orb-border)] text-white/60 hover:bg-white/10'
+                  : 'bg-white/5 border-[var(--orb-border)] text-adaptive-muted hover:bg-white/10'
               }`}
             >
               <TrendingDown className="w-5 h-5" />
@@ -174,7 +174,7 @@ export default function QuickTransactionModal({
         <div className="space-y-2">
           <label
             htmlFor="account"
-            className="text-sm text-white/80 font-medium block"
+            className="text-sm text-adaptive font-medium block"
           >
             Konto
           </label>
@@ -196,7 +196,7 @@ export default function QuickTransactionModal({
         <div className="space-y-2">
           <label
             htmlFor="amount"
-            className="text-sm text-white/80 font-medium block"
+            className="text-sm text-adaptive font-medium block"
           >
             Betrag
           </label>
@@ -211,9 +211,9 @@ export default function QuickTransactionModal({
               step="0.01"
               min="0"
               autoFocus
-              className="w-full px-3 py-2 pr-8 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white text-2xl font-semibold placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="w-full px-3 py-2 pr-8 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white text-2xl font-semibold placeholder:text-adaptive-dim focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 text-lg">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-adaptive-muted text-lg">
               €
             </span>
           </div>
@@ -221,7 +221,7 @@ export default function QuickTransactionModal({
 
         {/* Category Grid */}
         <div className="space-y-2">
-          <label className="text-sm text-white/80 font-medium block">
+          <label className="text-sm text-adaptive font-medium block">
             Kategorie
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -236,7 +236,7 @@ export default function QuickTransactionModal({
                 }`}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <span className="text-xs text-white/80">{cat.name}</span>
+                <span className="text-xs text-adaptive">{cat.name}</span>
               </button>
             ))}
           </div>
@@ -246,7 +246,7 @@ export default function QuickTransactionModal({
         <div className="space-y-2">
           <label
             htmlFor="description"
-            className="text-sm text-white/80 font-medium block"
+            className="text-sm text-adaptive font-medium block"
           >
             Beschreibung (optional)
           </label>
@@ -256,7 +256,7 @@ export default function QuickTransactionModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="z.B. Einkauf bei Rewe"
-            className="w-full px-3 py-2 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full px-3 py-2 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white placeholder:text-adaptive-dim focus:outline-none focus:ring-2 focus:ring-purple-500/50"
           />
         </div>
 

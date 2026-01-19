@@ -69,7 +69,7 @@ export default function ProjectTimeCard({
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-lg truncate">{project.name}</h3>
             {project.description && (
-              <p className="text-sm text-white/60 mt-0.5 line-clamp-1">
+              <p className="text-sm text-adaptive-muted mt-0.5 line-clamp-1">
                 {project.description}
               </p>
             )}
@@ -95,9 +95,9 @@ export default function ProjectTimeCard({
           />
         </div>
         <div className="flex items-center justify-between mt-1.5">
-          <span className="text-xs text-white/60">{project.progress}% Complete</span>
+          <span className="text-xs text-adaptive-muted">{project.progress}% Complete</span>
           {project.started_at && (
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-adaptive-dim">
               Started {new Date(project.started_at).toLocaleDateString('de-DE', {
                 day: '2-digit',
                 month: '2-digit',
@@ -110,10 +110,10 @@ export default function ProjectTimeCard({
 
       {/* Stats Row */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 text-sm text-white/80">
+        <div className="flex items-center gap-2 text-sm text-adaptive">
           <Clock className="w-4 h-4 text-purple-400" />
           <span className="font-medium">{(project.total_hours || 0).toFixed(1)}h</span>
-          <span className="text-white/40">total</span>
+          <span className="text-adaptive-dim">total</span>
         </div>
 
         {/* Status Badge */}

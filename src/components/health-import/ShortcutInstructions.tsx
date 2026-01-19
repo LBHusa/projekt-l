@@ -107,7 +107,7 @@ export default function ShortcutInstructions() {
         {/* QR Code Toggle */}
         <button
           onClick={() => setShowQR(!showQR)}
-          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-white/5 text-white/80 font-medium hover:bg-white/10 transition-colors"
+          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 transition-colors"
         >
           <QrCode className="w-4 h-4" />
           {showQR ? 'QR-Code ausblenden' : 'QR-Code anzeigen'}

@@ -31,7 +31,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
           <Wallet className="w-5 h-5 text-blue-400" />
           <h2 className="font-semibold">Cashflow</h2>
           {month && (
-            <span className="text-sm text-white/40">
+            <span className="text-sm text-adaptive-dim">
               {new Date(month + '-01').toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
             </span>
           )}
@@ -46,7 +46,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <ArrowUpCircle className="w-4 h-4 text-green-400" />
-            <span className="text-xs text-white/50">Einnahmen</span>
+            <span className="text-xs text-adaptive-muted">Einnahmen</span>
           </div>
           <p className="text-xl font-bold text-green-400">{formatCurrency(cashflow.income)}</p>
         </div>
@@ -55,7 +55,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDownCircle className="w-4 h-4 text-red-400" />
-            <span className="text-xs text-white/50">Ausgaben</span>
+            <span className="text-xs text-adaptive-muted">Ausgaben</span>
           </div>
           <p className="text-xl font-bold text-red-400">{formatCurrency(cashflow.expenses)}</p>
         </div>
@@ -64,7 +64,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-4 h-4 text-blue-400" />
-            <span className="text-xs text-white/50">Gespart</span>
+            <span className="text-xs text-adaptive-muted">Gespart</span>
           </div>
           <p className="text-xl font-bold text-blue-400">{formatCurrency(cashflow.savings)}</p>
         </div>
@@ -73,7 +73,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
         <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-purple-400" />
-            <span className="text-xs text-white/50">Investiert</span>
+            <span className="text-xs text-adaptive-muted">Investiert</span>
           </div>
           <p className="text-xl font-bold text-purple-400">{formatCurrency(cashflow.investments)}</p>
         </div>
@@ -82,7 +82,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
       {/* Savings Rate Bar */}
       <div className="mt-4 pt-4 border-t border-white/10">
         <div className="flex items-center justify-between text-sm mb-2">
-          <span className="text-white/50">Sparrate</span>
+          <span className="text-adaptive-muted">Sparrate</span>
           <span className={`font-medium ${Number(savingsRate) >= 20 ? 'text-green-400' : Number(savingsRate) >= 10 ? 'text-yellow-400' : 'text-red-400'}`}>
             {savingsRate}%
           </span>
@@ -93,7 +93,7 @@ export function CashflowSummary({ cashflow, month }: CashflowSummaryProps) {
             style={{ width: `${Math.min(100, Number(savingsRate))}%` }}
           />
         </div>
-        <p className="text-xs text-white/30 mt-1">
+        <p className="text-xs text-adaptive-dim mt-1">
           {Number(savingsRate) >= 20
             ? 'Exzellent! Uber 20% Sparrate'
             : Number(savingsRate) >= 10

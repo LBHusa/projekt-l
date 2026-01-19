@@ -250,7 +250,7 @@ function RelationshipGraphInner({
   if (filteredContacts.length === 0) {
     return (
       <div className="w-full h-[500px] bg-[var(--background)] rounded-xl border border-[var(--orb-border)] flex items-center justify-center">
-        <p className="text-white/40">Keine Kontakte vorhanden</p>
+        <p className="text-adaptive-dim">Keine Kontakte vorhanden</p>
       </div>
     );
   }
@@ -293,14 +293,14 @@ function RelationshipGraphInner({
         {/* Legend Panel */}
         <Panel position="bottom-left" className="bg-black/50 backdrop-blur-sm rounded-lg p-3 text-xs">
           <div className="flex flex-col gap-1.5">
-            <p className="text-white/60 font-medium mb-1">Kategorien</p>
+            <p className="text-adaptive-muted font-medium mb-1">Kategorien</p>
             {Object.entries(CATEGORY_META).map(([key, meta]) => (
               <div key={key} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: categoryColors[key as RelationshipCategory] }}
                 />
-                <span className="text-white/60">{meta.labelDe}</span>
+                <span className="text-adaptive-muted">{meta.labelDe}</span>
               </div>
             ))}
           </div>

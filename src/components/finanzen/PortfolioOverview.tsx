@@ -51,8 +51,8 @@ export function PortfolioOverview({ investments }: PortfolioOverviewProps) {
             <Briefcase className="w-6 h-6 text-purple-400" />
           </div>
           <div>
-            <p className="text-sm text-white/50">Portfolio</p>
-            <p className="text-white/40">Noch keine Investments</p>
+            <p className="text-sm text-adaptive-muted">Portfolio</p>
+            <p className="text-adaptive-dim">Noch keine Investments</p>
           </div>
         </div>
       </div>
@@ -67,14 +67,14 @@ export function PortfolioOverview({ investments }: PortfolioOverviewProps) {
             <Briefcase className="w-6 h-6 text-purple-400" />
           </div>
           <div>
-            <p className="text-sm text-white/50">Portfolio Gesamtwert</p>
+            <p className="text-sm text-adaptive-muted">Portfolio Gesamtwert</p>
             <p className="text-3xl font-bold text-purple-400">
               {formatCurrency(totalValue)}
             </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs text-white/40">Investment Level</p>
+          <p className="text-xs text-adaptive-dim">Investment Level</p>
           <p className="text-2xl font-bold text-purple-300">Lvl {investmentLevel}</p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export function PortfolioOverview({ investments }: PortfolioOverviewProps) {
         <span className="text-sm font-semibold">
           {formatCurrency(totalReturn)} ({formatPercent(totalReturnPercent)})
         </span>
-        <span className="text-xs text-white/40">Gesamt</span>
+        <span className="text-xs text-adaptive-dim">Gesamt</span>
       </div>
 
       {/* Stats Grid */}
@@ -98,13 +98,13 @@ export function PortfolioOverview({ investments }: PortfolioOverviewProps) {
           <p className="text-lg font-semibold text-blue-400">
             {formatCurrency(totalCost)}
           </p>
-          <p className="text-xs text-white/40">Investiert</p>
+          <p className="text-xs text-adaptive-dim">Investiert</p>
         </div>
         <div className="text-center">
           <p className="text-lg font-semibold text-purple-400">
             {investments.length}
           </p>
-          <p className="text-xs text-white/40">Positionen</p>
+          <p className="text-xs text-adaptive-dim">Positionen</p>
         </div>
       </div>
     </div>

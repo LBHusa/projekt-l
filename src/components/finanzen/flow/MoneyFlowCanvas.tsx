@@ -436,7 +436,7 @@ function MoneyFlowCanvasInner({
   if (nodes.length === 0) {
     return (
       <div className="w-full h-[500px] bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] flex flex-col items-center justify-center gap-4">
-        <p className="text-white/40">Keine Finanzdaten vorhanden</p>
+        <p className="text-adaptive-dim">Keine Finanzdaten vorhanden</p>
         {hasActions && (
           <div className="flex gap-2">
             {onAddAccount && (
@@ -547,7 +547,7 @@ function MoneyFlowCanvasInner({
             className={`p-2 rounded-lg border transition-colors ${
               direction === 'TB'
                 ? 'bg-white/20 border-white/40 text-white'
-                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-white/50 hover:text-white'
+                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-adaptive-muted hover:text-white'
             }`}
             title="Vertikal"
           >
@@ -558,7 +558,7 @@ function MoneyFlowCanvasInner({
             className={`p-2 rounded-lg border transition-colors ${
               direction === 'LR'
                 ? 'bg-white/20 border-white/40 text-white'
-                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-white/50 hover:text-white'
+                : 'bg-[var(--background-secondary)] border-[var(--orb-border)] text-adaptive-muted hover:text-white'
             }`}
             title="Horizontal"
           >
@@ -571,23 +571,23 @@ function MoneyFlowCanvasInner({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-white/60">Einnahmen</span>
+              <span className="text-adaptive-muted">Einnahmen</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              <span className="text-white/60">Konten</span>
+              <span className="text-adaptive-muted">Konten</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500" />
-              <span className="text-white/60">Ausgaben</span>
+              <span className="text-adaptive-muted">Ausgaben</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-purple-500" />
-              <span className="text-white/60">Sparziele</span>
+              <span className="text-adaptive-muted">Sparziele</span>
             </div>
             <div className="flex items-center gap-2 mt-1 pt-1 border-t border-white/10">
               <div className="w-3 h-0.5 bg-white/60" style={{ borderBottom: '2px dashed' }} />
-              <span className="text-white/60">Dauerauftrag</span>
+              <span className="text-adaptive-muted">Dauerauftrag</span>
             </div>
           </div>
         </Panel>

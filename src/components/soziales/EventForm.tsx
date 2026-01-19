@@ -173,7 +173,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
 
           {/* Title */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Titel *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Titel *</label>
             <input
               type="text"
               value={formData.title}
@@ -187,7 +187,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
           {/* Event Type & Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Event-Typ</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Event-Typ</label>
               <select
                 value={formData.event_type || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, event_type: e.target.value as SocialEventType || null }))}
@@ -201,7 +201,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
               </select>
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Datum/Zeit *</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Datum/Zeit *</label>
               <input
                 type="datetime-local"
                 value={formData.occurred_at}
@@ -215,7 +215,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
           {/* Location & Duration */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Ort</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Ort</label>
               <input
                 type="text"
                 value={formData.location || ''}
@@ -225,7 +225,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Dauer (Min.)</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Dauer (Min.)</label>
               <input
                 type="number"
                 min={0}
@@ -240,7 +240,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
 
           {/* Description */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Beschreibung</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Beschreibung</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value || null }))}
@@ -252,7 +252,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
 
           {/* Participants */}
           <div>
-            <label className="block text-sm text-white/60 mb-2">
+            <label className="block text-sm text-adaptive-muted mb-2">
               Teilnehmer ({selectedParticipants.size} ausgewählt)
             </label>
             <div className="bg-white/5 rounded-lg p-3 max-h-48 overflow-y-auto">
@@ -301,7 +301,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
               )}
 
               {contacts.length === 0 && (
-                <div className="text-center text-white/30 text-sm py-4">
+                <div className="text-center text-adaptive-dim text-sm py-4">
                   Keine Kontakte vorhanden
                 </div>
               )}
@@ -310,7 +310,7 @@ export default function EventForm({ event, contacts, isOpen, onClose, onSubmit }
 
           {/* Notes */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Notizen</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Notizen</label>
             <textarea
               value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value || null }))}

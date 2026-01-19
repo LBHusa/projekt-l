@@ -113,13 +113,13 @@ export default function MoodLogModal({
             {/* Existing Mood Notice */}
             {existingMood && (
               <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
-                <p className="text-sm text-white/80">
+                <p className="text-sm text-adaptive">
                   Bereits geloggt:{' '}
                   <span className="font-semibold">
                     {getMoodEmoji(existingMood)} {getMoodLabel(existingMood)}
                   </span>
                 </p>
-                <p className="text-xs text-white/60 mt-1">
+                <p className="text-xs text-adaptive-muted mt-1">
                   Möchtest du deine Stimmung aktualisieren?
                 </p>
               </div>
@@ -127,7 +127,7 @@ export default function MoodLogModal({
 
             {/* Mood Buttons */}
             <div className="space-y-2">
-              <label className="text-sm text-white/80 font-medium block">
+              <label className="text-sm text-adaptive font-medium block">
                 Wie fühlst du dich?
               </label>
               <div className="flex flex-col gap-2">
@@ -159,7 +159,7 @@ export default function MoodLogModal({
             <div className="space-y-2">
               <label
                 htmlFor="mood-note"
-                className="text-sm text-white/80 font-medium block"
+                className="text-sm text-adaptive font-medium block"
               >
                 Wie fühlst du dich? (optional)
               </label>
@@ -170,9 +170,9 @@ export default function MoodLogModal({
                 maxLength={200}
                 rows={3}
                 placeholder="Notiere deine Gedanken..."
-                className="w-full px-3 py-2 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
+                className="w-full px-3 py-2 bg-white/5 border border-[var(--orb-border)] rounded-lg text-white placeholder:text-adaptive-dim focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
               />
-              <div className="text-xs text-white/40 text-right">
+              <div className="text-xs text-adaptive-dim text-right">
                 {note.length}/200
               </div>
             </div>

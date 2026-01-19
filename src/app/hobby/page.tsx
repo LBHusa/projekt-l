@@ -145,7 +145,7 @@ export default function HobbysPage() {
           <div className="w-16 h-16 rounded-full bg-purple-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <Gamepad2 className="w-8 h-8 text-purple-400" />
           </div>
-          <p className="text-white/50">Lade Hobby-Daten...</p>
+          <p className="text-adaptive-muted">Lade Hobby-Daten...</p>
         </div>
       </div>
     );
@@ -201,19 +201,19 @@ export default function HobbysPage() {
         >
           <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-green-400">{stats.activeProjects}</div>
-            <div className="text-sm text-white/50">Aktive Projekte</div>
+            <div className="text-sm text-adaptive-muted">Aktive Projekte</div>
           </div>
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">{stats.completedProjects}</div>
-            <div className="text-sm text-white/50">Abgeschlossen</div>
+            <div className="text-sm text-adaptive-muted">Abgeschlossen</div>
           </div>
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-purple-400">{Math.round(stats.totalHours)}</div>
-            <div className="text-sm text-white/50">Stunden gesamt</div>
+            <div className="text-sm text-adaptive-muted">Stunden gesamt</div>
           </div>
           <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-cyan-400">{stats.hoursThisWeek}</div>
-            <div className="text-sm text-white/50">Std diese Woche</div>
+            <div className="text-sm text-adaptive-muted">Std diese Woche</div>
           </div>
         </motion.div>
 
@@ -251,7 +251,7 @@ export default function HobbysPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <Gamepad2 className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Noch keine Hobby-Projekte</p>
               <p className="text-sm mt-1">Starte dein erstes Projekt!</p>
@@ -285,22 +285,22 @@ export default function HobbysPage() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="bg-white/5 rounded-lg p-3 text-center">
               <div className="text-lg font-bold text-cyan-400">{stats.hoursThisWeek}h</div>
-              <div className="text-xs text-white/40">Diese Woche</div>
+              <div className="text-xs text-adaptive-dim">Diese Woche</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center">
               <div className="text-lg font-bold text-purple-400">{stats.hoursThisMonth}h</div>
-              <div className="text-xs text-white/40">Dieser Monat</div>
+              <div className="text-xs text-adaptive-dim">Dieser Monat</div>
             </div>
             <div className="bg-white/5 rounded-lg p-3 text-center">
-              <div className="text-lg font-bold text-white/80">{Math.round(stats.totalHours)}h</div>
-              <div className="text-xs text-white/40">Gesamt</div>
+              <div className="text-lg font-bold text-adaptive">{Math.round(stats.totalHours)}h</div>
+              <div className="text-xs text-adaptive-dim">Gesamt</div>
             </div>
           </div>
 
           {/* Recent Time Logs */}
           {recentLogs.length > 0 ? (
             <div className="space-y-2">
-              <h3 className="text-sm text-white/50 mb-2">Letzte Einträge</h3>
+              <h3 className="text-sm text-adaptive-muted mb-2">Letzte Einträge</h3>
               {recentLogs.map((log) => (
                 <div key={log.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
                   <div className="flex items-center gap-2">
@@ -308,7 +308,7 @@ export default function HobbysPage() {
                     <div>
                       <div className="text-sm">{log.project?.name || 'Unbekanntes Projekt'}</div>
                       {log.notes && (
-                        <div className="text-xs text-white/40 line-clamp-1">{log.notes}</div>
+                        <div className="text-xs text-adaptive-dim line-clamp-1">{log.notes}</div>
                       )}
                     </div>
                   </div>
@@ -316,7 +316,7 @@ export default function HobbysPage() {
                     <div className="text-sm font-medium text-cyan-400">
                       {formatDuration(log.duration_minutes)}
                     </div>
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-adaptive-dim">
                       {formatTimeAgo(log.logged_at)}
                     </div>
                   </div>
@@ -324,7 +324,7 @@ export default function HobbysPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-4 text-white/40">
+            <div className="text-center py-4 text-adaptive-dim">
               <p className="text-sm">Noch keine Zeit geloggt</p>
               <p className="text-xs mt-1">Logge Zeit für deine aktiven Projekte</p>
             </div>

@@ -26,7 +26,7 @@ export default function PersonalRecordsCard() {
           <Trophy className="w-5 h-5 text-yellow-400" />
           <h2 className="font-semibold">Personal Records</h2>
         </div>
-        <div className="text-center py-6 text-white/40">Laden...</div>
+        <div className="text-center py-6 text-adaptive-dim">Laden...</div>
       </div>
     );
   }
@@ -38,7 +38,7 @@ export default function PersonalRecordsCard() {
           <Trophy className="w-5 h-5 text-yellow-400" />
           <h2 className="font-semibold">Personal Records</h2>
         </div>
-        <div className="text-center py-6 text-white/40">
+        <div className="text-center py-6 text-adaptive-dim">
           <Trophy className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine PRs</p>
           <p className="text-sm mt-1">Deine besten Leistungen erscheinen hier</p>
@@ -82,13 +82,13 @@ export default function PersonalRecordsCard() {
                   <div className="text-xl font-bold text-yellow-400">
                     {pr.max_weight} kg
                   </div>
-                  <div className="text-xs text-white/40">
+                  <div className="text-xs text-adaptive-dim">
                     {pr.reps_at_max} Wdh.
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2 text-xs text-white/30">
+              <div className="mt-2 text-xs text-adaptive-dim">
                 Erreicht: {new Date(pr.achieved_at).toLocaleDateString('de-DE', {
                   day: '2-digit',
                   month: 'short',
@@ -101,7 +101,7 @@ export default function PersonalRecordsCard() {
       </div>
 
       {prs.length > 5 && (
-        <div className="mt-3 text-center text-sm text-white/40">
+        <div className="mt-3 text-center text-sm text-adaptive-dim">
           +{prs.length - 5} weitere PRs
         </div>
       )}

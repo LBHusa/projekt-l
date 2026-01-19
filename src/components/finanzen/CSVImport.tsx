@@ -261,9 +261,9 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
             <div className="text-center py-8">
               <label className="block cursor-pointer">
                 <div className="border-2 border-dashed border-white/20 hover:border-blue-500/50 rounded-xl p-8 transition-colors">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-white/30" />
-                  <p className="text-white/70 mb-2">CSV-Datei hier ablegen oder klicken</p>
-                  <p className="text-xs text-white/40">Unterstutzt: Deutsche Bankformate (DKB, Sparkasse, etc.)</p>
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-adaptive-dim" />
+                  <p className="text-adaptive mb-2">CSV-Datei hier ablegen oder klicken</p>
+                  <p className="text-xs text-adaptive-dim">Unterstutzt: Deutsche Bankformate (DKB, Sparkasse, etc.)</p>
                 </div>
                 <input
                   type="file"
@@ -275,7 +275,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
 
               <div className="mt-6 text-left bg-white/5 rounded-lg p-4">
                 <h3 className="text-sm font-medium mb-2">Tipps fur den Import:</h3>
-                <ul className="text-xs text-white/50 space-y-1">
+                <ul className="text-xs text-adaptive-muted space-y-1">
                   <li>Exportiere Transaktionen als CSV aus deiner Banking-App</li>
                   <li>Die Datei sollte Spalten fur Datum, Beschreibung und Betrag enthalten</li>
                   <li>Kategorien werden automatisch erkannt</li>
@@ -290,7 +290,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="font-medium">{file?.name}</p>
-                  <p className="text-sm text-white/50">{parsedTransactions.length} Transaktionen gefunden</p>
+                  <p className="text-sm text-adaptive-muted">{parsedTransactions.length} Transaktionen gefunden</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-green-400">
@@ -308,7 +308,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
                     <div className={`w-2 h-2 rounded-full ${tx.isIncome ? 'bg-green-500' : 'bg-red-500'}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm truncate">{tx.description}</p>
-                      <div className="flex items-center gap-2 text-xs text-white/40">
+                      <div className="flex items-center gap-2 text-xs text-adaptive-dim">
                         <span>{tx.date}</span>
                         {tx.category && (
                           <>
@@ -324,7 +324,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
                   </div>
                 ))}
                 {parsedTransactions.length > 20 && (
-                  <p className="text-center text-sm text-white/40 py-2">
+                  <p className="text-center text-sm text-adaptive-dim py-2">
                     ... und {parsedTransactions.length - 20} weitere
                   </p>
                 )}
@@ -335,14 +335,14 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
           {step === 'importing' && (
             <div className="text-center py-8">
               <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-400 animate-spin" />
-              <p className="text-white/70 mb-4">Importiere Transaktionen...</p>
+              <p className="text-adaptive mb-4">Importiere Transaktionen...</p>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-500 rounded-full transition-all"
                   style={{ width: `${importProgress}%` }}
                 />
               </div>
-              <p className="text-sm text-white/40 mt-2">{importProgress}%</p>
+              <p className="text-sm text-adaptive-dim mt-2">{importProgress}%</p>
             </div>
           )}
 
@@ -350,7 +350,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
             <div className="text-center py-8">
               <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
               <p className="text-lg font-medium text-green-400 mb-2">Import erfolgreich!</p>
-              <p className="text-white/50">
+              <p className="text-adaptive-muted">
                 {parsedTransactions.length} Transaktionen wurden importiert
               </p>
             </div>
@@ -363,7 +363,7 @@ export function CSVImport({ accountId, onImport, onClose }: CSVImportProps) {
             <>
               <button
                 onClick={() => { setStep('upload'); setFile(null); setParsedTransactions([]); }}
-                className="px-4 py-2 text-sm text-white/60 hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-adaptive-muted hover:text-white transition-colors"
               >
                 Andere Datei
               </button>

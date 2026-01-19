@@ -71,11 +71,11 @@ export default function InteractionForm({
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div>
             <h2 className="text-lg font-semibold text-white">Neue Interaktion</h2>
-            <p className="text-sm text-white/60">mit {getDisplayName(contact)}</p>
+            <p className="text-sm text-adaptive-muted">mit {getDisplayName(contact)}</p>
           </div>
           <button
             onClick={onCancel}
-            className="p-1 text-white/40 hover:text-white transition-colors"
+            className="p-1 text-adaptive-dim hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -85,7 +85,7 @@ export default function InteractionForm({
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Interaktionstyp */}
           <div>
-            <label className="text-sm text-white/60 block mb-2">Art der Interaktion</label>
+            <label className="text-sm text-adaptive-muted block mb-2">Art der Interaktion</label>
             <div className="grid grid-cols-5 gap-2">
               {(Object.entries(INTERACTION_TYPE_META) as [InteractionType, typeof INTERACTION_TYPE_META[InteractionType]][]).map(
                 ([type, meta]) => (
@@ -101,7 +101,7 @@ export default function InteractionForm({
                     title={meta.labelDe}
                   >
                     <span className="text-xl">{meta.icon}</span>
-                    <span className="text-[10px] text-white/60 truncate w-full text-center">
+                    <span className="text-[10px] text-adaptive-muted truncate w-full text-center">
                       {meta.labelDe}
                     </span>
                   </button>
@@ -112,7 +112,7 @@ export default function InteractionForm({
 
           {/* Qualität */}
           <div>
-            <label className="text-sm text-white/60 block mb-2">Qualität</label>
+            <label className="text-sm text-adaptive-muted block mb-2">Qualität</label>
             <div className="flex gap-2">
               {(Object.entries(QUALITY_META) as [InteractionQuality, typeof QUALITY_META[InteractionQuality]][]).map(
                 ([quality, meta]) => (
@@ -123,7 +123,7 @@ export default function InteractionForm({
                     className={`flex-1 py-2 rounded-lg text-sm transition-colors ${
                       formData.quality === quality
                         ? 'text-white'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                     }`}
                     style={{
                       backgroundColor:
@@ -141,7 +141,7 @@ export default function InteractionForm({
 
           {/* Dauer */}
           <div>
-            <label className="text-sm text-white/60 block mb-2">
+            <label className="text-sm text-adaptive-muted block mb-2">
               <Clock className="w-3 h-3 inline mr-1" />
               Dauer (Minuten)
             </label>
@@ -181,7 +181,7 @@ export default function InteractionForm({
 
           {/* Ort */}
           <div>
-            <label className="text-sm text-white/60 block mb-2">
+            <label className="text-sm text-adaptive-muted block mb-2">
               <MapPin className="w-3 h-3 inline mr-1" />
               Ort (optional)
             </label>
@@ -196,7 +196,7 @@ export default function InteractionForm({
 
           {/* XP Preview */}
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-3 flex items-center justify-between">
-            <span className="text-white/60 text-sm">XP-Gewinn</span>
+            <span className="text-adaptive-muted text-sm">XP-Gewinn</span>
             <span className="text-xl font-bold text-purple-400">+{previewXp} XP</span>
           </div>
 
@@ -205,7 +205,7 @@ export default function InteractionForm({
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors"
+              className="flex-1 py-2 rounded-lg bg-white/5 text-adaptive-muted hover:bg-white/10 transition-colors"
             >
               Abbrechen
             </button>

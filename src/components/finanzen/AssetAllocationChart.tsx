@@ -66,7 +66,7 @@ export function AssetAllocationChart({ investments }: AssetAllocationChartProps)
           <p className="text-lg font-bold text-purple-400">
             {formatCurrency(data.value)}
           </p>
-          <p className="text-xs text-white/60 mt-1">
+          <p className="text-xs text-adaptive-muted mt-1">
             {percent.toFixed(1)}% des Portfolios
           </p>
         </div>
@@ -101,7 +101,7 @@ export function AssetAllocationChart({ investments }: AssetAllocationChartProps)
     return (
       <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-6">
         <h3 className="text-lg font-semibold mb-4">Asset Allocation</h3>
-        <div className="flex items-center justify-center h-64 text-white/40">
+        <div className="flex items-center justify-center h-64 text-adaptive-dim">
           Keine Investments vorhanden
         </div>
       </div>
@@ -135,7 +135,7 @@ export function AssetAllocationChart({ investments }: AssetAllocationChartProps)
           <Legend
             verticalAlign="bottom"
             height={36}
-            formatter={(value) => <span className="text-sm text-white/70">{value}</span>}
+            formatter={(value) => <span className="text-sm text-adaptive">{value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -152,8 +152,8 @@ export function AssetAllocationChart({ investments }: AssetAllocationChartProps)
                   style={{ backgroundColor: ASSET_TYPE_COLORS[item.type as AssetType | 'other'] }}
                 />
                 <div className="flex-1">
-                  <p className="text-xs text-white/40">{item.name}</p>
-                  <p className="text-sm font-semibold text-white/80">{percent.toFixed(1)}%</p>
+                  <p className="text-xs text-adaptive-dim">{item.name}</p>
+                  <p className="text-sm font-semibold text-adaptive">{percent.toFixed(1)}%</p>
                 </div>
               </div>
             );

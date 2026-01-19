@@ -55,8 +55,8 @@ export default function QuickActionsWidget({
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <Target className="w-5 h-5 text-white/60" />
-        <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+        <Target className="w-5 h-5 text-adaptive-muted" />
+        <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
           Schnellaktionen
         </h3>
       </div>

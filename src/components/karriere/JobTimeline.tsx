@@ -68,7 +68,7 @@ export default function JobTimeline({
 
       {/* Timeline */}
       {jobs.length === 0 ? (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <Briefcase className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Jobs eingetragen</p>
           {onAddJob && (
@@ -123,17 +123,17 @@ export default function JobTimeline({
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-white/60">
+                      <div className="flex items-center gap-2 text-sm text-adaptive-muted">
                         <Building2 className="w-4 h-4" />
                         <span>{job.company}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-white/50 flex items-center gap-1">
+                      <div className="text-sm text-adaptive-muted flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatDate(job.start_date)} - {job.end_date ? formatDate(job.end_date) : 'Heute'}
                       </div>
-                      <div className="text-xs text-white/30 mt-1">
+                      <div className="text-xs text-adaptive-dim mt-1">
                         {calculateDuration(job.start_date, job.end_date)}
                       </div>
                     </div>
@@ -147,13 +147,13 @@ export default function JobTimeline({
                       className="mt-4 pt-4 border-t border-white/10"
                     >
                       {job.location && (
-                        <div className="flex items-center gap-2 text-sm text-white/50 mb-2">
+                        <div className="flex items-center gap-2 text-sm text-adaptive-muted mb-2">
                           <MapPin className="w-4 h-4" />
                           {job.location}
                         </div>
                       )}
                       {job.employment_type && (
-                        <div className="text-sm text-white/50 mb-2">
+                        <div className="text-sm text-adaptive-muted mb-2">
                           <span className="px-2 py-0.5 bg-white/10 rounded text-xs">
                             {job.employment_type === 'full_time' && 'Vollzeit'}
                             {job.employment_type === 'part_time' && 'Teilzeit'}
@@ -164,7 +164,7 @@ export default function JobTimeline({
                         </div>
                       )}
                       {job.description && (
-                        <p className="text-sm text-white/60">{job.description}</p>
+                        <p className="text-sm text-adaptive-muted">{job.description}</p>
                       )}
 
                       {/* Actions */}
@@ -202,7 +202,7 @@ export default function JobTimeline({
                   )}
 
                   <ChevronRight
-                    className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 transition-transform ${
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim transition-transform ${
                       expandedJob === job.id ? 'rotate-90' : ''
                     }`}
                   />

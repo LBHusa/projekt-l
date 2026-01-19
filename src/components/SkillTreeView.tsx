@@ -140,7 +140,7 @@ function SkillTreeNode({
             w-5 h-5 flex items-center justify-center rounded
             transition-colors duration-200
             ${hasChildren
-              ? 'hover:bg-white/20 text-white/60 hover:text-white'
+              ? 'hover:bg-white/20 text-adaptive-muted hover:text-white'
               : 'text-transparent'
             }
           `}
@@ -158,7 +158,7 @@ function SkillTreeNode({
         <span className="text-lg">{skill.icon}</span>
 
         {/* Skill Name */}
-        <span className="flex-1 text-sm font-medium text-white/90 truncate">
+        <span className="flex-1 text-sm font-medium text-adaptive truncate">
           {skill.name}
         </span>
 
@@ -177,7 +177,7 @@ function SkillTreeNode({
 
         {/* Children Count */}
         {hasChildren && (
-          <span className="text-xs text-white/40 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-xs text-adaptive-dim opacity-0 group-hover:opacity-100 transition-opacity">
             {skill.children!.length}
           </span>
         )}

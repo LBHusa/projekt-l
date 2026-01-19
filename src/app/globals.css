@@ -367,3 +367,69 @@ body::before {
 .text-adaptive-muted:hover {
   color: var(--foreground);
 }
+
+/* ============================================
+   EXTENDED THEME-ADAPTIVE TEXT UTILITIES
+   Light Mode: dark text, Dark Mode: light text
+   ============================================ */
+
+/* Opacity variants - adapt based on theme */
+.text-adaptive-30 {
+  color: color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+
+.text-adaptive-40 {
+  color: color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+.text-adaptive-50 {
+  color: color-mix(in srgb, var(--foreground) 50%, transparent);
+}
+
+.text-adaptive-60 {
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+}
+
+.text-adaptive-70 {
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.text-adaptive-80 {
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+/* ============================================
+   THEME-ADAPTIVE BACKGROUND UTILITIES
+   ============================================ */
+
+.bg-surface {
+  background-color: var(--background-secondary);
+}
+
+.bg-surface-hover:hover {
+  background-color: var(--background-tertiary);
+}
+
+.bg-surface-5 {
+  background-color: color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+
+.bg-surface-10 {
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+/* ============================================
+   THEME-ADAPTIVE BORDER UTILITIES
+   ============================================ */
+
+.border-adaptive {
+  border-color: var(--orb-border);
+}
+
+.border-adaptive-10 {
+  border-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.border-adaptive-20 {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+}

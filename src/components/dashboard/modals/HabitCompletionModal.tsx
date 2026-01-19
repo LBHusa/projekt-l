@@ -153,7 +153,7 @@ export default function HabitCompletionModal({
             <h3 className="text-lg font-semibold text-white mb-2">
               Alle Habits für heute erledigt!
             </h3>
-            <p className="text-white/60 mb-4">
+            <p className="text-adaptive-muted mb-4">
               Großartig! Alle deine Habits sind geschafft.
             </p>
             <Link href="/habits">
@@ -216,7 +216,7 @@ export default function HabitCompletionModal({
                     {/* Habit Info */}
                     <div className="flex-1 text-left">
                       <div className="font-medium text-white">{habit.name}</div>
-                      <div className="text-xs text-white/60">
+                      <div className="text-xs text-adaptive-muted">
                         +{habit.xp_per_completion} XP
                         {habit.current_streak > 0 && (
                           <span className="ml-2">
@@ -233,7 +233,7 @@ export default function HabitCompletionModal({
             {/* Total XP Preview */}
             {selectedIds.size > 0 && (
               <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-lg border border-purple-500/30">
-                <span className="text-white/80">
+                <span className="text-adaptive">
                   {selectedIds.size} Habit{selectedIds.size > 1 ? 's' : ''}{' '}
                   ausgewählt
                 </span>

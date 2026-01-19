@@ -57,7 +57,7 @@ export default function MentalStatsChart({ data }: MentalStatsChartProps) {
     if (active && payload?.length) {
       return (
         <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg p-3 shadow-lg">
-          <p className="text-sm text-white/60 mb-2">{label}</p>
+          <p className="text-sm text-adaptive-muted mb-2">{label}</p>
           {payload.map((entry: any) => (
             <div key={entry.dataKey} className="flex items-center gap-2 text-sm">
               <div
@@ -99,7 +99,7 @@ export default function MentalStatsChart({ data }: MentalStatsChartProps) {
               className={`px-3 py-1 text-xs rounded transition-colors ${
                 timeRange === range
                   ? 'bg-purple-500 text-white'
-                  : 'text-white/60 hover:text-white'
+                  : 'text-adaptive-muted hover:text-white'
               }`}
             >
               {range}
@@ -116,7 +116,7 @@ export default function MentalStatsChart({ data }: MentalStatsChartProps) {
             onClick={() => toggleMetric(key)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all ${
               hiddenMetrics.has(key)
-                ? 'bg-white/5 text-white/30'
+                ? 'bg-white/5 text-adaptive-dim'
                 : 'bg-white/10 text-white'
             }`}
           >
@@ -200,7 +200,7 @@ export default function MentalStatsChart({ data }: MentalStatsChartProps) {
           </LineChart>
         </ResponsiveContainer>
       ) : (
-        <div className="text-center py-12 text-white/40">
+        <div className="text-center py-12 text-adaptive-dim">
           <Calendar className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Daten vorhanden</p>
           <p className="text-sm mt-1">Tracke deine mentalen Stats!</p>

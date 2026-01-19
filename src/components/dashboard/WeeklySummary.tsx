@@ -46,7 +46,7 @@ export default function WeeklySummary() {
   if (error || !data) {
     return (
       <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
-        <div className="text-center py-6 text-white/40">
+        <div className="text-center py-6 text-adaptive-dim">
           <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p>{error || 'Keine Daten verfügbar'}</p>
         </div>
@@ -65,8 +65,8 @@ export default function WeeklySummary() {
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <Calendar className="w-5 h-5 text-white/60" />
-        <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+        <Calendar className="w-5 h-5 text-adaptive-muted" />
+        <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
           Wochenübersicht
         </h3>
       </div>
@@ -97,11 +97,11 @@ export default function WeeklySummary() {
       {data.topFaction && (
         <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-white/40" />
-            <span className="text-xs text-white/40 uppercase tracking-wider">Top Bereich</span>
+            <TrendingUp className="w-4 h-4 text-adaptive-dim" />
+            <span className="text-xs text-adaptive-dim uppercase tracking-wider">Top Bereich</span>
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-white/90 font-medium">
+            <span className="text-adaptive font-medium">
               {data.topFaction.icon} {data.topFaction.name}
             </span>
             <span className="text-green-400 text-sm">
@@ -123,7 +123,7 @@ export default function WeeklySummary() {
               className="flex items-center gap-2"
             >
               <span className="w-6 text-center">{faction.icon}</span>
-              <span className="w-20 text-sm text-white/70 truncate">{faction.name}</span>
+              <span className="w-20 text-sm text-adaptive truncate">{faction.name}</span>
               <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
@@ -133,7 +133,7 @@ export default function WeeklySummary() {
                   style={{ backgroundColor: faction.color }}
                 />
               </div>
-              <span className="w-16 text-right text-sm text-white/50">
+              <span className="w-16 text-right text-sm text-adaptive-muted">
                 {faction.xp.toLocaleString('de-DE')}
               </span>
             </motion.div>
@@ -143,7 +143,7 @@ export default function WeeklySummary() {
 
       {/* Empty State */}
       {data.factionBreakdown.length === 0 && !data.topFaction && (
-        <div className="text-center py-4 text-white/40 text-sm">
+        <div className="text-center py-4 text-adaptive-dim text-sm">
           Noch keine Aktivitäten diese Woche
         </div>
       )}
@@ -170,8 +170,8 @@ function StatCard({ icon, value, label, color }: StatCardProps) {
       <div className="flex items-center gap-2 mb-1">
         {icon}
       </div>
-      <div className="text-xl font-bold text-white/90">{value}</div>
-      <div className="text-xs text-white/40">{label}</div>
+      <div className="text-xl font-bold text-adaptive">{value}</div>
+      <div className="text-xs text-adaptive-dim">{label}</div>
     </div>
   );
 }

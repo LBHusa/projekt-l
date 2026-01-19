@@ -135,7 +135,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
 
           {/* Company */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Firma *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Firma *</label>
             <input
               type="text"
               value={formData.company}
@@ -148,7 +148,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
 
           {/* Position */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Position *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Position *</label>
             <input
               type="text"
               value={formData.position}
@@ -162,7 +162,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
           {/* Employment Type & Location */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Anstellungsart</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Anstellungsart</label>
               <select
                 value={formData.employment_type}
                 onChange={(e) => setFormData(prev => ({ ...prev, employment_type: e.target.value as EmploymentType }))}
@@ -174,7 +174,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
               </select>
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Standort</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Standort</label>
               <input
                 type="text"
                 value={formData.location || ''}
@@ -188,7 +188,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
           {/* Start Date & End Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Startdatum *</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Startdatum *</label>
               <input
                 type="date"
                 value={formData.start_date}
@@ -198,7 +198,7 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Enddatum</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Enddatum</label>
               <input
                 type="date"
                 value={formData.end_date || ''}
@@ -222,14 +222,14 @@ export default function JobForm({ job, isOpen, onClose, onSubmit }: JobFormProps
               }))}
               className="w-4 h-4 bg-white/10 border-white/20 rounded focus:ring-amber-500"
             />
-            <label htmlFor="is_current" className="text-sm text-white/80">
+            <label htmlFor="is_current" className="text-sm text-adaptive">
               Aktueller Job
             </label>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Beschreibung</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Beschreibung</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value || null }))}

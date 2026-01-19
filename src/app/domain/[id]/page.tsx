@@ -363,7 +363,7 @@ export default function DomainPage() {
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'tree'
                       ? 'bg-white/10 text-white'
-                      : 'text-white/50 hover:text-white'
+                      : 'text-adaptive-muted hover:text-white'
                   }`}
                   onClick={() => setViewMode('tree')}
                   title="Baum-Ansicht"
@@ -374,7 +374,7 @@ export default function DomainPage() {
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'graph'
                       ? 'bg-white/10 text-white'
-                      : 'text-white/50 hover:text-white'
+                      : 'text-adaptive-muted hover:text-white'
                   }`}
                   onClick={() => setViewMode('graph')}
                   title="Graph-Ansicht"
@@ -475,7 +475,7 @@ export default function DomainPage() {
               transition={{ delay: 0.3 }}
               className="bg-[var(--background-secondary)] rounded-xl border border-[var(--orb-border)] p-4"
             >
-              <h3 className="text-lg font-semibold mb-4 text-white/80">
+              <h3 className="text-lg font-semibold mb-4 text-adaptive">
                 Skill-Hierarchie
               </h3>
               {skillTree.length > 0 ? (
@@ -495,7 +495,7 @@ export default function DomainPage() {
                   maxDepthExpanded={3}
                 />
               ) : (
-                <div className="text-center py-8 text-white/40">
+                <div className="text-center py-8 text-adaptive-dim">
                   <p>Noch keine Skills vorhanden.</p>
                   <p className="text-sm mt-2">Erstelle deinen ersten Skill mit dem + Button.</p>
                 </div>

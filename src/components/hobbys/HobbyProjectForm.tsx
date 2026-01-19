@@ -64,7 +64,7 @@ export default function HobbyProjectForm({ project, onSubmit, onCancel }: HobbyP
           </h2>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,7 +109,7 @@ export default function HobbyProjectForm({ project, onSubmit, onCancel }: HobbyP
                   className={`py-2 px-2 rounded-lg text-xs transition-all flex flex-col items-center gap-1 ${
                     formData.category === category.id
                       ? 'bg-white/20 ring-1 ring-white/50'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
+                      : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                   }`}
                 >
                   <span className="text-lg">{category.icon}</span>
@@ -152,7 +152,7 @@ export default function HobbyProjectForm({ project, onSubmit, onCancel }: HobbyP
                   className={`py-2 px-3 rounded-lg text-sm transition-all ${
                     formData.status === status.id
                       ? status.color
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
+                      : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                   }`}
                 >
                   {status.name}
@@ -175,7 +175,7 @@ export default function HobbyProjectForm({ project, onSubmit, onCancel }: HobbyP
               onChange={e => setFormData(prev => ({ ...prev, progress: parseInt(e.target.value) }))}
               className="w-full accent-[var(--accent-primary)]"
             />
-            <div className="flex justify-between text-xs text-white/40 mt-1">
+            <div className="flex justify-between text-xs text-adaptive-dim mt-1">
               <span>0%</span>
               <span>50%</span>
               <span>100%</span>

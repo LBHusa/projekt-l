@@ -138,7 +138,7 @@ export default function TrainingPlanModal({ plan, onClose, onSave }: TrainingPla
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -165,7 +165,7 @@ export default function TrainingPlanModal({ plan, onClose, onSave }: TrainingPla
                       </span>
                       <span className="font-medium">{template.name}</span>
                     </div>
-                    <p className="text-xs text-white/50">{template.description}</p>
+                    <p className="text-xs text-adaptive-muted">{template.description}</p>
                   </button>
                 ))}
               </div>
@@ -286,7 +286,7 @@ export default function TrainingPlanModal({ plan, onClose, onSave }: TrainingPla
                           ))}
                         </div>
                       ) : (
-                        <div className="text-xs text-white/30 text-center py-2">
+                        <div className="text-xs text-adaptive-dim text-center py-2">
                           Ruhetag
                         </div>
                       )}

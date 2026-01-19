@@ -79,8 +79,8 @@ export function InvestmentsList({ investments, onEdit, onDelete }: InvestmentsLi
   if (investments.length === 0) {
     return (
       <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-8 text-center">
-        <p className="text-white/40">Noch keine Investments vorhanden</p>
-        <p className="text-sm text-white/30 mt-2">
+        <p className="text-adaptive-dim">Noch keine Investments vorhanden</p>
+        <p className="text-sm text-adaptive-dim mt-2">
           Füge dein erstes Investment hinzu, um dein Portfolio zu tracken
         </p>
       </div>
@@ -98,7 +98,7 @@ export function InvestmentsList({ investments, onEdit, onDelete }: InvestmentsLi
             className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
               filterType === 'all'
                 ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
+                : 'bg-white/5 text-adaptive-muted border border-white/10 hover:bg-white/10'
             }`}
           >
             Alle ({investments.length})
@@ -112,7 +112,7 @@ export function InvestmentsList({ investments, onEdit, onDelete }: InvestmentsLi
                 className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                   filterType === type
                     ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted border border-white/10 hover:bg-white/10'
                 }`}
               >
                 {getAssetTypeLabel(type)} ({count})
@@ -123,11 +123,11 @@ export function InvestmentsList({ investments, onEdit, onDelete }: InvestmentsLi
 
         {/* Sort */}
         <div className="flex gap-2 items-center">
-          <span className="text-xs text-white/40">Sortieren:</span>
+          <span className="text-xs text-adaptive-dim">Sortieren:</span>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white/80 focus:outline-none focus:border-purple-500/50"
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-adaptive focus:outline-none focus:border-purple-500/50"
           >
             <option value="value">Wert (hoch-niedrig)</option>
             <option value="performance">Performance</option>
@@ -152,7 +152,7 @@ export function InvestmentsList({ investments, onEdit, onDelete }: InvestmentsLi
       {/* Summary */}
       {sortedInvestments.length > 0 && (
         <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4">
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-adaptive-muted">
             Zeige {sortedInvestments.length} von {investments.length} Investment{investments.length !== 1 ? 's' : ''}
           </p>
         </div>

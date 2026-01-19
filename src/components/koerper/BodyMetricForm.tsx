@@ -67,7 +67,7 @@ export default function BodyMetricForm({
           </div>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -87,7 +87,7 @@ export default function BodyMetricForm({
                   className={`py-2 px-2 rounded-lg border text-xs transition-all ${
                     formData.metric_type === type
                       ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
-                      : 'border-white/10 text-white/60 hover:bg-white/5'
+                      : 'border-white/10 text-adaptive-muted hover:bg-white/5'
                   }`}
                 >
                   {config.label}
@@ -114,10 +114,10 @@ export default function BodyMetricForm({
                 required
               />
               {currentConfig.unit && (
-                <span className="text-xl text-white/40">{currentConfig.unit}</span>
+                <span className="text-xl text-adaptive-dim">{currentConfig.unit}</span>
               )}
             </div>
-            <p className="text-sm text-white/40 mt-2">{currentConfig.label}</p>
+            <p className="text-sm text-adaptive-dim mt-2">{currentConfig.label}</p>
           </div>
 
           {/* Date */}
@@ -147,7 +147,7 @@ export default function BodyMetricForm({
           {/* XP Info */}
           <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 text-center">
             <span className="text-purple-400 font-medium">+5 XP</span>
-            <span className="text-white/40 text-sm ml-2">für das Tracken</span>
+            <span className="text-adaptive-dim text-sm ml-2">für das Tracken</span>
           </div>
 
           {/* Actions */}

@@ -99,12 +99,12 @@ function ContactNode({ data }: { data: ContactNodeData }) {
       </div>
 
       {/* Name Label */}
-      <span className="mt-2 text-sm text-white/80 font-medium text-center max-w-[100px] truncate">
+      <span className="mt-2 text-sm text-adaptive font-medium text-center max-w-[100px] truncate">
         {displayName}
       </span>
 
       {/* Relationship Type */}
-      <span className="text-xs text-white/40">
+      <span className="text-xs text-adaptive-dim">
         {typeMeta.labelDe}
       </span>
     </motion.div>

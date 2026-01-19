@@ -45,7 +45,7 @@ export function AccountCard({ account, onClick }: AccountCardProps) {
           </div>
           <div>
             <h3 className="font-medium">{account.name}</h3>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-adaptive-dim">
               {config.label}
               {account.institution && ` • ${account.institution}`}
             </p>
@@ -56,7 +56,7 @@ export function AccountCard({ account, onClick }: AccountCardProps) {
             {formatCurrency(account.current_balance)}
           </p>
           {account.credit_limit && (
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-adaptive-dim">
               Limit: {formatCurrency(account.credit_limit)}
             </p>
           )}

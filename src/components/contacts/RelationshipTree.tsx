@@ -295,8 +295,8 @@ function RelationshipTreeInner({
     return (
       <div className="w-full h-[500px] bg-[var(--background)] rounded-xl border border-[var(--orb-border)] flex items-center justify-center flex-col gap-2">
         <span className="text-4xl">👨‍👩‍👧‍👦</span>
-        <p className="text-white/40">Keine Familienmitglieder vorhanden</p>
-        <p className="text-white/30 text-sm">Füge Familien-Kontakte hinzu um den Stammbaum zu sehen</p>
+        <p className="text-adaptive-dim">Keine Familienmitglieder vorhanden</p>
+        <p className="text-adaptive-dim text-sm">Füge Familien-Kontakte hinzu um den Stammbaum zu sehen</p>
       </div>
     );
   }
@@ -338,22 +338,22 @@ function RelationshipTreeInner({
         {/* Generation Legend */}
         <Panel position="bottom-left" className="bg-black/50 backdrop-blur-sm rounded-lg p-3 text-xs">
           <div className="flex flex-col gap-1.5">
-            <p className="text-white/60 font-medium mb-1">Generationen</p>
+            <p className="text-adaptive-muted font-medium mb-1">Generationen</p>
             <div className="flex items-center gap-2">
-              <span className="text-white/40">👴</span>
-              <span className="text-white/60">Großeltern</span>
+              <span className="text-adaptive-dim">👴</span>
+              <span className="text-adaptive-muted">Großeltern</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-white/40">👨‍👩‍👧</span>
-              <span className="text-white/60">Eltern</span>
+              <span className="text-adaptive-dim">👨‍👩‍👧</span>
+              <span className="text-adaptive-muted">Eltern</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-white/40">👤</span>
-              <span className="text-white/60">Du & Geschwister</span>
+              <span className="text-adaptive-dim">👤</span>
+              <span className="text-adaptive-muted">Du & Geschwister</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-white/40">👶</span>
-              <span className="text-white/60">Kinder</span>
+              <span className="text-adaptive-dim">👶</span>
+              <span className="text-adaptive-muted">Kinder</span>
             </div>
           </div>
         </Panel>

@@ -196,7 +196,7 @@ export default function DomainFactionEditor({
                   <span className="text-xl" style={{ filter: isSelected ? 'none' : 'grayscale(1)' }}>
                     {faction.icon}
                   </span>
-                  <span className={isSelected ? 'text-white' : 'text-white/50'}>
+                  <span className={isSelected ? 'text-white' : 'text-adaptive-muted'}>
                     {faction.name}
                   </span>
                 </div>
@@ -232,7 +232,7 @@ export default function DomainFactionEditor({
                       className={`px-2 py-1 rounded text-xs transition-colors ${
                         selected.is_primary
                           ? 'bg-[var(--accent-primary)] text-white'
-                          : 'bg-white/10 text-white/60 hover:bg-white/20'
+                          : 'bg-white/10 text-adaptive-muted hover:bg-white/20'
                       }`}
                     >
                       {selected.is_primary ? 'Hauptbereich' : 'Als Hauptbereich setzen'}
@@ -246,7 +246,7 @@ export default function DomainFactionEditor({
       </div>
 
       {selectedFactions.length === 0 && (
-        <p className="text-sm text-white/50 text-center py-2">
+        <p className="text-sm text-adaptive-muted text-center py-2">
           Waehle mindestens einen Lebensbereich aus
         </p>
       )}

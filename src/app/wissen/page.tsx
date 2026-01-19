@@ -144,7 +144,7 @@ export default function WeisheitPage() {
           <div className="w-16 h-16 rounded-full bg-indigo-500/20 animate-pulse mx-auto mb-4 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-indigo-400" />
           </div>
-          <p className="text-white/50">Lade Weisheit-Daten...</p>
+          <p className="text-adaptive-muted">Lade Weisheit-Daten...</p>
         </div>
       </div>
     );
@@ -222,17 +222,17 @@ export default function WeisheitPage() {
             {/* Currently Reading */}
             {stats.currentlyReading && (
               <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
+                <div className="flex items-center gap-2 text-adaptive-muted text-sm mb-2">
                   <BookOpen className="w-4 h-4" />
                   Lese gerade
                 </div>
                 <h2 className="text-lg font-bold mb-1">{stats.currentlyReading.title}</h2>
                 {stats.currentlyReading.author && (
-                  <p className="text-white/70 text-sm">{stats.currentlyReading.author}</p>
+                  <p className="text-adaptive text-sm">{stats.currentlyReading.author}</p>
                 )}
                 {stats.currentlyReading.pages && (
                   <div className="mt-3">
-                    <div className="flex justify-between text-xs text-white/50 mb-1">
+                    <div className="flex justify-between text-xs text-adaptive-muted mb-1">
                       <span>Seite {stats.currentlyReading.current_page}</span>
                       <span>{Math.round((stats.currentlyReading.current_page / stats.currentlyReading.pages) * 100)}%</span>
                     </div>
@@ -250,16 +250,16 @@ export default function WeisheitPage() {
             {/* Current Course */}
             {stats.currentCourse && (
               <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-white/60 text-sm mb-2">
+                <div className="flex items-center gap-2 text-adaptive-muted text-sm mb-2">
                   <GraduationCap className="w-4 h-4" />
                   Aktueller Kurs
                 </div>
                 <h2 className="text-lg font-bold mb-1">{stats.currentCourse.title}</h2>
                 {stats.currentCourse.platform && (
-                  <p className="text-white/70 text-sm">{stats.currentCourse.platform}</p>
+                  <p className="text-adaptive text-sm">{stats.currentCourse.platform}</p>
                 )}
                 <div className="mt-3">
-                  <div className="flex justify-between text-xs text-white/50 mb-1">
+                  <div className="flex justify-between text-xs text-adaptive-muted mb-1">
                     <span>Fortschritt</span>
                     <span>{stats.currentCourse.progress}%</span>
                   </div>

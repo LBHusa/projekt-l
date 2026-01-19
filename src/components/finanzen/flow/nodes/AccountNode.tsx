@@ -93,7 +93,7 @@ function AccountNode({ data }: { data: AccountNodeData }) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{name}</p>
             {institution && (
-              <p className="text-xs text-white/40 truncate">{institution}</p>
+              <p className="text-xs text-adaptive-dim truncate">{institution}</p>
             )}
           </div>
         </div>

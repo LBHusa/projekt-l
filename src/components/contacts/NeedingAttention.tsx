@@ -35,7 +35,7 @@ export default function NeedingAttention({ contacts, maxDisplay = 5 }: NeedingAt
     if (days > 90) return 'text-red-400';
     if (days > 60) return 'text-orange-400';
     if (days > 30) return 'text-yellow-400';
-    return 'text-white/60';
+    return 'text-adaptive-muted';
   };
 
   return (
@@ -48,7 +48,7 @@ export default function NeedingAttention({ contacts, maxDisplay = 5 }: NeedingAt
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-amber-400" />
-          <h3 className="text-sm font-medium text-white/80">Braucht Aufmerksamkeit</h3>
+          <h3 className="text-sm font-medium text-adaptive">Braucht Aufmerksamkeit</h3>
         </div>
         {contacts.length > maxDisplay && (
           <Link
@@ -90,7 +90,7 @@ export default function NeedingAttention({ contacts, maxDisplay = 5 }: NeedingAt
                 <p className="text-sm text-white font-medium truncate group-hover:text-amber-300 transition-colors">
                   {displayName}
                 </p>
-                <p className="text-xs text-white/40">{typeMeta.labelDe}</p>
+                <p className="text-xs text-adaptive-dim">{typeMeta.labelDe}</p>
               </div>
 
               {/* Days Since */}

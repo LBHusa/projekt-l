@@ -136,7 +136,7 @@ function ExpenseNode({ data }: { data: ExpenseNodeData }) {
               <span className={colors.text}>
                 {budgetPercent.toFixed(0)}%
               </span>
-              <span className="text-white/40">
+              <span className="text-adaptive-dim">
                 / {formatCurrency(budget)}
               </span>
             </div>

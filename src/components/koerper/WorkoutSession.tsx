@@ -185,14 +185,14 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
             {!isStarted ? (
               <div>
                 <h2 className="text-lg font-bold">Workout starten</h2>
-                <p className="text-sm text-white/50">Beginne dein Training</p>
+                <p className="text-sm text-adaptive-muted">Beginne dein Training</p>
               </div>
             ) : (
               <div>
                 <h2 className="text-lg font-bold">
                   {workoutName || `${workoutType} Training`}
                 </h2>
-                <div className="flex items-center gap-3 text-sm text-white/60">
+                <div className="flex items-center gap-3 text-sm text-adaptive-muted">
                   <span className="flex items-center gap-1">
                     <Timer className="w-3 h-3" />
                     {formatTime(elapsedSeconds)}
@@ -205,7 +205,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -268,7 +268,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-medium">{workoutExercise.exercise.name}</h3>
-                      <span className="text-xs text-white/50">
+                      <span className="text-xs text-adaptive-muted">
                         {MUSCLE_GROUP_CONFIG[workoutExercise.exercise.muscle_group].label}
                       </span>
                     </div>
@@ -281,7 +281,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                         key={set.id}
                         className="flex items-center gap-2 bg-white/5 rounded-lg p-2"
                       >
-                        <span className="text-xs text-white/50 w-8">#{idx + 1}</span>
+                        <span className="text-xs text-adaptive-muted w-8">#{idx + 1}</span>
 
                         <input
                           type="number"
@@ -292,7 +292,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                           placeholder="kg"
                           className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500/50"
                         />
-                        <span className="text-xs text-white/50">kg ×</span>
+                        <span className="text-xs text-adaptive-muted">kg ×</span>
 
                         <input
                           type="number"
@@ -303,7 +303,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                           placeholder="reps"
                           className="w-16 px-2 py-1 bg-white/5 border border-white/10 rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500/50"
                         />
-                        <span className="text-xs text-white/50">reps</span>
+                        <span className="text-xs text-adaptive-muted">reps</span>
 
                         <button
                           onClick={() => handleDeleteSet(set.id)}
@@ -316,7 +316,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
 
                     <button
                       onClick={() => handleAddSet(workoutExercise.id)}
-                      className="w-full py-2 rounded-lg border border-dashed border-white/20 hover:bg-white/5 text-sm text-white/50 transition-colors"
+                      className="w-full py-2 rounded-lg border border-dashed border-white/20 hover:bg-white/5 text-sm text-adaptive-muted transition-colors"
                     >
                       + Set hinzufügen
                     </button>
@@ -370,7 +370,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                     className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap ${
                       selectedMuscleGroup === 'all'
                         ? 'bg-green-500/20 text-green-400'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                     }`}
                   >
                     Alle
@@ -382,7 +382,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                       className={`px-3 py-1 rounded-lg text-sm whitespace-nowrap ${
                         selectedMuscleGroup === key
                           ? 'bg-green-500/20 text-green-400'
-                          : 'bg-white/5 text-white/60 hover:bg-white/10'
+                          : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                       }`}
                     >
                       {config.icon} {config.label}
@@ -406,7 +406,7 @@ export default function WorkoutSession({ onClose, onComplete }: WorkoutSessionPr
                         className="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                       >
                         <div className="font-medium">{exercise.name}</div>
-                        <div className="text-xs text-white/50 mt-1">
+                        <div className="text-xs text-adaptive-muted mt-1">
                           {MUSCLE_GROUP_CONFIG[exercise.muscle_group].label}
                           {exercise.equipment && ` • ${exercise.equipment}`}
                         </div>

@@ -301,7 +301,7 @@ export default function NotificationSettingsPage() {
           href="/"
           className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-white/60" />
+          <ArrowLeft className="w-5 h-5 text-adaptive-muted" />
         </Link>
         <div>
           <h1 className="text-xl font-bold text-adaptive">Benachrichtigungen</h1>
@@ -349,7 +349,7 @@ export default function NotificationSettingsPage() {
               <button
                 onClick={handleTestNotification}
                 disabled={isTesting}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-white/80 hover:bg-white/10 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-adaptive hover:bg-white/10 transition-colors disabled:opacity-50"
               >
                 {isTesting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -413,7 +413,7 @@ export default function NotificationSettingsPage() {
               <button
                 onClick={handleTestTelegram}
                 disabled={isTestingTelegram}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-white/80 hover:bg-white/10 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white/5 text-adaptive hover:bg-white/10 transition-colors disabled:opacity-50"
               >
                 {isTestingTelegram ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -474,7 +474,7 @@ export default function NotificationSettingsPage() {
                 className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                   birthdayDays.includes(option.value)
                     ? 'bg-pink-500 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
               >
                 {option.label}
@@ -510,7 +510,7 @@ export default function NotificationSettingsPage() {
                 className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                   attentionThreshold === option.value
                     ? 'bg-amber-500 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
               >
                 {option.label}
@@ -557,7 +557,7 @@ export default function NotificationSettingsPage() {
           {quietHoursEnabled && (
             <div className="flex items-center gap-4">
               <div>
-                <label className="text-xs text-white/40 block mb-1">Von</label>
+                <label className="text-xs text-adaptive-dim block mb-1">Von</label>
                 <input
                   type="time"
                   value={quietHoursStart}
@@ -566,7 +566,7 @@ export default function NotificationSettingsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-white/40 block mb-1">Bis</label>
+                <label className="text-xs text-adaptive-dim block mb-1">Bis</label>
                 <input
                   type="time"
                   value={quietHoursEnd}

@@ -60,7 +60,7 @@ export default function HabitTemplateSelector({
               className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                 selectedCategory === undefined
                   ? 'bg-white/20 text-white'
-                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+                  : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
               }`}
             >
               Alle
@@ -72,7 +72,7 @@ export default function HabitTemplateSelector({
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                   selectedCategory === faction.id
                     ? 'bg-white/20 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
                 }`}
                 style={
                   selectedCategory === faction.id
@@ -90,7 +90,7 @@ export default function HabitTemplateSelector({
 
           {/* Template Grid */}
           {filteredTemplates.length === 0 ? (
-            <div className="text-center py-8 text-white/40">
+            <div className="text-center py-8 text-adaptive-dim">
               <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-40" />
               <p>Keine Vorlagen in dieser Kategorie</p>
             </div>
@@ -121,11 +121,11 @@ export default function HabitTemplateSelector({
                           {template.name}
                         </h3>
                         {template.description && (
-                          <p className="text-xs text-white/50 mb-2 line-clamp-2">
+                          <p className="text-xs text-adaptive-muted mb-2 line-clamp-2">
                             {template.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 text-xs text-white/60">
+                        <div className="flex items-center gap-2 text-xs text-adaptive-muted">
                           {faction && (
                             <span>
                               {faction.icon} {faction.name}

@@ -239,7 +239,7 @@ export default function GraphViewManager({
                               className="p-1 rounded hover:bg-white/10 transition-colors"
                               title="Als Standard setzen"
                             >
-                              <Star className="w-3.5 h-3.5 text-white/40" />
+                              <Star className="w-3.5 h-3.5 text-adaptive-dim" />
                             </button>
                           )}
                           <button

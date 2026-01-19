@@ -81,7 +81,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
       <div className="flex items-center gap-2 mb-6">
         <ArrowRight className="w-5 h-5 text-blue-400" />
         <h2 className="font-semibold">Weg des Geldes</h2>
-        <span className="text-xs text-white/40">Monatlicher Geldfluss</span>
+        <span className="text-xs text-adaptive-dim">Monatlicher Geldfluss</span>
       </div>
 
       {/* Main Flow Visualization */}
@@ -91,7 +91,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
           <div className="flex items-center gap-2 mb-3">
             <div className="w-3 h-3 rounded-full bg-green-500" />
             <span className="text-sm font-medium text-green-400">Einnahmen</span>
-            <span className="text-sm text-white/50 ml-auto">{formatCurrency(incomeTotal)}</span>
+            <span className="text-sm text-adaptive-muted ml-auto">{formatCurrency(incomeTotal)}</span>
           </div>
 
           <div className="space-y-2">
@@ -102,8 +102,8 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-white/70">{item.config.label}</span>
-                    <span className="text-white/50">{formatCurrency(item.amount)}</span>
+                    <span className="text-adaptive">{item.config.label}</span>
+                    <span className="text-adaptive-muted">{formatCurrency(item.amount)}</span>
                   </div>
                   <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                     <div
@@ -115,7 +115,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
                     />
                   </div>
                 </div>
-                <span className="text-xs text-white/40 w-12 text-right">{item.percent.toFixed(0)}%</span>
+                <span className="text-xs text-adaptive-dim w-12 text-right">{item.percent.toFixed(0)}%</span>
               </div>
             ))}
           </div>
@@ -135,7 +135,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
               <span className="text-xs text-red-400">Ausgaben</span>
             </div>
             <p className="text-lg font-bold text-red-400">{formatCurrency(expenseTotal)}</p>
-            <p className="text-xs text-white/40">{((expenseTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
+            <p className="text-xs text-adaptive-dim">{((expenseTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
           </div>
 
           {/* Savings */}
@@ -145,7 +145,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
               <span className="text-xs text-blue-400">Sparen</span>
             </div>
             <p className="text-lg font-bold text-blue-400">{formatCurrency(savingsTotal)}</p>
-            <p className="text-xs text-white/40">{((savingsTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
+            <p className="text-xs text-adaptive-dim">{((savingsTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
           </div>
 
           {/* Investing */}
@@ -155,7 +155,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
               <span className="text-xs text-purple-400">Investieren</span>
             </div>
             <p className="text-lg font-bold text-purple-400">{formatCurrency(investingTotal)}</p>
-            <p className="text-xs text-white/40">{((investingTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
+            <p className="text-xs text-adaptive-dim">{((investingTotal / incomeTotal) * 100 || 0).toFixed(0)}%</p>
           </div>
         </div>
 
@@ -177,12 +177,12 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
                     {item.config.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-white/70 truncate">{item.config.label}</p>
+                    <p className="text-xs text-adaptive truncate">{item.config.label}</p>
                     <p className="text-sm font-medium" style={{ color: item.config.color }}>
                       {formatCurrency(item.amount)}
                     </p>
                   </div>
-                  <span className="text-xs text-white/40">{item.percent.toFixed(0)}%</span>
+                  <span className="text-xs text-adaptive-dim">{item.percent.toFixed(0)}%</span>
                 </div>
               ))}
             </div>
@@ -191,7 +191,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
 
         {/* Balance */}
         <div className={`flex items-center justify-between p-3 rounded-xl ${balance >= 0 ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-          <span className="text-sm text-white/60">Verbleibendes Budget</span>
+          <span className="text-sm text-adaptive-muted">Verbleibendes Budget</span>
           <span className={`text-lg font-bold ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
           </span>
@@ -200,7 +200,7 @@ export function MoneyFlowSankey({ data }: MoneyFlowSankeyProps) {
 
       {/* Legend */}
       <div className="mt-4 pt-4 border-t border-white/10">
-        <p className="text-xs text-white/30 text-center">
+        <p className="text-xs text-adaptive-dim text-center">
           Basierend auf Transaktionen der letzten 30 Tage
         </p>
       </div>

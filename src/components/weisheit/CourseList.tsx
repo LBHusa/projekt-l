@@ -67,7 +67,7 @@ export default function CourseList({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as CourseStatus | 'all')}
-            className="px-2 py-1 text-sm bg-white/10 border border-white/20 rounded-lg text-white/70"
+            className="px-2 py-1 text-sm bg-white/10 border border-white/20 rounded-lg text-adaptive"
           >
             <option value="all">Alle</option>
             <option value="in_progress">In Arbeit</option>
@@ -88,7 +88,7 @@ export default function CourseList({
 
       {/* Course List */}
       {filteredCourses.length === 0 ? (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <GraduationCap className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Keine Kurse gefunden</p>
           {onAddCourse && filterStatus === 'all' && (
@@ -120,17 +120,17 @@ export default function CourseList({
                     </span>
                   </div>
                   {course.platform && (
-                    <p className="text-sm text-white/60 truncate">{course.platform}</p>
+                    <p className="text-sm text-adaptive-muted truncate">{course.platform}</p>
                   )}
                   {course.instructor && (
-                    <p className="text-xs text-white/40 truncate">von {course.instructor}</p>
+                    <p className="text-xs text-adaptive-dim truncate">von {course.instructor}</p>
                   )}
                 </div>
 
                 {/* Progress */}
                 {course.status === 'in_progress' && (
                   <div className="text-right ml-4">
-                    <div className="text-sm text-white/50">{course.progress}%</div>
+                    <div className="text-sm text-adaptive-muted">{course.progress}%</div>
                     <div className="w-20 h-1.5 bg-white/10 rounded-full mt-1">
                       <div
                         className="h-full bg-amber-500 rounded-full transition-all"
@@ -155,26 +155,26 @@ export default function CourseList({
                 >
                   <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                     {course.total_hours && (
-                      <div className="flex items-center gap-1 text-white/50">
+                      <div className="flex items-center gap-1 text-adaptive-muted">
                         <Clock className="w-3 h-3" />
                         <span>{formatHours(course.total_hours)}</span>
                       </div>
                     )}
                     {course.completed_hours > 0 && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Absolviert:</span>{' '}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Absolviert:</span>{' '}
                         {formatHours(course.completed_hours)}
                       </div>
                     )}
                     {course.started_at && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Begonnen:</span>{' '}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Begonnen:</span>{' '}
                         {new Date(course.started_at).toLocaleDateString('de-DE')}
                       </div>
                     )}
                     {course.finished_at && (
-                      <div className="text-white/50">
-                        <span className="text-white/30">Beendet:</span>{' '}
+                      <div className="text-adaptive-muted">
+                        <span className="text-adaptive-dim">Beendet:</span>{' '}
                         {new Date(course.finished_at).toLocaleDateString('de-DE')}
                       </div>
                     )}
@@ -194,7 +194,7 @@ export default function CourseList({
                   )}
 
                   {course.notes && (
-                    <p className="text-sm text-white/60 mb-3">{course.notes}</p>
+                    <p className="text-sm text-adaptive-muted mb-3">{course.notes}</p>
                   )}
 
                   {course.xp_gained > 0 && (
@@ -206,7 +206,7 @@ export default function CourseList({
                   {/* Progress slider for in_progress courses */}
                   {course.status === 'in_progress' && onUpdateProgress && (
                     <div className="mb-4">
-                      <label className="text-xs text-white/40 block mb-2">Fortschritt aktualisieren (Slider loslassen zum Speichern)</label>
+                      <label className="text-xs text-adaptive-dim block mb-2">Fortschritt aktualisieren (Slider loslassen zum Speichern)</label>
                       <input
                         type="range"
                         min={0}
@@ -236,7 +236,7 @@ export default function CourseList({
                         }}
                         className="w-full accent-indigo-500"
                       />
-                      <div className="flex justify-between text-xs text-white/30 mt-1">
+                      <div className="flex justify-between text-xs text-adaptive-dim mt-1">
                         <span>0%</span>
                         <span className="text-amber-400 font-medium">
                           {pendingProgress?.courseId === course.id ? pendingProgress.value : course.progress}%
@@ -295,7 +295,7 @@ export default function CourseList({
               )}
 
               <ChevronRight
-                className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 transition-transform ${
+                className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim transition-transform ${
                   expandedCourse === course.id ? 'rotate-90' : ''
                 }`}
               />

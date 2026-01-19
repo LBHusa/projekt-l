@@ -36,13 +36,13 @@ export default function FactionStatsBar({
       label: 'Diese Woche',
       value: `+${weeklyXp.toLocaleString()}`,
       icon: <TrendingUp className="w-4 h-4" />,
-      color: weeklyXp > 0 ? 'text-green-400' : 'text-white/40',
+      color: weeklyXp > 0 ? 'text-green-400' : 'text-adaptive-dim',
     },
     {
       label: 'Dieser Monat',
       value: `+${monthlyXp.toLocaleString()}`,
       icon: <Calendar className="w-4 h-4" />,
-      color: monthlyXp > 0 ? 'text-blue-400' : 'text-white/40',
+      color: monthlyXp > 0 ? 'text-blue-400' : 'text-adaptive-dim',
     },
     {
       label: 'Skills',
@@ -69,7 +69,7 @@ export default function FactionStatsBar({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 + index * 0.05 }}
         >
-          <div className={`flex items-center gap-2 text-white/50 mb-1 ${stat.color}`}>
+          <div className={`flex items-center gap-2 text-adaptive-muted mb-1 ${stat.color}`}>
             {stat.icon}
             <span className="text-sm">{stat.label}</span>
           </div>

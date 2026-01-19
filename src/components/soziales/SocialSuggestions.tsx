@@ -109,7 +109,7 @@ export default function SocialSuggestions({
         </div>
 
         {/* Empty State - All good! */}
-        <div className="text-center py-8 text-white/60">
+        <div className="text-center py-8 text-adaptive-muted">
           <Users className="w-10 h-10 mx-auto mb-2 opacity-50 text-green-400" />
           <p className="text-green-300">Alle Kontakte sind aktuell! 🎉</p>
           <p className="text-sm mt-1">Du bleibst gut in Verbindung.</p>
@@ -129,7 +129,7 @@ export default function SocialSuggestions({
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-5 h-5 text-amber-400" />
         <h2 className="font-semibold text-amber-300">Event-Vorschläge</h2>
-        <span className="text-sm text-white/40">Basierend auf Kontakt-Intervallen</span>
+        <span className="text-sm text-adaptive-dim">Basierend auf Kontakt-Intervallen</span>
       </div>
 
       {/* Suggestion Cards */}
@@ -197,7 +197,7 @@ export default function SocialSuggestions({
       </div>
 
       {/* Footer Hint */}
-      <div className="mt-4 text-center text-xs text-white/40">
+      <div className="mt-4 text-center text-xs text-adaptive-dim">
         💡 Tipp: Plane ein Event mit diesen Kontakten, um die Beziehung zu stärken
       </div>
     </motion.div>

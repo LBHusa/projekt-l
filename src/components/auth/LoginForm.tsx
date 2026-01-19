@@ -23,12 +23,12 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm text-white/60 mb-1">E-Mail</label>
+        <label className="block text-sm text-adaptive-muted mb-1">E-Mail</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
           className="w-full px-4 py-2 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--accent)]" />
       </div>
       <div>
-        <label className="block text-sm text-white/60 mb-1">Passwort</label>
+        <label className="block text-sm text-adaptive-muted mb-1">Passwort</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
           className="w-full px-4 py-2 bg-black/30 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[var(--accent)]" />
       </div>

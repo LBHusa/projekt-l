@@ -69,7 +69,7 @@ export default function ContactList({
     <div className="space-y-4">
       {/* Suchleiste */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-adaptive-dim" />
         <input
           type="text"
           placeholder="Kontakt suchen..."
@@ -88,7 +88,7 @@ export default function ContactList({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
               activeCategory === cat.key
                 ? 'bg-white/20 text-white'
-                : 'bg-white/5 text-white/60 hover:bg-white/10'
+                : 'bg-white/5 text-adaptive-muted hover:bg-white/10'
             }`}
             style={{
               borderColor: activeCategory === cat.key && cat.color ? cat.color : 'transparent',
@@ -97,7 +97,7 @@ export default function ContactList({
           >
             <span>{cat.icon}</span>
             <span>{cat.label}</span>
-            <span className="text-xs text-white/40">
+            <span className="text-xs text-adaptive-dim">
               {stats[cat.key as keyof typeof stats]}
             </span>
           </button>
@@ -130,8 +130,8 @@ export default function ContactList({
       {/* Leere State */}
       {filteredContacts.length === 0 && (
         <div className="text-center py-12">
-          <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">
+          <Users className="w-12 h-12 text-adaptive-dim mx-auto mb-4" />
+          <p className="text-adaptive-dim">
             {search
               ? 'Keine Kontakte gefunden'
               : activeCategory === 'favorites'

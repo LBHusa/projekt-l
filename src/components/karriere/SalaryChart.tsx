@@ -52,12 +52,12 @@ export default function SalaryChart({
     if (active && payload && payload.length) {
       return (
         <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg p-3 shadow-lg">
-          <p className="text-sm text-white/60 mb-1">{payload[0].payload.fullDate}</p>
+          <p className="text-sm text-adaptive-muted mb-1">{payload[0].payload.fullDate}</p>
           <p className="text-lg font-bold text-amber-400">
             {formatCurrency(payload[0].value)}
           </p>
           {payload[0].payload.company && (
-            <p className="text-xs text-white/40 mt-1">{payload[0].payload.company}</p>
+            <p className="text-xs text-adaptive-dim mt-1">{payload[0].payload.company}</p>
           )}
         </div>
       );
@@ -90,7 +90,7 @@ export default function SalaryChart({
       </div>
 
       {salaries.length === 0 ? (
-        <div className="text-center py-12 text-white/40">
+        <div className="text-center py-12 text-adaptive-dim">
           <Euro className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Gehaltsdaten</p>
           {onAddSalary && (
@@ -107,19 +107,19 @@ export default function SalaryChart({
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="text-xs text-white/40 mb-1">Aktuell</div>
+              <div className="text-xs text-adaptive-dim mb-1">Aktuell</div>
               <div className="text-lg font-bold text-amber-400">
                 {formatCurrency(latestSalary)}
               </div>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="text-xs text-white/40 mb-1">Durchschnitt</div>
+              <div className="text-xs text-adaptive-dim mb-1">Durchschnitt</div>
               <div className="text-lg font-bold">
                 {formatCurrency(avgSalary)}
               </div>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <div className="text-xs text-white/40 mb-1">Wachstum</div>
+              <div className="text-xs text-adaptive-dim mb-1">Wachstum</div>
               <div className={`text-lg font-bold ${totalGrowth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {totalGrowth >= 0 ? '+' : ''}{totalGrowth}%
               </div>
@@ -160,14 +160,14 @@ export default function SalaryChart({
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-center py-8 text-white/30 text-sm">
+            <div className="text-center py-8 text-adaptive-dim text-sm">
               Mindestens 2 Einträge für Chart erforderlich
             </div>
           )}
 
           {/* Recent entries list */}
           <div className="mt-4 pt-4 border-t border-white/10">
-            <h3 className="text-sm font-medium text-white/60 mb-3">Letzte Einträge</h3>
+            <h3 className="text-sm font-medium text-adaptive-muted mb-3">Letzte Einträge</h3>
             <div className="space-y-2">
               {salaries.slice(0, 5).map((salary, index) => (
                 <div
@@ -175,16 +175,16 @@ export default function SalaryChart({
                   className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-white/30" />
+                    <Calendar className="w-4 h-4 text-adaptive-dim" />
                     <div>
                       <div className="text-sm">{formatCurrency(salary.amount)}</div>
-                      <div className="text-xs text-white/40">
+                      <div className="text-xs text-adaptive-dim">
                         {new Date(salary.effective_date).toLocaleDateString('de-DE')}
                       </div>
                     </div>
                   </div>
                   {salary.job && (
-                    <span className="text-xs text-white/30 truncate max-w-[120px]">
+                    <span className="text-xs text-adaptive-dim truncate max-w-[120px]">
                       {salary.job.company}
                     </span>
                   )}

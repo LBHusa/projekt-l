@@ -73,7 +73,7 @@ export default function CharacterHeader({
           <h1 className="text-xl font-bold bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
             {displayName}
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-adaptive-muted">
             Level {totalLevel} Abenteurer
           </p>
         </div>
@@ -82,8 +82,8 @@ export default function CharacterHeader({
       {/* Right: XP Progress */}
       <div className="flex-1 max-w-xs">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-white/60">Erfahrung</span>
-          <span className="text-xs font-medium text-white/80">
+          <span className="text-xs text-adaptive-muted">Erfahrung</span>
+          <span className="text-xs font-medium text-adaptive">
             {xpInCurrentLevel.toLocaleString('de-DE')} / {xpForNextLevel.toLocaleString('de-DE')} XP
           </span>
         </div>
@@ -98,10 +98,10 @@ export default function CharacterHeader({
         </div>
 
         <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-white/40">
+          <span className="text-[10px] text-adaptive-dim">
             {Math.round(xpProgress)}% bis Level {totalLevel + 1}
           </span>
-          <span className="text-[10px] text-white/40">
+          <span className="text-[10px] text-adaptive-dim">
             Gesamt: {totalXp.toLocaleString('de-DE')} XP
           </span>
         </div>

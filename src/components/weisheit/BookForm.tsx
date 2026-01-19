@@ -173,7 +173,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
 
           {/* ISBN Lookup */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">ISBN-Suche</label>
+            <label className="block text-sm text-adaptive-muted mb-1">ISBN-Suche</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -191,14 +191,14 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
                 {isLookingUp ? 'Suche...' : 'Suchen'}
               </button>
             </div>
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-adaptive-dim mt-1">
               ISBN eingeben und auf Suchen klicken, um Buchdaten automatisch zu laden
             </p>
           </div>
 
           {/* Title */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Titel *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Titel *</label>
             <input
               type="text"
               value={formData.title}
@@ -211,7 +211,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
 
           {/* Author */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Autor</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Autor</label>
             <input
               type="text"
               value={formData.author || ''}
@@ -224,7 +224,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
           {/* Genre & Pages */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Genre</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Genre</label>
               <select
                 value={formData.genre || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, genre: e.target.value || null }))}
@@ -237,7 +237,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
               </select>
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Seiten</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Seiten</label>
               <input
                 type="number"
                 min={1}
@@ -251,7 +251,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
 
           {/* ISBN */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">ISBN</label>
+            <label className="block text-sm text-adaptive-muted mb-1">ISBN</label>
             <input
               type="text"
               value={formData.isbn || ''}
@@ -263,7 +263,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
 
           {/* Status */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Status</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Status</label>
             <select
               value={formData.status}
               onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as BookStatus }))}
@@ -279,7 +279,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
           {/* Rating (only for read books) */}
           {formData.status === 'read' && (
             <div>
-              <label className="block text-sm text-white/60 mb-1">Bewertung</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Bewertung</label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map(star => (
                   <button
@@ -292,7 +292,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
                       className={`w-6 h-6 ${
                         formData.rating && star <= formData.rating
                           ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-white/20'
+                          : 'text-adaptive-dim'
                       }`}
                     />
                   </button>
@@ -303,7 +303,7 @@ export default function BookForm({ book, isOpen, onClose, onSubmit }: BookFormPr
 
           {/* Notes */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Notizen</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Notizen</label>
             <textarea
               value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value || null }))}

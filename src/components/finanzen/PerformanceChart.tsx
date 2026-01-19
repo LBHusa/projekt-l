@@ -89,7 +89,7 @@ export function PerformanceChart({ investments }: PerformanceChartProps) {
 
       return (
         <div className="bg-[var(--background-secondary)] border border-[var(--orb-border)] rounded-lg p-3 shadow-lg">
-          <p className="text-sm text-white/60 mb-1">{payload[0].payload.displayDate}</p>
+          <p className="text-sm text-adaptive-muted mb-1">{payload[0].payload.displayDate}</p>
           <p className="text-lg font-bold text-purple-400">
             {formatCurrency(value)}
           </p>
@@ -106,7 +106,7 @@ export function PerformanceChart({ investments }: PerformanceChartProps) {
     return (
       <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-6">
         <h3 className="text-lg font-semibold mb-4">Portfolio Performance</h3>
-        <div className="flex items-center justify-center h-64 text-white/40">
+        <div className="flex items-center justify-center h-64 text-adaptive-dim">
           Keine Daten verfügbar
         </div>
       </div>
@@ -129,7 +129,7 @@ export function PerformanceChart({ investments }: PerformanceChartProps) {
             <span className="text-xs">
               ({totalChangePercent >= 0 ? '+' : ''}{totalChangePercent.toFixed(2)}%)
             </span>
-            <span className="text-xs text-white/40">über {timeRange}</span>
+            <span className="text-xs text-adaptive-dim">über {timeRange}</span>
           </div>
         </div>
 
@@ -142,7 +142,7 @@ export function PerformanceChart({ investments }: PerformanceChartProps) {
               className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                 timeRange === range
                   ? 'bg-purple-500/30 text-purple-300'
-                  : 'text-white/60 hover:text-white/80'
+                  : 'text-adaptive-muted hover:text-adaptive'
               }`}
             >
               {range}

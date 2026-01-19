@@ -120,7 +120,7 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
           </h2>
           <button
             onClick={onCancel}
-            className="p-2 rounded-lg hover:bg-white/10 text-white/60"
+            className="p-2 rounded-lg hover:bg-white/10 text-adaptive-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -287,7 +287,7 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
               onChange={e => setFormData(prev => ({ ...prev, xp_reward: parseInt(e.target.value) }))}
               className="w-full accent-blue-500"
             />
-            <div className="flex justify-between text-xs text-white/40 mt-1">
+            <div className="flex justify-between text-xs text-adaptive-dim mt-1">
               <span>50 XP</span>
               <span>500 XP</span>
             </div>
@@ -295,12 +295,12 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
 
           {/* Projection Preview */}
           <div className="bg-white/5 rounded-xl p-4 space-y-3">
-            <h3 className="text-sm font-medium text-white/70">Vorschau</h3>
+            <h3 className="text-sm font-medium text-adaptive">Vorschau</h3>
 
             {/* Progress Bar */}
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-white/60">Fortschritt</span>
+                <span className="text-adaptive-muted">Fortschritt</span>
                 <span className="font-medium">{progressPercent.toFixed(1)}%</span>
               </div>
               <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
@@ -312,7 +312,7 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
                   }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-white/40 mt-1">
+              <div className="flex justify-between text-xs text-adaptive-dim mt-1">
                 <span>{formatCurrency(formData.current_amount)}</span>
                 <span>{formatCurrency(formData.target_amount)}</span>
               </div>
@@ -320,7 +320,7 @@ export function SavingsGoalForm({ goal, onSubmit, onCancel }: SavingsGoalFormPro
 
             {/* Time to Goal */}
             <div className="flex justify-between">
-              <span className="text-sm text-white/60">Ziel erreicht in:</span>
+              <span className="text-sm text-adaptive-muted">Ziel erreicht in:</span>
               <span className="text-sm font-medium text-blue-400">
                 {formatMonths(projection.months)}
               </span>

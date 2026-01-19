@@ -83,25 +83,25 @@ function StreakCard({ streak }: { streak: FinanceStreak }) {
             {config.icon}
           </div>
           <div>
-            <h3 className={`font-medium ${isActive ? '' : 'text-white/50'}`}>{config.title}</h3>
-            <p className="text-xs text-white/40">{config.description}</p>
+            <h3 className={`font-medium ${isActive ? '' : 'text-adaptive-muted'}`}>{config.title}</h3>
+            <p className="text-xs text-adaptive-dim">{config.description}</p>
           </div>
         </div>
 
         <div className="flex items-end justify-between">
           <div>
-            <p className={`text-3xl font-bold ${isActive ? 'text-orange-400' : 'text-white/30'}`}>
+            <p className={`text-3xl font-bold ${isActive ? 'text-orange-400' : 'text-adaptive-dim'}`}>
               {streak.current_streak}
             </p>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-adaptive-dim">
               {streak.current_streak === 1 ? 'Tag' : 'Tage'}
             </p>
           </div>
 
           {streak.longest_streak > 0 && (
             <div className="text-right">
-              <p className="text-xs text-white/40">Rekord</p>
-              <p className="text-sm font-medium text-white/60">
+              <p className="text-xs text-adaptive-dim">Rekord</p>
+              <p className="text-sm font-medium text-adaptive-muted">
                 {streak.longest_streak} {streak.longest_streak === 1 ? 'Tag' : 'Tage'}
               </p>
             </div>
@@ -154,7 +154,7 @@ export function SavingsStreak({ streaks }: SavingsStreakProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <Flame className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Noch keine Streaks</p>
           <p className="text-sm mt-1">Starte deinen ersten Spar-Streak!</p>
@@ -164,7 +164,7 @@ export function SavingsStreak({ streaks }: SavingsStreakProps) {
       {/* Tips */}
       {activeStreaks.length === 0 && streaks.length > 0 && (
         <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-white/40 text-center">
+          <p className="text-xs text-adaptive-dim text-center">
             Tipp: Spare heute etwas Geld um deinen Streak zu starten!
           </p>
         </div>
@@ -172,7 +172,7 @@ export function SavingsStreak({ streaks }: SavingsStreakProps) {
 
       {activeStreaks.length > 0 && (
         <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-white/40 text-center">
+          <p className="text-xs text-adaptive-dim text-center">
             Halte deine Streaks aktiv fur Bonus-XP!
           </p>
         </div>

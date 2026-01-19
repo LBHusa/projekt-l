@@ -132,7 +132,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
 
           {/* Title */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Kurstitel *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Kurstitel *</label>
             <input
               type="text"
               value={formData.title}
@@ -146,7 +146,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
           {/* Platform & Hours */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Plattform</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Plattform</label>
               <select
                 value={formData.platform || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, platform: e.target.value || null }))}
@@ -159,7 +159,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
               </select>
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Dauer (Std.)</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Dauer (Std.)</label>
               <input
                 type="number"
                 min={0.5}
@@ -174,7 +174,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
 
           {/* Instructor */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Dozent/Instructor</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Dozent/Instructor</label>
             <input
               type="text"
               value={formData.instructor || ''}
@@ -186,7 +186,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
 
           {/* URL */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Kurs-URL</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Kurs-URL</label>
             <input
               type="url"
               value={formData.url || ''}
@@ -198,7 +198,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
 
           {/* Status */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Status</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Status</label>
             <select
               value={formData.status}
               onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as CourseStatus }))}
@@ -214,7 +214,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
           {/* Certificate URL (only for completed courses) */}
           {formData.status === 'completed' && (
             <div>
-              <label className="block text-sm text-white/60 mb-1">Zertifikat-URL</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Zertifikat-URL</label>
               <input
                 type="url"
                 value={formData.certificate_url || ''}
@@ -227,7 +227,7 @@ export default function CourseForm({ course, isOpen, onClose, onSubmit }: Course
 
           {/* Notes */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Notizen</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Notizen</label>
             <textarea
               value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value || null }))}

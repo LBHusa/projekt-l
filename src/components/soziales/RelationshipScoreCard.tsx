@@ -76,7 +76,7 @@ function getUrgencyColor(days: number | null): string {
   if (days > 90) return 'text-red-500';
   if (days > 60) return 'text-orange-500';
   if (days > 30) return 'text-yellow-500';
-  return 'text-white/60';
+  return 'text-adaptive-muted';
 }
 
 export default function RelationshipScoreCard({
@@ -102,11 +102,11 @@ export default function RelationshipScoreCard({
         <div className="flex items-center gap-2 mb-4">
           <TrendingDown className="w-5 h-5 text-purple-400" />
           <h2 className="font-semibold text-purple-300">Beziehungspflege benötigt</h2>
-          <span className="text-sm text-white/40">Nach Health-Score sortiert</span>
+          <span className="text-sm text-adaptive-dim">Nach Health-Score sortiert</span>
         </div>
 
         {/* Empty State */}
-        <div className="text-center py-8 text-white/40">
+        <div className="text-center py-8 text-adaptive-dim">
           <TrendingUp className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p>Alle Beziehungen sind gesund! 🎉</p>
           <p className="text-sm mt-1">Weiter so!</p>
@@ -126,7 +126,7 @@ export default function RelationshipScoreCard({
       <div className="flex items-center gap-2 mb-4">
         <TrendingDown className="w-5 h-5 text-purple-400" />
         <h2 className="font-semibold text-purple-300">Beziehungspflege benötigt</h2>
-        <span className="text-sm text-white/40">Nach Health-Score sortiert</span>
+        <span className="text-sm text-adaptive-dim">Nach Health-Score sortiert</span>
       </div>
 
       {/* Contact Cards */}
@@ -173,7 +173,7 @@ export default function RelationshipScoreCard({
                       ? `Vor ${contact.days_since_interaction} Tagen`
                       : 'Nie kontaktiert'}
                   </span>
-                  <span className="text-white/40">
+                  <span className="text-adaptive-dim">
                     {contact.interaction_count} Interaktionen
                   </span>
                 </div>

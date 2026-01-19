@@ -62,7 +62,7 @@ export default function MentalStatsPanel({ stats }: MentalStatsPanelProps) {
       className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-[var(--orb-border)] p-4"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-white/60 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
           🧠 Seele & Kopf
         </h3>
         <span
@@ -95,10 +95,10 @@ export default function MentalStatsPanel({ stats }: MentalStatsPanelProps) {
                 <span className="text-lg w-6 text-center">{config.icon}</span>
                 <div className="flex-1">
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-white/70">{config.label}</span>
+                    <span className="text-adaptive">{config.label}</span>
                     <div className="flex items-center gap-2">
                       <span
-                        className="text-[10px] text-white/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="text-[10px] text-adaptive-dim opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         {statusLabel}
                       </span>
@@ -162,7 +162,7 @@ function MentalTip({ stats }: { stats: MentalStats }) {
   };
 
   return (
-    <p className="text-xs text-white/50 italic">
+    <p className="text-xs text-adaptive-muted italic">
       💡 Tipp: {tips[lowestStat]}
     </p>
   );

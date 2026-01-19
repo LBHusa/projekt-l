@@ -34,7 +34,7 @@ export default function CareerGoalsList({
       case 'abandoned':
         return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
       default:
-        return 'bg-white/10 text-white/60 border-white/20';
+        return 'bg-white/10 text-adaptive-muted border-white/20';
     }
   };
 
@@ -95,7 +95,7 @@ export default function CareerGoalsList({
             className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap transition-colors ${
               statusFilter === tab.value
                 ? 'bg-amber-600 text-white'
-                : 'bg-white/10 text-white/60 hover:bg-white/20'
+                : 'bg-white/10 text-adaptive-muted hover:bg-white/20'
             }`}
           >
             {tab.label}
@@ -105,7 +105,7 @@ export default function CareerGoalsList({
 
       {/* Goals Grid */}
       {filteredGoals.length === 0 ? (
-        <div className="text-center py-12 text-white/40">
+        <div className="text-center py-12 text-adaptive-dim">
           <Target className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p>Noch keine Ziele erstellt</p>
           {statusFilter !== 'all' && (
@@ -141,7 +141,7 @@ export default function CareerGoalsList({
 
                 {/* Progress Bar */}
                 <div className="mb-3">
-                  <div className="flex justify-between text-sm text-white/60 mb-1">
+                  <div className="flex justify-between text-sm text-adaptive-muted mb-1">
                     <span>Fortschritt</span>
                     <span className="font-medium text-amber-400">{goal.progress}%</span>
                   </div>
@@ -163,7 +163,7 @@ export default function CareerGoalsList({
 
                 {/* Target Date */}
                 {goal.target_date && (
-                  <div className="flex items-center gap-2 text-sm text-white/60 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-adaptive-muted mb-3">
                     <Calendar className="w-4 h-4" />
                     <span>Ziel: {new Date(goal.target_date).toLocaleDateString('de-DE', {
                       day: '2-digit',
@@ -182,7 +182,7 @@ export default function CareerGoalsList({
                     className="pt-3 border-t border-white/10"
                   >
                     {goal.description && (
-                      <p className="text-sm text-white/70 mb-3">{goal.description}</p>
+                      <p className="text-sm text-adaptive mb-3">{goal.description}</p>
                     )}
 
                     {/* Action Buttons */}
@@ -219,7 +219,7 @@ export default function CareerGoalsList({
 
                 {/* Click hint */}
                 {!isExpanded && (goal.description || onEditGoal || onDeleteGoal) && (
-                  <p className="text-xs text-white/40 text-center mt-2">
+                  <p className="text-xs text-adaptive-dim text-center mt-2">
                     Klicken für Details
                   </p>
                 )}

@@ -136,7 +136,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
 
           {/* Job Selection */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Job *</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Job *</label>
             <select
               value={formData.job_id}
               onChange={(e) => setFormData(prev => ({ ...prev, job_id: e.target.value }))}
@@ -158,7 +158,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
           {/* Amount & Currency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Betrag *</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Betrag *</label>
               <input
                 type="number"
                 min={0}
@@ -171,7 +171,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Währung</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Währung</label>
               <select
                 value={formData.currency}
                 onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
@@ -187,7 +187,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
           {/* Period & Effective Date */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Periode</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Periode</label>
               <select
                 value={formData.period}
                 onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value as SalaryPeriod }))}
@@ -199,7 +199,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
               </select>
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Gültig ab *</label>
+              <label className="block text-sm text-adaptive-muted mb-1">Gültig ab *</label>
               <input
                 type="date"
                 value={formData.effective_date}
@@ -212,7 +212,7 @@ export default function SalaryForm({ jobs, salary, defaultJobId, isOpen, onClose
 
           {/* Notes */}
           <div>
-            <label className="block text-sm text-white/60 mb-1">Notizen</label>
+            <label className="block text-sm text-adaptive-muted mb-1">Notizen</label>
             <textarea
               value={formData.notes || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value || null }))}
