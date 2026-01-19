@@ -145,23 +145,27 @@ export async function getAccountById(id: string): Promise<Account | null> {
 }
 
 export async function createAccount(account: Omit<Account, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Account | null> {
-  const supabase = createBrowserClient();
+  try {
+    const response = await fetch('/api/finanzen/account/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(account),
+    });
 
-  const { data, error } = await supabase
-    .from('accounts')
-    .insert({
-      ...account,
-      user_id: await getUserIdOrCurrent(),
-    })
-    .select()
-    .single();
+    const result = await response.json();
 
-  if (error) {
+    if (!response.ok || !result.success) {
+      console.error('Error creating account:', result.error);
+      return null;
+    }
+
+    return result.data;
+  } catch (error) {
     console.error('Error creating account:', error);
     return null;
   }
-
-  return data;
 }
 
 export async function updateAccountBalance(id: string, balance: number): Promise<boolean> {

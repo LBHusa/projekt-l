@@ -168,45 +168,27 @@ export async function getContactWithStatsById(id: string): Promise<ContactWithSt
 }
 
 export async function createContact(formData: ContactFormData): Promise<Contact> {
-  const supabase = createBrowserClient();
-  const userId = await getUserIdOrCurrent();
+  try {
+    const response = await fetch('/api/contacts/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-  // Bestimme automatisch die Kategorie und Domain
-  const category = getCategoryFromType(formData.relationship_type);
-  const domainId = getDomainIdFromCategory(category);
+    const result = await response.json();
 
-  const { data, error } = await supabase
-    .from('contacts')
-    .insert({
-      user_id: userId,
-      first_name: formData.first_name,
-      last_name: formData.last_name || null,
-      nickname: formData.nickname || null,
-      photo_url: formData.photo_url || null,
-      relationship_type: formData.relationship_type,
-      relationship_category: category,
-      domain_id: domainId,
-      birthday: formData.birthday || null,
-      anniversary: formData.anniversary || null,
-      met_date: formData.met_date || null,
-      met_context: formData.met_context || null,
-      contact_info: formData.contact_info || {},
-      shared_interests: formData.shared_interests || [],
-      notes: formData.notes || null,
-      tags: formData.tags || [],
-      trust_level: formData.trust_level || 50,
-      is_favorite: formData.is_favorite || false,
-      reminder_frequency_days: formData.reminder_frequency_days || null,
-    })
-    .select()
-    .single();
+    if (!response.ok || !result.success) {
+      console.error('Error creating contact:', result.error);
+      throw new Error(result.error || 'Failed to create contact');
+    }
 
-  if (error) {
+    return result.data;
+  } catch (error) {
     console.error('Error creating contact:', error);
     throw error;
   }
-
-  return data;
 }
 
 export async function updateContact(
