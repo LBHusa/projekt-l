@@ -2,19 +2,25 @@ import { createBrowserClient } from '@/lib/supabase';
 import type { SkillDomain, SkillDomainFaction, SkillDomainWithFactions, FactionId } from '@/lib/database.types';
 import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-// Default test user ID (for MVP without auth)
-// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
-
 // ============================================
 // SKILL DOMAINS DATA ACCESS
 // ============================================
 
-export async function getAllDomains(): Promise<SkillDomain[]> {
+/**
+ * Get all domains visible to the current user.
+ * Shows: Template domains + user's own domains
+ * Hides: Other users' custom domains
+ */
+export async function getAllDomains(userId?: string): Promise<SkillDomain[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
+  // Defensive filtering: Templates OR user's own domains
+  // This protects even if RLS is misconfigured
   const { data, error } = await supabase
     .from('skill_domains')
     .select('*')
+    .or(`is_template.eq.true,created_by.eq.${resolvedUserId}`)
     .order('display_order', { ascending: true });
 
   if (error) {
@@ -25,18 +31,25 @@ export async function getAllDomains(): Promise<SkillDomain[]> {
   return data || [];
 }
 
-export async function getDomainById(id: string): Promise<SkillDomain | null> {
+/**
+ * Get a domain by ID with access control.
+ * Returns null if user doesn't have access.
+ */
+export async function getDomainById(id: string, userId?: string): Promise<SkillDomain | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
+  // Only return if template OR user's own domain
   const { data, error } = await supabase
     .from('skill_domains')
     .select('*')
     .eq('id', id)
+    .or(`is_template.eq.true,created_by.eq.${resolvedUserId}`)
     .single();
 
   if (error) {
     if (error.code === 'PGRST116') {
-      return null; // Not found
+      return null; // Not found or no access
     }
     console.error('Error fetching domain:', error);
     throw error;
@@ -142,10 +155,10 @@ export async function getDomainFactions(domainId: string): Promise<SkillDomainFa
 }
 
 /**
- * Get domain with all faction mappings
+ * Get domain with all faction mappings (with access control)
  */
-export async function getDomainWithFactions(domainId: string): Promise<SkillDomainWithFactions | null> {
-  const domain = await getDomainById(domainId);
+export async function getDomainWithFactions(domainId: string, userId?: string): Promise<SkillDomainWithFactions | null> {
+  const domain = await getDomainById(domainId, userId);
   if (!domain) return null;
 
   const factions = await getDomainFactions(domainId);
