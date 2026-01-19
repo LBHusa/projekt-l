@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords, Plus } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { getAllDomains, createDomainWithFactions } from '@/lib/data/domains';
-import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/user-skills';
+import { getUserProfile, getDomainStats, getTotalSkillCount, calculateAttributes } from '@/lib/data/user-skills';
 import { getFactionsWithStats } from '@/lib/data/factions';
 import { getContactsStats, getUpcomingBirthdays, getContactsNeedingAttention } from '@/lib/data/contacts';
 import { UpcomingBirthdays, NeedingAttention } from '@/components/contacts';
@@ -108,7 +108,7 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       // Load all data in parallel
-      const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData] = await Promise.all([
+      const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData, calculatedAttrs] = await Promise.all([
         getAllDomains(),
         getUserProfile(userId!),
         getTotalSkillCount(),
@@ -117,6 +117,7 @@ export default function Dashboard() {
         getContactsNeedingAttention(5),
         getFactionsWithStats(userId!),
         getAccounts(userId!),
+        calculateAttributes(userId!),
       ]);
 
       // Filter out Familie domain (now replaced by Contacts button)
@@ -150,7 +151,7 @@ export default function Dashboard() {
           avatarUrl: profile.avatar_url,
           totalLevel: profile.total_level,
           totalXp: profile.total_xp,
-          attributes: profile.attributes || DEFAULT_ATTRIBUTES,
+          attributes: calculatedAttrs || profile.attributes || DEFAULT_ATTRIBUTES,
           mentalStats: profile.mental_stats || DEFAULT_MENTAL_STATS,
         });
       }
