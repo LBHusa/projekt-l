@@ -2,26 +2,28 @@ import { createBrowserClient } from '@/lib/supabase';
 import type { HobbyProject, HobbyTimeLog, HobbyProjectStatus } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // HOBBYS DATA ACCESS
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // HOBBY PROJECTS
 // ============================================
 
 export async function getHobbyProjects(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyProject[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('hobby_projects')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('updated_at', { ascending: false });
 
   if (error) {
@@ -52,14 +54,15 @@ export async function getHobbyProject(
 }
 
 export async function getActiveHobbyProjects(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyProject[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('hobby_projects')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('status', 'active')
     .order('updated_at', { ascending: false });
 
@@ -83,15 +86,16 @@ export interface CreateHobbyProjectInput {
 
 export async function createHobbyProject(
   input: CreateHobbyProjectInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyProject> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('hobby_projects')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       icon: input.icon || '🎨',
       status: input.status || 'active',
       progress: input.progress || 0,
@@ -111,8 +115,9 @@ export async function createHobbyProject(
 export async function updateHobbyProject(
   projectId: string,
   input: Partial<CreateHobbyProjectInput & { completed_at?: string | null }>,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyProject> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Fetch current project BEFORE updating to detect status change
@@ -248,15 +253,16 @@ export async function getTimeLogsForProject(
 }
 
 export async function getRecentTimeLogs(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 10
 ): Promise<(HobbyTimeLog & { project?: HobbyProject })[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('hobby_time_logs')
     .select('*, project:hobby_projects(*)')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('logged_at', { ascending: false })
     .limit(limit);
 
@@ -277,15 +283,16 @@ export interface LogHobbyTimeInput {
 
 export async function logHobbyTime(
   input: LogHobbyTimeInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyTimeLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('hobby_time_logs')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       logged_at: input.logged_at || new Date().toISOString(),
     })
     .select()
@@ -366,15 +373,16 @@ export interface HobbyStats {
 }
 
 export async function getHobbyStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HobbyStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get all projects
   const { data: projects } = await supabase
     .from('hobby_projects')
     .select('*')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   const allProjects = projects || [];
   const activeProjects = allProjects.filter(p => p.status === 'active');
@@ -400,7 +408,7 @@ export async function getHobbyStats(
   const { data: weekLogs } = await supabase
     .from('hobby_time_logs')
     .select('duration_minutes')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('logged_at', weekAgo.toISOString());
 
   const totalMinutesThisWeek = (weekLogs || []).reduce(
@@ -415,7 +423,7 @@ export async function getHobbyStats(
   const { data: monthLogs } = await supabase
     .from('hobby_time_logs')
     .select('duration_minutes')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('logged_at', monthAgo.toISOString());
 
   const totalMinutesThisMonth = (monthLogs || []).reduce(

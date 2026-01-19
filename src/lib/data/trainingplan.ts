@@ -5,8 +5,9 @@
 
 import { createBrowserClient } from '@/lib/supabase';
 import type { TrainingPlan, WorkoutExercise } from '@/lib/database.types';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 export type TrainingGoal = 'strength' | 'endurance' | 'weight_loss' | 'muscle_gain' | 'flexibility';
 export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
@@ -34,7 +35,7 @@ export async function getTrainingPlans(): Promise<TrainingPlan[]> {
   const { data, error } = await supabase
     .from('training_plans')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -54,7 +55,7 @@ export async function getActivePlan(): Promise<TrainingPlan | null> {
   const { data, error } = await supabase
     .from('training_plans')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('is_active', true)
     .single();
 
@@ -80,7 +81,7 @@ export async function getTrainingPlan(id: string): Promise<TrainingPlan | null> 
     .from('training_plans')
     .select('*')
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .single();
 
   if (error) {
@@ -117,7 +118,7 @@ export async function createTrainingPlan(data: {
   const { data: plan, error } = await supabase
     .from('training_plans')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       name: data.name,
       description: data.description || null,
       goal: data.goal || null,
@@ -163,7 +164,7 @@ export async function updateTrainingPlan(
     .from('training_plans')
     .update(data)
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 
@@ -185,7 +186,7 @@ export async function deleteTrainingPlan(id: string): Promise<boolean> {
     .from('training_plans')
     .delete()
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error deleting training plan:', error);
@@ -204,7 +205,7 @@ async function deactivateAllPlans(): Promise<void> {
   await supabase
     .from('training_plans')
     .update({ is_active: false })
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('is_active', true);
 }
 

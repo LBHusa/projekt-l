@@ -2,8 +2,9 @@ import { createBrowserClient } from '@/lib/supabase';
 import type { SocialEvent, SocialEventType } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // TYPE DEFINITIONS
@@ -53,14 +54,15 @@ function calculateEventXp(event: {
  * Get all social events for a user, sorted by date descending
  */
 export async function getEvents(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SocialEvent[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('social_events')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('occurred_at', { ascending: false });
 
   if (error) {
@@ -75,9 +77,10 @@ export async function getEvents(
  * Get upcoming events within the next N days
  */
 export async function getUpcomingEvents(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   days: number = 30
 ): Promise<SocialEvent[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const now = new Date().toISOString();
@@ -88,7 +91,7 @@ export async function getUpcomingEvents(
   const { data, error } = await supabase
     .from('social_events')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('occurred_at', now)
     .lte('occurred_at', future)
     .order('occurred_at', { ascending: true });
@@ -106,14 +109,15 @@ export async function getUpcomingEvents(
  */
 export async function getEventsByType(
   eventType: SocialEventType,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SocialEvent[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('social_events')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('event_type', eventType)
     .order('occurred_at', { ascending: false });
 
@@ -136,8 +140,9 @@ export async function getEventsByType(
  */
 export async function createEvent(
   input: CreateEventInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SocialEvent> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Auto-calculate participant_count from participants array
@@ -154,7 +159,7 @@ export async function createEvent(
     .from('social_events')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       participant_count,
       photos_urls: [], // Default empty array
       xp_gained: xpGained,
@@ -275,8 +280,9 @@ export interface SocialEventStats {
  * Get event statistics for a user
  */
 export async function getEventStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SocialEventStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const events = await getEvents(userId);
 
   const now = new Date();

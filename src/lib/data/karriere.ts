@@ -2,26 +2,28 @@ import { createBrowserClient } from '@/lib/supabase';
 import type { JobHistory, SalaryEntry, CareerGoal, CareerSource } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // KARRIERE DATA ACCESS
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // JOB HISTORY
 // ============================================
 
 export async function getJobHistory(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<JobHistory[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('job_history')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('start_date', { ascending: false });
 
   if (error) {
@@ -65,14 +67,15 @@ export async function getJobWithSalaries(
 }
 
 export async function getCurrentJob(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<JobHistory | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('job_history')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('is_current', true)
     .maybeSingle();
 
@@ -97,8 +100,9 @@ export interface CreateJobInput {
 
 export async function createJob(
   input: CreateJobInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<JobHistory> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // If marking as current, unset other current jobs
@@ -106,7 +110,7 @@ export async function createJob(
     await supabase
       .from('job_history')
       .update({ is_current: false })
-      .eq('user_id', userId)
+      .eq('user_id', resolvedUserId)
       .eq('is_current', true);
   }
 
@@ -114,7 +118,7 @@ export async function createJob(
     .from('job_history')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
     })
     .select()
     .single();
@@ -167,14 +171,16 @@ export async function deleteJob(jobId: string): Promise<void> {
 // ============================================
 
 export async function getSalaryHistory(
-  userId: string = TEST_USER_ID
-): Promise<(SalaryEntry & { job?: JobHistory })[]> {
+  userId?: string
+): Promise<(SalaryEntry & {
+  job?: JobHistory })[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data: jobs } = await supabase
     .from('job_history')
     .select('id')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (!jobs || jobs.length === 0) return [];
 
@@ -195,8 +201,9 @@ export async function getSalaryHistory(
 }
 
 export async function getCurrentSalary(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SalaryEntry | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const currentJob = await getCurrentJob(userId);
   if (!currentJob) return null;
 
@@ -229,15 +236,16 @@ export interface CreateSalaryInput {
 
 export async function createSalaryEntry(
   input: CreateSalaryInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SalaryEntry> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('salary_entries')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       currency: input.currency || 'EUR',
       period: input.period || 'monthly',
       bonus: 0,
@@ -294,14 +302,15 @@ export async function deleteSalaryEntry(salaryId: string): Promise<void> {
 // ============================================
 
 export async function getCareerGoals(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<CareerGoal[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('career_goals')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('target_date', { ascending: true });
 
   if (error) {
@@ -321,15 +330,16 @@ export interface CreateCareerGoalInput {
 
 export async function createCareerGoal(
   input: CreateCareerGoalInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<CareerGoal> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('career_goals')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       status: 'active',
     })
     .select()
@@ -363,8 +373,9 @@ function calculateCareerGoalXp(goal: CareerGoal): number {
 export async function updateCareerGoal(
   goalId: string,
   input: Partial<CreateCareerGoalInput & { status: string }>,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<CareerGoal> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Fetch current goal state BEFORE updating
@@ -458,8 +469,9 @@ export interface KarriereStats {
 }
 
 export async function getKarriereStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<KarriereStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const [jobs, currentJob, currentSalary, goals, salaryHistory] = await Promise.all([
     getJobHistory(userId),
     getCurrentJob(userId),

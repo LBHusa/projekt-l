@@ -3,27 +3,29 @@ import type { Book, Course, BookStatus, CourseStatus } from '@/lib/database.type
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
 import { checkBookAchievements, checkCourseAchievements } from './achievements';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // WEISHEIT DATA ACCESS
 // Books & Courses for the Weisheit faction
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // BOOKS
 // ============================================
 
 export async function getBooks(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Book[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('books')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('updated_at', { ascending: false });
 
   if (error) {
@@ -36,14 +38,15 @@ export async function getBooks(
 
 export async function getBooksByStatus(
   status: BookStatus,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Book[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('books')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('status', status)
     .order('updated_at', { ascending: false });
 
@@ -86,15 +89,16 @@ export interface CreateBookInput {
 
 export async function createBook(
   input: CreateBookInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Book> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('books')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       status: input.status || 'to_read',
       current_page: 0,
       rating: null,
@@ -118,7 +122,7 @@ export async function createBook(
     // Award XP to Weisheit faction
     if (xpGained > 0) {
       try {
-        await updateFactionStats('wissen', xpGained, userId);
+        await updateFactionStats('wissen', xpGained, resolvedUserId);
       } catch (err) {
         console.error('Error updating faction stats for book creation:', err);
       }
@@ -127,7 +131,7 @@ export async function createBook(
     // Log activity to feed
     try {
       await logActivity({
-        userId,
+        userId: resolvedUserId,
         activityType: 'book_finished',
         factionId: 'wissen',
         title: `Buch gelesen: "${data.title}"`,
@@ -149,11 +153,11 @@ export async function createBook(
       const { count } = await supabase
         .from('books')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('user_id', resolvedUserId)
         .eq('status', 'read');
 
       const totalRead = count || 0;
-      await checkBookAchievements(userId, totalRead);
+      await checkBookAchievements(totalRead, resolvedUserId);
     } catch (err) {
       console.error('Error checking book achievements:', err);
     }
@@ -221,8 +225,9 @@ export async function deleteBook(bookId: string): Promise<void> {
 export async function updateBookProgress(
   bookId: string,
   currentPage: number,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Book> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const book = await getBook(bookId);
   if (!book) {
     throw new Error('Book not found');
@@ -280,11 +285,11 @@ export async function updateBookProgress(
       const { count } = await supabase
         .from('books')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('user_id', resolvedUserId)
         .eq('status', 'read');
 
       const totalRead = count || 0;
-      await checkBookAchievements(userId, totalRead);
+      await checkBookAchievements(totalRead, userId);
     } catch (err) {
       console.error('Error checking book achievements:', err);
     }
@@ -310,14 +315,15 @@ function calculateBookXp(pages: number | null): number {
 // ============================================
 
 export async function getCourses(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Course[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('courses')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('updated_at', { ascending: false });
 
   if (error) {
@@ -330,14 +336,15 @@ export async function getCourses(
 
 export async function getCoursesByStatus(
   status: CourseStatus,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Course[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('courses')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('status', status)
     .order('updated_at', { ascending: false });
 
@@ -379,15 +386,16 @@ export interface CreateCourseInput {
 
 export async function createCourse(
   input: CreateCourseInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Course> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('courses')
     .insert({
       ...input,
-      user_id: userId,
+      user_id: resolvedUserId,
       status: input.status || 'planned',
       progress: 0,
       completed_hours: 0,
@@ -430,10 +438,10 @@ export async function createCourse(
     const { count: totalCompleted } = await supabase
       .from('courses')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
+      .eq('user_id', resolvedUserId)
       .eq('status', 'completed');
 
-    await checkCourseAchievements(userId, totalCompleted || 0);
+    await checkCourseAchievements(totalCompleted || 0, userId);
 
     // Update course with XP
     await supabase
@@ -495,8 +503,9 @@ export async function updateCourseProgress(
   courseId: string,
   progress: number,
   completedHours?: number,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Course> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const course = await getCourse(courseId);
   if (!course) {
     throw new Error('Course not found');
@@ -561,11 +570,11 @@ export async function updateCourseProgress(
       const { count } = await supabase
         .from('courses')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('user_id', resolvedUserId)
         .eq('status', 'completed');
 
       const totalCompleted = count || 0;
-      await checkCourseAchievements(userId, totalCompleted);
+      await checkCourseAchievements(totalCompleted, userId);
     } catch (err) {
       console.error('Error checking course achievements:', err);
     }
@@ -612,8 +621,9 @@ export interface WeisheitStats {
 }
 
 export async function getWeisheitStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<WeisheitStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const [books, courses] = await Promise.all([
     getBooks(userId),
     getCourses(userId),

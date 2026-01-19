@@ -5,8 +5,9 @@ import type { Achievement, UserAchievement } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
 import type { FactionId } from '@/lib/database.types';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // TYPES
@@ -31,8 +32,9 @@ export interface AchievementStats {
 // ============================================
 
 export async function getAchievements(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AchievementWithProgress[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get all achievements with user progress
@@ -51,7 +53,7 @@ export async function getAchievements(
   const { data: userProgress, error: progError } = await supabase
     .from('user_achievements')
     .select('*')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (progError) {
     console.error('Error fetching user achievements:', progError);
@@ -72,22 +74,25 @@ export async function getAchievements(
 
 export async function getAchievementsByCategory(
   category: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AchievementWithProgress[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const all = await getAchievements(userId);
   return all.filter(a => a.category === category);
 }
 
 export async function getUnlockedAchievements(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AchievementWithProgress[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const all = await getAchievements(userId);
   return all.filter(a => a.is_unlocked);
 }
 
 export async function getAchievementStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AchievementStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const all = await getAchievements(userId);
   const unlocked = all.filter(a => a.is_unlocked);
   const locked = all.filter(a => !a.is_unlocked);
@@ -125,8 +130,9 @@ export async function getAchievementStats(
 
 export async function unlockAchievement(
   achievementKey: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AchievementWithProgress | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get achievement definition
@@ -146,7 +152,7 @@ export async function unlockAchievement(
   const { data: existing } = await supabase
     .from('user_achievements')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('achievement_id', achievement.id)
     .eq('is_unlocked', true)
     .maybeSingle();
@@ -161,7 +167,7 @@ export async function unlockAchievement(
     .from('user_achievements')
     .upsert(
       {
-        user_id: userId,
+        user_id: resolvedUserId,
         achievement_id: achievement.id,
         current_progress: achievement.requirement_value,
         is_unlocked: true,
@@ -221,8 +227,9 @@ export async function unlockAchievement(
 export async function updateAchievementProgress(
   achievementKey: string,
   newProgress: number,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<void> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get achievement
@@ -240,7 +247,7 @@ export async function updateAchievementProgress(
     .from('user_achievements')
     .upsert(
       {
-        user_id: userId,
+        user_id: resolvedUserId,
         achievement_id: achievement.id,
         current_progress: newProgress,
         is_unlocked: false,
@@ -315,41 +322,46 @@ export async function checkAndAwardAchievements(
 
 // Export helper for common checks
 export async function checkHabitAchievements(
-  userId: string,
   habitCount: number,
-  currentStreak: number
+  currentStreak: number,
+  userId?: string
 ): Promise<void> {
-  await checkAndAwardAchievements(userId, 'habit_count', { habit_count: habitCount });
-  await checkAndAwardAchievements(userId, 'habit_streak', { habit_streak: currentStreak });
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  await checkAndAwardAchievements(resolvedUserId, 'habit_count', { habit_count: habitCount });
+  await checkAndAwardAchievements(resolvedUserId, 'habit_streak', { habit_streak: currentStreak });
 }
 
 export async function checkBookAchievements(
-  userId: string,
-  booksRead: number
+  booksRead: number,
+  userId?: string
 ): Promise<void> {
-  await checkAndAwardAchievements(userId, 'book_count', { book_count: booksRead });
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  await checkAndAwardAchievements(resolvedUserId, 'book_count', { book_count: booksRead });
 }
 
 export async function checkCourseAchievements(
-  userId: string,
-  coursesCompleted: number
+  coursesCompleted: number,
+  userId?: string
 ): Promise<void> {
-  await checkAndAwardAchievements(userId, 'course_count', { course_count: coursesCompleted });
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  await checkAndAwardAchievements(resolvedUserId, 'course_count', { course_count: coursesCompleted });
 }
 
 export async function checkSavingsAchievements(
-  userId: string,
-  goalsAchieved: number
+  goalsAchieved: number,
+  userId?: string
 ): Promise<void> {
-  await checkAndAwardAchievements(userId, 'savings_goal', { savings_goal: goalsAchieved });
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  await checkAndAwardAchievements(resolvedUserId, 'savings_goal', { savings_goal: goalsAchieved });
 }
 
 export async function checkXPAchievements(
-  userId: string,
   factionId: string,
   factionXp: number,
-  totalXp: number
+  totalXp: number,
+  userId?: string
 ): Promise<void> {
-  await checkAndAwardAchievements(userId, 'faction_xp', { faction_xp: factionXp });
-  await checkAndAwardAchievements(userId, 'total_xp', { total_xp: totalXp });
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  await checkAndAwardAchievements(resolvedUserId, 'faction_xp', { faction_xp: factionXp });
+  await checkAndAwardAchievements(resolvedUserId, 'total_xp', { total_xp: totalXp });
 }

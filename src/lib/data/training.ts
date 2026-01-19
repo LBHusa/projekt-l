@@ -20,8 +20,9 @@ import type {
 } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // EXERCISES
@@ -31,8 +32,9 @@ const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
  * Get all exercises (standard + custom)
  */
 export async function getExercises(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Exercise[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
@@ -55,8 +57,9 @@ export async function getExercises(
  */
 export async function getExercisesByMuscleGroup(
   muscleGroup: MuscleGroup,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Exercise[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
@@ -79,8 +82,9 @@ export async function getExercisesByMuscleGroup(
  */
 export async function getExercisesByEquipment(
   equipment: Equipment,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Exercise[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
@@ -106,8 +110,9 @@ export async function createCustomExercise(
   muscleGroup: MuscleGroup,
   equipment?: Equipment,
   description?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Exercise> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
@@ -141,14 +146,15 @@ export async function createCustomExercise(
 export async function startWorkoutSession(
   workoutType: WorkoutSessionType,
   name?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<WorkoutSession> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('workout_sessions')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       name: name || null,
       workout_type: workoutType,
       started_at: new Date().toISOString(),
@@ -169,7 +175,7 @@ export async function startWorkoutSession(
  */
 export async function endWorkoutSession(
   workoutId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<{ session: WorkoutSession; xpEarned: number }> {
   const supabase = createBrowserClient();
 
@@ -229,14 +235,15 @@ export async function endWorkoutSession(
  */
 export async function getWorkoutHistory(
   limit: number = 10,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<WorkoutSession[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('workout_sessions')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .not('ended_at', 'is', null)
     .order('started_at', { ascending: false })
     .limit(limit);
@@ -253,14 +260,15 @@ export async function getWorkoutHistory(
  * Get active (unfinished) workout
  */
 export async function getActiveWorkout(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<WorkoutSession | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('workout_sessions')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .is('ended_at', null)
     .order('started_at', { ascending: false })
     .limit(1)
@@ -513,14 +521,15 @@ export async function deleteSet(setId: string): Promise<void> {
  * Get personal records for all exercises
  */
 export async function getPersonalRecords(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<PersonalRecord[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('personal_records')
     .select('*')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error fetching personal records:', error);
@@ -534,15 +543,16 @@ export async function getPersonalRecords(
  * Get workout statistics
  */
 export async function getWorkoutStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<WorkoutStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get all completed workouts
   const { data: workouts, error } = await supabase
     .from('workout_sessions')
     .select('id, duration_minutes, xp_earned, started_at')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .not('ended_at', 'is', null);
 
   if (error) {

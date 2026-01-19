@@ -3,8 +3,9 @@
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 export interface HabitReminder {
   id: string;
@@ -52,14 +53,15 @@ export async function getHabitReminders(
  * Get all reminders for current user
  */
 export async function getUserReminders(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HabitReminder[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('habit_reminders')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('enabled', true)
     .order('reminder_time');
 
@@ -76,15 +78,16 @@ export async function getUserReminders(
  */
 export async function createHabitReminder(
   input: CreateHabitReminderInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HabitReminder> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('habit_reminders')
     .insert({
       habit_id: input.habit_id,
-      user_id: userId,
+      user_id: resolvedUserId,
       reminder_time: input.reminder_time,
       days_of_week: input.days_of_week || ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       label: input.label || null,

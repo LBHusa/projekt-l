@@ -4,6 +4,7 @@
  */
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type {
   Workout,
   WorkoutType,
@@ -13,7 +14,7 @@ import type {
   MetricType,
 } from '@/lib/database.types';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 const FACTION_ID = 'koerper';
 
 // =============================================
@@ -68,7 +69,7 @@ export async function getWorkouts(
   const { data, error } = await supabase
     .from('workouts')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('occurred_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -90,7 +91,7 @@ export async function getWorkout(id: string): Promise<Workout | null> {
     .from('workouts')
     .select('*')
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .single();
 
   if (error) {
@@ -113,7 +114,7 @@ export async function getRecentWorkouts(days: number = 30): Promise<Workout[]> {
   const { data, error } = await supabase
     .from('workouts')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .gte('occurred_at', startDate.toISOString())
     .order('occurred_at', { ascending: false });
 
@@ -134,7 +135,7 @@ export async function getWorkoutsByType(type: WorkoutType): Promise<Workout[]> {
   const { data, error } = await supabase
     .from('workouts')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('workout_type', type)
     .order('occurred_at', { ascending: false });
 
@@ -248,8 +249,9 @@ function calculateWorkoutXP(data: WorkoutFormData): number {
  */
 export async function createWorkout(
   data: WorkoutFormData,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Workout | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const xpGained = calculateWorkoutXP(data);
@@ -257,7 +259,7 @@ export async function createWorkout(
   const { data: workout, error } = await supabase
     .from('workouts')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       name: data.name,
       workout_type: data.workout_type,
       duration_minutes: data.duration_minutes || null,
@@ -303,7 +305,7 @@ export async function updateWorkout(
         : {}),
     })
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 
@@ -325,7 +327,7 @@ export async function deleteWorkout(id: string): Promise<boolean> {
     .from('workouts')
     .delete()
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error deleting workout:', error);
@@ -343,7 +345,7 @@ async function logWorkoutActivity(workout: Workout, xpGained: number): Promise<v
 
   // Log to activity_log
   await supabase.from('activity_log').insert({
-    user_id: TEST_USER_ID,
+    user_id: await getUserIdOrCurrent(),
     activity_type: 'workout_logged',
     title: `${workout.name} absolviert`,
     description: workout.duration_minutes
@@ -359,7 +361,7 @@ async function logWorkoutActivity(workout: Workout, xpGained: number): Promise<v
   const { data: currentStats } = await supabase
     .from('user_faction_stats')
     .select('total_xp')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('faction_id', FACTION_ID)
     .single();
 
@@ -371,7 +373,7 @@ async function logWorkoutActivity(workout: Workout, xpGained: number): Promise<v
         total_xp: newXP,
         level: Math.floor(newXP / 100) + 1,
       })
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', await getUserIdOrCurrent())
       .eq('faction_id', FACTION_ID);
   }
 }
@@ -389,7 +391,7 @@ export async function getBodyMetrics(limit: number = 50): Promise<BodyMetric[]> 
   const { data, error } = await supabase
     .from('body_metrics')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('measured_at', { ascending: false })
     .limit(limit);
 
@@ -411,7 +413,7 @@ export async function getBodyMetric(id: string): Promise<BodyMetric | null> {
     .from('body_metrics')
     .select('*')
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .single();
 
   if (error) {
@@ -439,7 +441,7 @@ export async function getLatestMetrics(): Promise<Record<MetricType, BodyMetric 
     const { data, error } = await supabase
       .from('body_metrics')
       .select('*')
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', await getUserIdOrCurrent())
       .eq('metric_type', type)
       .order('measured_at', { ascending: false })
       .limit(1)
@@ -466,7 +468,7 @@ export async function getMetricHistory(
   const { data, error } = await supabase
     .from('body_metrics')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('metric_type', type)
     .gte('measured_at', startDate.toISOString().split('T')[0])
     .order('measured_at', { ascending: true });
@@ -511,7 +513,7 @@ export async function createBodyMetric(
   const { data: metric, error } = await supabase
     .from('body_metrics')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       metric_type: data.metric_type,
       value: data.value,
       unit: data.unit || getDefaultUnit(data.metric_type),
@@ -547,7 +549,7 @@ export async function updateBodyMetric(
     .from('body_metrics')
     .update(data)
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 
@@ -569,7 +571,7 @@ export async function deleteBodyMetric(id: string): Promise<boolean> {
     .from('body_metrics')
     .delete()
     .eq('id', id)
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error deleting body metric:', error);
@@ -597,7 +599,7 @@ async function logMetricActivity(metric: BodyMetric): Promise<void> {
   };
 
   await supabase.from('activity_log').insert({
-    user_id: TEST_USER_ID,
+    user_id: await getUserIdOrCurrent(),
     activity_type: 'xp_gained',
     title: `${labels[metric.metric_type]} erfasst`,
     description: `${metric.value} ${metric.unit}`,
@@ -613,7 +615,7 @@ async function logMetricActivity(metric: BodyMetric): Promise<void> {
   const { data: currentStats } = await supabase
     .from('user_faction_stats')
     .select('total_xp')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('faction_id', FACTION_ID)
     .single();
 
@@ -625,7 +627,7 @@ async function logMetricActivity(metric: BodyMetric): Promise<void> {
         total_xp: newXP,
         level: Math.floor(newXP / 100) + 1,
       })
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', await getUserIdOrCurrent())
       .eq('faction_id', FACTION_ID);
   }
 }

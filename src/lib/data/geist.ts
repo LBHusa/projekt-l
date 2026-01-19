@@ -13,8 +13,9 @@ import type {
 } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // MOOD LOGS
@@ -26,8 +27,9 @@ const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 export async function saveMoodLog(
   mood: MoodValue,
   note?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<MoodLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const response = await fetch("/api/geist/mood", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -50,8 +52,9 @@ export async function saveMoodLog(
 export async function getMoodHistory(
   limit: number = 30,
   daysBack: number = 30,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<MoodLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   try {
     const response = await fetch(`/api/geist/mood?userId=${userId}&limit=${limit}&daysBack=${daysBack}`);
     if (!response.ok) {
@@ -70,8 +73,9 @@ export async function getMoodHistory(
  * Get today's mood (if logged)
  */
 export async function getTodaysMood(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<MoodLog | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   try {
     // Use getMoodHistory with 1 day back, limit 1
     const history = await getMoodHistory(1, 1, userId);
@@ -97,8 +101,9 @@ export async function getTodaysMood(
  */
 export async function getMoodStats(
   daysBack: number = 30,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<MoodStats | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   try {
     const response = await fetch(`/api/geist/stats?userId=${userId}&days=${daysBack}`);
     if (!response.ok) {
@@ -123,14 +128,15 @@ export async function getMoodStats(
 export async function saveJournalEntry(
   content: string,
   prompt?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<JournalEntry> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('journal_entries')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       content,
       prompt: prompt || null,
     })
@@ -174,14 +180,15 @@ export async function saveJournalEntry(
  */
 export async function getJournalEntries(
   limit: number = 10,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<JournalEntry[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('journal_entries')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -241,8 +248,9 @@ export async function deleteJournalEntry(entryId: string): Promise<void> {
  * Get combined Geist stats
  */
 export async function getGeistStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<GeistStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get mood stats
@@ -255,7 +263,7 @@ export async function getGeistStats(
   const { data: journalData, error: journalError } = await supabase
     .from('journal_entries')
     .select('word_count')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (journalError && journalError.code !== 'PGRST116') {
     console.error('Error fetching journal stats:', journalError);
@@ -276,7 +284,7 @@ export async function getGeistStats(
  * Get weekly mood data for chart
  */
 export async function getWeeklyMoodData(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<{ date: string; mood: MoodValue; score: number }[]> {
   const moods = await getMoodHistory(7, 7, userId);
 
@@ -366,8 +374,9 @@ export function getRandomPrompt(): string {
  */
 export async function getMentalStatsHistory(
   daysBack: number = 30,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<import('@/lib/database.types').MentalStatsChartData[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const startDate = new Date();
@@ -376,7 +385,7 @@ export async function getMentalStatsHistory(
   const { data, error } = await supabase
     .from('mental_stats_logs')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: true });
 

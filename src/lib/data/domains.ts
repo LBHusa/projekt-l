@@ -1,8 +1,9 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { SkillDomain, SkillDomainFaction, SkillDomainWithFactions, FactionId } from '@/lib/database.types';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // Default test user ID (for MVP without auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // SKILL DOMAINS DATA ACCESS
@@ -244,8 +245,9 @@ export async function createDomainWithFactions(
     description?: string;
   },
   factions: { faction_id: FactionId; weight: number; is_primary: boolean }[],
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SkillDomainWithFactions> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   // Transform factions to API format
   const factionData = factions.map(f => ({
     factionId: f.faction_id,

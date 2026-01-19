@@ -3,21 +3,23 @@ import type { UserSkill, UserSkillFull, Experience, UserProfile, FactionId, XpDi
 import { addXp, xpForLevel } from '@/lib/xp';
 import { getFactionForSkill, updateFactionStats } from './factions';
 import { getDomainFactions, getPrimaryFactionForDomain } from './domains';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // USER SKILLS DATA ACCESS
 // ============================================
 
 // Default test user ID (for MVP without auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
-export async function getUserSkills(userId: string = TEST_USER_ID): Promise<UserSkillFull[]> {
+export async function getUserSkills(userId?: string): Promise<UserSkillFull[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('user_skills_full')
     .select('*')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error fetching user skills:', error);
@@ -29,15 +31,16 @@ export async function getUserSkills(userId: string = TEST_USER_ID): Promise<User
 
 export async function getUserSkillsByDomain(
   domainId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserSkillFull[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get skills for domain with user progress
   const { data, error } = await supabase
     .from('user_skills_full')
     .select('*')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error fetching user skills:', error);
@@ -51,14 +54,15 @@ export async function getUserSkillsByDomain(
 
 export async function getUserSkillForSkill(
   skillId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserSkill | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('user_skills')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('skill_id', skillId)
     .single();
 
@@ -78,8 +82,9 @@ export const getUserSkillBySkillId = getUserSkillForSkill;
 
 export async function ensureUserSkill(
   skillId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserSkill> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Try to get existing
@@ -92,7 +97,7 @@ export async function ensureUserSkill(
   const { data, error } = await supabase
     .from('user_skills')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       skill_id: skillId,
       level: 1,
       current_xp: 0,
@@ -129,9 +134,10 @@ export async function addXpToSkill(
   skillId: string,
   xpAmount: number,
   description: string,
-  userId: string = TEST_USER_ID,
+  userId?: string,
   factionOverride?: FactionId
 ): Promise<AddXpResult> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   // Use API route to bypass RLS
   const response = await fetch("/api/skills/xp", {
     method: "POST",
@@ -291,15 +297,16 @@ async function propagateXpToParent(
 
 export async function getExperiencesForSkill(
   skillId: string,
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 10
 ): Promise<Experience[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('experiences')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('skill_id', skillId)
     .order('date', { ascending: false })
     .limit(limit);
@@ -313,15 +320,16 @@ export async function getExperiencesForSkill(
 }
 
 export async function getRecentExperiences(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 10
 ): Promise<Experience[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('experiences')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -337,13 +345,14 @@ export async function getRecentExperiences(
 // USER PROFILE DATA ACCESS
 // ============================================
 
-export async function getUserProfile(userId: string = TEST_USER_ID): Promise<UserProfile | null> {
+export async function getUserProfile(userId?: string): Promise<UserProfile | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .single();
 
   if (error) {
@@ -406,14 +415,15 @@ export async function getTotalSkillCount(): Promise<number> {
  * Get the count of skills the user has interacted with
  */
 export async function getUserActiveSkillCount(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<number> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { count, error } = await supabase
     .from('user_skills')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error counting user skills:', error);
@@ -425,7 +435,7 @@ export async function getUserActiveSkillCount(
 
 export async function getDomainStats(
   domainId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<{
   totalSkills: number;
   activeSkills: number;
@@ -433,6 +443,7 @@ export async function getDomainStats(
   totalXp: number;
 }> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   // Get skills count in domain
   const { count: totalSkills } = await supabase
@@ -460,7 +471,7 @@ export async function getDomainStats(
   const { data: userSkills } = await supabase
     .from('user_skills')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .in('skill_id', skillIds);
 
   if (!userSkills || userSkills.length === 0) {
@@ -520,8 +531,9 @@ const FACTION_TO_ATTR: Record<FactionId, keyof UserAttributes> = {
  * Maps faction activity to RPG attributes (STR, DEX, INT, CHA, WIS, VIT)
  */
 export async function calculateAttributes(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<UserAttributes> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const thirtyDaysAgo = new Date();
@@ -530,7 +542,7 @@ export async function calculateAttributes(
   const { data: experiences } = await supabase
     .from('experiences')
     .select('faction_id, xp_gained')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
     .not('faction_id', 'is', null);
 

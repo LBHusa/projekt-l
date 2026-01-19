@@ -29,7 +29,7 @@ import type {
 import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // DEPRECATED: Will be removed. Use getUserIdOrCurrent() instead
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // =============================================
 // NET WORTH
@@ -41,7 +41,7 @@ export async function getNetWorth(): Promise<UserNetWorth | null> {
   const { data, error } = await supabase
     .from('user_net_worth')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .maybeSingle();
 
   if (error) {
@@ -58,7 +58,7 @@ export async function getNetWorthExtended(): Promise<UserNetWorthExtended | null
   const { data, error } = await supabase
     .from('user_net_worth_extended')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .maybeSingle();
 
   if (error) {
@@ -91,7 +91,7 @@ export async function getNetWorthHistory(months: number = 12): Promise<NetWorthH
   const { data, error } = await supabase
     .from('net_worth_history')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .gte('recorded_at', startDate.toISOString().split('T')[0])
     .order('recorded_at', { ascending: true });
 
@@ -107,13 +107,14 @@ export async function getNetWorthHistory(months: number = 12): Promise<NetWorthH
 // ACCOUNTS
 // =============================================
 
-export async function getAccounts(userId: string = TEST_USER_ID): Promise<Account[]> {
+export async function getAccounts(userId?: string): Promise<Account[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('accounts')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('is_active', true)
     .order('account_type', { ascending: true })
     .order('name', { ascending: true });
@@ -150,7 +151,7 @@ export async function createAccount(account: Omit<Account, 'id' | 'user_id' | 'c
     .from('accounts')
     .insert({
       ...account,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
     })
     .select()
     .single();
@@ -202,7 +203,7 @@ export async function getTransactions(
   let query = supabase
     .from('transactions')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('occurred_at', { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -254,7 +255,7 @@ export async function getTransactionsByCategory(
   const { data, error } = await supabase
     .from('transactions')
     .select('category, transaction_type, amount')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .gte('occurred_at', startDate)
     .lt('occurred_at', endDate);
 
@@ -282,15 +283,16 @@ export async function getTransactionsByCategory(
 
 export async function createTransaction(
   transaction: Omit<Transaction, 'id' | 'user_id' | 'created_at'>,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Transaction | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('transactions')
     .insert({
       ...transaction,
-      user_id: userId,
+      user_id: resolvedUserId,
     })
     .select()
     .single();
@@ -342,8 +344,9 @@ function calculateNextDate(current: string, frequency: string): string {
  * Creates new transaction instances and updates next_occurrence
  */
 export async function processRecurringTransactions(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Transaction[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
   const today = new Date().toISOString().split('T')[0];
 
@@ -351,7 +354,7 @@ export async function processRecurringTransactions(
   const { data: dueTransactions, error } = await supabase
     .from('transactions')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('is_recurring', true)
     .lte('next_occurrence', today)
     .or('recurrence_end_date.is.null,recurrence_end_date.gte.' + today);
@@ -410,14 +413,15 @@ export async function processRecurringTransactions(
  * Get all recurring transactions (templates)
  */
 export async function getRecurringTransactions(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Transaction[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('transactions')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('is_recurring', true)
     .order('next_occurrence', { ascending: true });
 
@@ -437,7 +441,7 @@ export async function getMonthlyCashflow(year: number, month: number): Promise<M
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase.rpc('get_monthly_cashflow', {
-    p_user_id: TEST_USER_ID,
+    p_user_id: await getUserIdOrCurrent(),
     p_year: year,
     p_month: month,
   });
@@ -579,7 +583,7 @@ export async function getTransactionCategories(): Promise<TransactionCategory[]>
   const { data, error } = await supabase
     .from('transaction_categories')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('is_active', true)
     .order('display_order', { ascending: true });
 
@@ -614,7 +618,7 @@ export async function getSavingsGoals(): Promise<SavingsGoal[]> {
   const { data, error } = await supabase
     .from('savings_goals')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -631,7 +635,7 @@ export async function getSavingsGoalsWithProgress(): Promise<SavingsGoalProgress
   const { data, error } = await supabase
     .from('savings_goals_progress')
     .select('*')
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error fetching savings goals progress:', error);
@@ -663,7 +667,7 @@ export async function createSavingsGoal(
     .from('savings_goals')
     .insert({
       ...goal,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
     })
     .select()
     .single();
@@ -716,7 +720,7 @@ export async function updateSavingsGoalAmount(id: string, amount: number): Promi
 
     // Update faction stats with XP
     try {
-      await updateFactionStats('finanzen', xpGained, TEST_USER_ID);
+      await updateFactionStats('finanzen', xpGained, await getUserIdOrCurrent());
     } catch (err) {
       console.error('Error updating finanzen faction stats:', err);
     }
@@ -724,7 +728,7 @@ export async function updateSavingsGoalAmount(id: string, amount: number): Promi
     // Log activity for feed
     try {
       await logActivity({
-        userId: TEST_USER_ID,
+        userId: await getUserIdOrCurrent(),
         activityType: 'goal_achieved',
         factionId: 'finanzen',
         title: `Sparziel erreicht: "${previousGoal.name}"`,
@@ -813,7 +817,7 @@ export async function getFinanceAchievements(): Promise<FinanceAchievement[]> {
   const { data, error } = await supabase
     .from('finance_achievements')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('unlocked_at', { ascending: false });
 
   if (error) {
@@ -837,7 +841,7 @@ export async function unlockAchievement(
   const { data, error } = await supabase
     .from('finance_achievements')
     .upsert({
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       achievement_key: key,
       achievement_type: type,
       title,
@@ -868,7 +872,7 @@ export async function getFinanceStreaks(): Promise<FinanceStreak[]> {
   const { data, error } = await supabase
     .from('finance_streaks')
     .select('*')
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error fetching finance streaks:', error);
@@ -888,7 +892,7 @@ export async function updateStreak(
   const { data: current } = await supabase
     .from('finance_streaks')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('streak_type', streakType)
     .maybeSingle();
 
@@ -899,7 +903,7 @@ export async function updateStreak(
     const { data, error } = await supabase
       .from('finance_streaks')
       .insert({
-        user_id: TEST_USER_ID,
+        user_id: await getUserIdOrCurrent(),
         streak_type: streakType,
         current_streak: success ? 1 : 0,
         longest_streak: success ? 1 : 0,
@@ -1044,7 +1048,7 @@ export async function getInvestments(): Promise<Investment[]> {
   const { data, error } = await supabase
     .from('investments')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('name', { ascending: true });
 
   if (error) {
@@ -1079,7 +1083,7 @@ export async function getBudgets(): Promise<Budget[]> {
   const { data, error } = await supabase
     .from('budgets')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('is_active', true)
     .order('category', { ascending: true });
 
@@ -1122,7 +1126,7 @@ export async function createBudget(input: {
     .from('budgets')
     .insert({
       ...input,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       is_active: true,
     })
     .select()
@@ -1183,7 +1187,7 @@ export async function getRecurringFlows(): Promise<RecurringFlow[]> {
   const { data, error } = await supabase
     .from('recurring_flows')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('is_active', true)
     .order('name', { ascending: true });
 
@@ -1223,7 +1227,7 @@ export async function createRecurringFlow(flow: RecurringFlowCreate): Promise<Re
     .from('recurring_flows')
     .insert({
       ...flow,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       start_date: startDate.toISOString().split('T')[0],
       next_due_date: nextDueDate.toISOString().split('T')[0],
     })
@@ -1439,7 +1443,7 @@ export async function importTransactions(
 
     const { error } = await supabase.from('transactions').insert({
       account_id: accountId,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       transaction_type: tx.amount >= 0 ? 'income' : 'expense',
       category: tx.category,
       amount: Math.abs(tx.amount),

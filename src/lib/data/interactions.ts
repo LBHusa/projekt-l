@@ -3,6 +3,7 @@
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type {
   ContactInteraction,
   InteractionFormData,
@@ -15,7 +16,7 @@ import {
   calculateInteractionXp,
 } from '@/lib/types/contacts';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // CRUD Operations
@@ -51,7 +52,7 @@ export async function getRecentInteractions(days: number = 7): Promise<ContactIn
   const { data, error } = await supabase
     .from('contact_interactions')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .gte('occurred_at', cutoffDate.toISOString())
     .order('occurred_at', { ascending: false });
 
@@ -95,7 +96,7 @@ export async function createInteraction(formData: InteractionFormData): Promise<
     .from('contact_interactions')
     .insert({
       contact_id: formData.contact_id,
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       interaction_type: formData.interaction_type,
       title: formData.title || null,
       description: formData.description || null,
@@ -294,7 +295,7 @@ export async function getGlobalInteractionStats(): Promise<{
   const { data, error } = await supabase
     .from('contact_interactions')
     .select('*')
-    .eq('user_id', TEST_USER_ID);
+    .eq('user_id', await getUserIdOrCurrent());
 
   if (error) {
     console.error('Error fetching global interaction stats:', error);
@@ -377,7 +378,7 @@ export async function getRecentInteractionsWithContacts(
       )
     `
     )
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('occurred_at', { ascending: false })
     .limit(limit);
 

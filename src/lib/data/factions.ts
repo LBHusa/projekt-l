@@ -118,6 +118,7 @@ export async function getUserFactionStat(
 export async function getFactionsWithStats(
   userId?: string
 ): Promise<FactionWithStats[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const factions = await getAllFactions();
   const stats = await getUserFactionStats(userId);
 
@@ -219,7 +220,7 @@ export function factionLevelProgress(totalXp: number): number {
   const nextLevelXp = xpForFactionLevel(currentLevel + 1);
   const xpInLevel = totalXp - currentLevelXp;
   const xpNeeded = nextLevelXp - currentLevelXp;
-  return Math.min(100, Math.round((xpInLevel / xpNeeded) * 100));
+  return Math.min(100, Math.max(0, Math.round((xpInLevel / xpNeeded) * 100)));
 }
 
 // ============================================

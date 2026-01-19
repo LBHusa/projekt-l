@@ -3,6 +3,7 @@
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type {
   NotificationSettings,
   NotificationSettingsFormData,
@@ -10,7 +11,7 @@ import type {
 } from '@/lib/types/notifications';
 
 // Test-User ID (TODO: Replace with auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 /**
  * Get notification settings for current user
@@ -21,7 +22,7 @@ export async function getNotificationSettings(): Promise<NotificationSettings | 
   const { data, error } = await supabase
     .from('notification_settings')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .single();
 
   if (error) {
@@ -47,7 +48,7 @@ export async function createNotificationSettings(
   const { data, error } = await supabase
     .from('notification_settings')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       ...settings,
     })
     .select()
@@ -78,7 +79,7 @@ export async function updateNotificationSettings(
   const { data, error } = await supabase
     .from('notification_settings')
     .update(updates)
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 
@@ -114,7 +115,7 @@ export async function removePushSubscription(): Promise<NotificationSettings> {
       push_enabled: false,
       push_subscription: null,
     })
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 
@@ -150,7 +151,7 @@ export async function removeTelegramConnection(): Promise<NotificationSettings> 
       telegram_enabled: false,
       telegram_chat_id: null,
     })
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .select()
     .single();
 

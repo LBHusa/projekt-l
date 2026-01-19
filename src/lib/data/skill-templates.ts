@@ -4,9 +4,10 @@
 // ============================================
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // Default test user ID (for MVP without auth)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // Types
@@ -141,7 +142,7 @@ export async function getTemplateCategories(): Promise<{ category: string; count
  */
 export async function applyTemplate(
   templateId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<{ domainId: string; skillCount: number } | null> {
   const supabase = createBrowserClient();
 
@@ -232,8 +233,9 @@ export async function createTemplateFromDomain(
   name: string,
   description: string,
   category: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SkillTemplate | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get domain
@@ -309,8 +311,9 @@ export async function createTemplateFromDomain(
  */
 export async function deleteTemplate(
   templateId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<boolean> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Only delete if user created it or it's not official

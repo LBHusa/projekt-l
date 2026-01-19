@@ -6,8 +6,9 @@
 import { createBrowserClient } from '@/lib/supabase';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // TEMPORARY TYPES (until migration is ready)
@@ -564,7 +565,7 @@ export async function validateApiKey(apiKey: string): Promise<string | null> {
   // Note: This will query health_api_keys table once migration is ready
   // For now, we'll check against environment variable
   if (process.env.HEALTH_IMPORT_API_KEY && apiKey === process.env.HEALTH_IMPORT_API_KEY) {
-    return TEST_USER_ID;
+    return await getUserIdOrCurrent();
   }
 
   // When migration is ready, use this:

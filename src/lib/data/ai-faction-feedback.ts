@@ -5,8 +5,9 @@
 
 import { createBrowserClient } from '@/lib/supabase';
 import type { FactionId } from '@/lib/database.types';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // TYPES
@@ -68,8 +69,9 @@ export interface ConfusionMatrixEntry {
  */
 export async function createFactionFeedback(
   input: CreateFeedbackInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<AiFactionFeedback> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const timestamp = input.activity_timestamp || new Date();
@@ -77,7 +79,7 @@ export async function createFactionFeedback(
   const { data, error } = await supabase
     .from('ai_faction_suggestions_feedback')
     .insert({
-      user_id: userId,
+      user_id: resolvedUserId,
       activity_description: input.activity_description,
       activity_timestamp: timestamp.toISOString(),
       activity_hour: timestamp.getHours(),
@@ -109,15 +111,16 @@ export async function createFactionFeedback(
  * Get user's faction feedback history
  */
 export async function getFactionFeedback(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 100
 ): Promise<AiFactionFeedback[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('ai_faction_suggestions_feedback')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('activity_timestamp', { ascending: false })
     .limit(limit);
 
@@ -133,14 +136,15 @@ export async function getFactionFeedback(
  * Get suggestion accuracy stats for a user
  */
 export async function getSuggestionAccuracy(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<SuggestionAccuracy | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('ai_faction_suggestion_accuracy')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .maybeSingle();
 
   if (error) {
@@ -173,15 +177,16 @@ export async function getConfusionMatrix(): Promise<ConfusionMatrixEntry[]> {
  * Get recent activities that can help with context (last N activities)
  */
 export async function getRecentActivities(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 5
 ): Promise<string[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('activity_log')
     .select('title, description')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -201,14 +206,15 @@ export async function getRecentActivities(
  * Get feedback grouped by hour of day
  */
 export async function getFeedbackByHour(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Record<number, { total: number; accepted: number }>> {
   const supabase = createBrowserClient();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('ai_faction_suggestions_feedback')
     .select('activity_hour, accepted')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error fetching feedback by hour:', error);
@@ -234,14 +240,15 @@ export async function getFeedbackByHour(
  * Get most commonly suggested factions for a user
  */
 export async function getCommonSuggestions(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Array<{ faction_id: FactionId; count: number; acceptance_rate: number }>> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('ai_faction_suggestions_feedback')
     .select('suggested_faction_id, accepted')
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   if (error) {
     console.error('Error fetching common suggestions:', error);

@@ -13,18 +13,20 @@ import type {
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
 import { checkHabitAchievements } from './achievements';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // HABITS DATA ACCESS
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // READ OPERATIONS
 // ============================================
 
-export async function getHabits(userId: string = TEST_USER_ID): Promise<Habit[]> {
+export async function getHabits(userId?: string): Promise<Habit[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   try {
     const response = await fetch(`/api/habits/list?userId=${userId}`);
     if (!response.ok) {
@@ -58,9 +60,10 @@ export async function getHabit(habitId: string): Promise<Habit | null> {
 }
 
 export async function getHabitsWithLogs(
-  userId: string = TEST_USER_ID,
+  userId?: string,
   daysBack: number = 7
 ): Promise<HabitWithLogs[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   // Get habits
@@ -73,7 +76,7 @@ export async function getHabitsWithLogs(
   const { data: logs, error } = await supabase
     .from('habit_logs')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('logged_at', startDate.toISOString())
     .order('logged_at', { ascending: false });
 
@@ -99,7 +102,8 @@ export async function getHabitsWithLogs(
   });
 }
 
-export async function getTodaysHabits(userId: string = TEST_USER_ID): Promise<HabitWithLogs[]> {
+export async function getTodaysHabits(userId?: string): Promise<HabitWithLogs[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const habits = await getHabitsWithLogs(userId, 1);
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
 
@@ -114,14 +118,15 @@ export async function getTodaysHabits(userId: string = TEST_USER_ID): Promise<Ha
 
 export async function getHabitsByFaction(
   factionId: FactionId,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Habit[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('habits')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('faction_id', factionId)
     .eq('is_active', true)
     .order('created_at', { ascending: false });
@@ -156,8 +161,9 @@ export interface CreateHabitInput {
  */
 export async function createHabit(
   input: CreateHabitInput,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<Habit> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   // Transform factions to API format
   const factions = input.factions?.map(f => ({
     factionId: f.faction_id,
@@ -279,8 +285,9 @@ export async function logHabitCompletion(
   habitId: string,
   completed: boolean = true,
   notes?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<LogHabitResult> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const response = await fetch('/api/habits/complete', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -305,15 +312,16 @@ export async function logHabitCompletion(
 export async function getHabitLogs(
   habitId: string,
   limit: number = 30,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<HabitLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('habit_logs')
     .select('*')
     .eq('habit_id', habitId)
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('logged_at', { ascending: false })
     .limit(limit);
 
@@ -338,7 +346,8 @@ export interface HabitStats {
   totalCompletions: number;
 }
 
-export async function getHabitStats(userId: string = TEST_USER_ID): Promise<HabitStats> {
+export async function getHabitStats(userId?: string): Promise<HabitStats> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const habits = await getHabitsWithLogs(userId, 1);
 
   const positiveHabits = habits.filter(h => h.habit_type === 'positive');
@@ -356,8 +365,9 @@ export async function getHabitStats(userId: string = TEST_USER_ID): Promise<Habi
 export async function getHabitCompletionRate(
   habitId: string,
   daysBack: number = 30,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<number> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const startDate = new Date();
@@ -367,7 +377,7 @@ export async function getHabitCompletionRate(
     .from('habit_logs')
     .select('completed')
     .eq('habit_id', habitId)
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('logged_at', startDate.toISOString());
 
   if (error) {
@@ -548,8 +558,9 @@ export async function removeHabitFaction(
 export async function distributeHabitXpToFactions(
   habitId: string,
   totalXp: number,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<void> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const factions = await getHabitFactions(habitId);
 
   for (const faction of factions) {
@@ -574,15 +585,16 @@ export async function logHabitWithTime(
   notes?: string,
   trigger?: string,
   context?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<void> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { error } = await supabase
     .from('habit_logs')
     .insert({
       habit_id: habitId,
-      user_id: userId,
+      user_id: resolvedUserId,
       completed: true,
       duration_minutes: durationMinutes,
       notes,
@@ -603,9 +615,9 @@ export async function logHabitWithTime(
   }
 
   // Check achievements
-  const totalHabits = await getHabits(userId);
-  const habitStats = await getHabitStats(userId);
-  await checkHabitAchievements(userId, totalHabits.length, habitStats.longestStreak);
+  const totalHabits = await getHabits(resolvedUserId);
+  const habitStats = await getHabitStats(resolvedUserId);
+  await checkHabitAchievements(totalHabits.length, habitStats.longestStreak, resolvedUserId);
 
   // Log activity
   await logActivity({
@@ -621,12 +633,13 @@ export async function logHabitWithTime(
 }
 
 export async function getTodayTimeStats(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<any[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
-    .rpc('get_today_time_summary', { p_user_id: userId });
+    .rpc('get_today_time_summary', { p_user_id: resolvedUserId });
 
   if (error) {
     // PGRST116 = no rows found, or RPC returns empty - graceful degradation
@@ -642,14 +655,15 @@ export async function getTodayTimeStats(
 
 export async function getDailyTimeStats(
   date: Date,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<any[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('daily_time_stats')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('log_date', date.toISOString().split('T')[0]);
 
   if (error) {
@@ -662,14 +676,15 @@ export async function getDailyTimeStats(
 
 export async function getWeeklyTimeStats(
   weekStart: Date,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<any[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('weekly_time_stats')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('week_start', weekStart.toISOString());
 
   if (error) {

@@ -1,11 +1,12 @@
 import { createBrowserClient } from '@/lib/supabase';
 import type { ActivityLog, ActivityType, FactionId } from '@/lib/database.types';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
 // ACTIVITY LOG DATA ACCESS
 // ============================================
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 
 // ============================================
 // READ OPERATIONS
@@ -13,14 +14,15 @@ const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 export async function getRecentActivity(
   limit: number = 10,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('activity_log')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .order('occurred_at', { ascending: false })
     .limit(limit);
 
@@ -34,15 +36,16 @@ export async function getRecentActivity(
 
 export async function getActivityByFaction(
   factionId: FactionId,
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 20
 ): Promise<ActivityLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('activity_log')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('faction_id', factionId)
     .order('occurred_at', { ascending: false })
     .limit(limit);
@@ -57,15 +60,16 @@ export async function getActivityByFaction(
 
 export async function getActivityByType(
   activityType: ActivityType,
-  userId: string = TEST_USER_ID,
+  userId?: string,
   limit: number = 20
 ): Promise<ActivityLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('activity_log')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('activity_type', activityType)
     .order('occurred_at', { ascending: false })
     .limit(limit);
@@ -81,14 +85,15 @@ export async function getActivityByType(
 export async function getActivityForDateRange(
   startDate: Date,
   endDate: Date,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const supabase = createBrowserClient();
 
   const { data, error } = await supabase
     .from('activity_log')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .gte('occurred_at', startDate.toISOString())
     .lte('occurred_at', endDate.toISOString())
     .order('occurred_at', { ascending: false });
@@ -102,8 +107,9 @@ export async function getActivityForDateRange(
 }
 
 export async function getTodaysActivity(
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -135,7 +141,7 @@ export async function logActivity(input: LogActivityInput): Promise<ActivityLog>
   const { data, error } = await supabase
     .from('activity_log')
     .insert({
-      user_id: input.userId || TEST_USER_ID,
+      user_id: input.userId || await getUserIdOrCurrent(),
       activity_type: input.activityType,
       faction_id: input.factionId || null,
       title: input.title,
@@ -170,8 +176,9 @@ export interface ActivitySummary {
 
 export async function getActivitySummary(
   daysBack: number = 7,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivitySummary> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - daysBack);
 
@@ -204,7 +211,7 @@ export async function getActivitySummary(
 
 export async function getDailyActivityCount(
   daysBack: number = 7,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<{ date: string; count: number; xp: number }[]> {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - daysBack);
@@ -250,8 +257,9 @@ export async function logXpGained(
   factionId?: FactionId,
   relatedEntityType?: string,
   relatedEntityId?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'xp_gained',
@@ -268,8 +276,9 @@ export async function logLevelUp(
   newLevel: number,
   factionId?: FactionId,
   skillId?: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'level_up',
@@ -287,8 +296,9 @@ export async function logWorkout(
   durationMinutes: number,
   xpGained: number,
   workoutId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'workout_logged',
@@ -307,8 +317,9 @@ export async function logBookFinished(
   rating: number | null,
   xpGained: number,
   bookId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'book_finished',
@@ -327,8 +338,9 @@ export async function logCourseCompleted(
   platform: string | null,
   xpGained: number,
   courseId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'course_completed',
@@ -345,8 +357,9 @@ export async function logJobStarted(
   company: string,
   position: string,
   jobId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'job_started',
@@ -361,8 +374,9 @@ export async function logSalaryUpdate(
   amount: number,
   currency: string,
   jobId: string | null,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'salary_updated',
@@ -378,8 +392,9 @@ export async function logGoalAchieved(
   goalTitle: string,
   factionId: FactionId,
   goalId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'goal_achieved',
@@ -396,8 +411,9 @@ export async function logSocialEvent(
   participantCount: number,
   xpGained: number,
   eventId: string,
-  userId: string = TEST_USER_ID
+  userId?: string
 ): Promise<ActivityLog> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
   return logActivity({
     userId,
     activityType: 'event_logged',

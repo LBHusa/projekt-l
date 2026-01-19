@@ -4,6 +4,7 @@
  */
 
 import { createBrowserClient } from '@/lib/supabase';
+import { getUserIdOrCurrent } from '@/lib/auth-helper';
 import type {
   Exercise,
   WorkoutSession,
@@ -18,7 +19,7 @@ import type {
   SetType,
 } from '@/lib/database.types';
 
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+// await getUserIdOrCurrent() removed - now using getUserIdOrCurrent()
 const FACTION_ID = 'koerper';
 
 // =============================================
@@ -34,7 +35,7 @@ export async function getExercises(): Promise<Exercise[]> {
   const { data, error } = await supabase
     .from('exercises')
     .select('*')
-    .or(`is_custom.eq.false,created_by.eq.${TEST_USER_ID}`)
+    .or(`is_custom.eq.false,created_by.eq.${await getUserIdOrCurrent()}`)
     .order('muscle_group', { ascending: true })
     .order('name', { ascending: true });
 
@@ -58,7 +59,7 @@ export async function getExercisesByMuscleGroup(
     .from('exercises')
     .select('*')
     .eq('muscle_group', muscleGroup)
-    .or(`is_custom.eq.false,created_by.eq.${TEST_USER_ID}`)
+    .or(`is_custom.eq.false,created_by.eq.${await getUserIdOrCurrent()}`)
     .order('name', { ascending: true });
 
   if (error) {
@@ -88,7 +89,7 @@ export async function createCustomExercise(data: {
       equipment: data.equipment || null,
       description: data.description || null,
       is_custom: true,
-      created_by: TEST_USER_ID,
+      created_by: await getUserIdOrCurrent(),
     })
     .select()
     .single();
@@ -117,7 +118,7 @@ export async function startWorkoutSession(data: {
   const { data: session, error } = await supabase
     .from('workout_sessions')
     .insert({
-      user_id: TEST_USER_ID,
+      user_id: await getUserIdOrCurrent(),
       name: data.name || null,
       workout_type: data.workout_type,
       started_at: new Date().toISOString(),
@@ -172,7 +173,7 @@ export async function getWorkoutSessions(
   const { data, error } = await supabase
     .from('workout_sessions')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('started_at', { ascending: false })
     .limit(limit);
 
@@ -419,7 +420,7 @@ export async function getPersonalRecords(): Promise<PersonalRecord[]> {
   const { data, error } = await supabase
     .from('personal_records')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .order('max_weight', { ascending: false });
 
   if (error) {
@@ -441,7 +442,7 @@ export async function getExercisePR(
   const { data, error } = await supabase
     .from('personal_records')
     .select('*')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('exercise_id', exerciseId)
     .single();
 
@@ -474,7 +475,7 @@ async function logWorkoutSessionActivity(
 
   // Log to activity_log
   await supabase.from('activity_log').insert({
-    user_id: TEST_USER_ID,
+    user_id: await getUserIdOrCurrent(),
     activity_type: 'workout_logged',
     title: session.name || `${session.workout_type} Training`,
     description: session.duration_minutes
@@ -490,7 +491,7 @@ async function logWorkoutSessionActivity(
   const { data: currentStats } = await supabase
     .from('user_faction_stats')
     .select('total_xp')
-    .eq('user_id', TEST_USER_ID)
+    .eq('user_id', await getUserIdOrCurrent())
     .eq('faction_id', FACTION_ID)
     .single();
 
@@ -502,7 +503,7 @@ async function logWorkoutSessionActivity(
         total_xp: newXP,
         level: Math.floor(newXP / 100) + 1,
       })
-      .eq('user_id', TEST_USER_ID)
+      .eq('user_id', await getUserIdOrCurrent())
       .eq('faction_id', FACTION_ID);
   }
 }
