@@ -215,7 +215,7 @@ export default function HabitCompletionModal({
 
                     {/* Habit Info */}
                     <div className="flex-1 text-left">
-                      <div className="font-medium text-white">{habit.name}</div>
+                      <div className="font-medium text-adaptive">{habit.name}</div>
                       <div className="text-xs text-adaptive-muted">
                         +{habit.xp_per_completion} XP
                         {habit.current_streak > 0 && (

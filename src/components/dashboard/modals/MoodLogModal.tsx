@@ -101,7 +101,7 @@ export default function MoodLogModal({
             >
               {getMoodEmoji(selectedMood)}
             </motion.div>
-            <p className="text-lg font-semibold text-white">
+            <p className="text-lg font-semibold text-adaptive">
               Stimmung gespeichert!
             </p>
           </motion.div>
@@ -146,7 +146,7 @@ export default function MoodLogModal({
                       }`}
                     >
                       <span className="text-3xl">{getMoodEmoji(mood)}</span>
-                      <span className="flex-1 text-left font-medium text-white">
+                      <span className="flex-1 text-left font-medium text-adaptive">
                         {getMoodLabel(mood)}
                       </span>
                     </motion.button>

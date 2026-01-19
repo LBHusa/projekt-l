@@ -203,7 +203,7 @@ export function QuestMasterSidebar({ onClose }: QuestMasterSidebarProps) {
                     className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 hover:border-purple-500/50 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-medium text-white">{quest.title}</h3>
+                      <h3 className="font-medium text-adaptive">{quest.title}</h3>
                       <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(quest.difficulty)}`}>
                         {quest.difficulty}
                       </span>

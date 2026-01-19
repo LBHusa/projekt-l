@@ -80,7 +80,7 @@ export function InvestmentCard({ investment, onEdit, onDelete }: InvestmentCardP
               {getAssetTypeLabel(investment.asset_type)}
             </span>
           </div>
-          <h4 className="font-semibold text-white">{investment.name}</h4>
+          <h4 className="font-semibold text-adaptive">{investment.name}</h4>
         </div>
         <div className="flex gap-2">
           {onEdit && (

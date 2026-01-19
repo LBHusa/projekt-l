@@ -98,7 +98,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
               </div>
             </div>
             <div className="mt-2 text-sm text-adaptive-muted text-center">
-              Gesamt: <span className="font-medium text-white">{totalMinutes}</span> Minuten
+              Gesamt: <span className="font-medium text-adaptive">{totalMinutes}</span> Minuten
             </div>
 
             {/* Quick Select */}
@@ -189,7 +189,7 @@ export default function TimeLogModal({ habit, onSubmit, onCancel }: TimeLogModal
             <button
               type="submit"
               disabled={isSubmitting || totalMinutes <= 0}
-              className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-white"
+              className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-adaptive"
             >
               {isSubmitting ? 'Logge...' : 'Zeit loggen'}
             </button>

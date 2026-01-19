@@ -117,7 +117,7 @@ export default function HabitTemplateSelector({
                     <div className="flex items-start gap-3">
                       <div className="text-3xl flex-shrink-0">{template.icon}</div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold mb-1 truncate text-white">
+                        <h3 className="font-semibold mb-1 truncate text-adaptive">
                           {template.name}
                         </h3>
                         {template.description && (

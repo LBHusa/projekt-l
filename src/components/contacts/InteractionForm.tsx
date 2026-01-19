@@ -70,7 +70,7 @@ export default function InteractionForm({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <div>
-            <h2 className="text-lg font-semibold text-white">Neue Interaktion</h2>
+            <h2 className="text-lg font-semibold text-adaptive">Neue Interaktion</h2>
             <p className="text-sm text-adaptive-muted">mit {getDisplayName(contact)}</p>
           </div>
           <button
