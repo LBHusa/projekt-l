@@ -63,14 +63,14 @@ export default function Modal({
           onClick={handleOverlayClick}
         >
           <motion.div
-            className={`${sizeClasses[size]} w-full bg-[var(--background-secondary)] rounded-xl border border-[var(--orb-border)] shadow-2xl`}
+            className={`${sizeClasses[size]} w-full max-h-[90vh] flex flex-col bg-[var(--background-secondary)] rounded-xl border border-[var(--orb-border)] shadow-2xl`}
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--orb-border)]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--orb-border)] flex-shrink-0">
               <h2 className="text-lg font-semibold">{title}</h2>
               <motion.button
                 onClick={onClose}
@@ -82,8 +82,8 @@ export default function Modal({
               </motion.button>
             </div>
 
-            {/* Content */}
-            <div className="px-6 py-4">{children}</div>
+            {/* Content - scrollable */}
+            <div className="px-6 py-4 overflow-y-auto flex-1">{children}</div>
           </motion.div>
         </motion.div>
       )}
