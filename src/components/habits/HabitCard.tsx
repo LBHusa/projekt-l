@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, MoreVertical, Trash2, Edit2, Bell } from 'lucide-react';
+import { Check, X, MoreVertical, Trash2, Edit2, Bell, Shield } from 'lucide-react';
 import type { HabitWithLogs } from '@/lib/database.types';
 import HabitStreak from './HabitStreak';
 
@@ -58,7 +58,7 @@ export default function HabitCard({
               ? 'bg-green-500 text-white'
               : isPositive
               ? 'bg-white/10 text-adaptive-muted hover:bg-white/20'
-              : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
           } ${isLoading ? 'opacity-50' : ''}`}
         >
           {isCompleted ? (
@@ -66,7 +66,7 @@ export default function HabitCard({
           ) : isPositive ? (
             <span className="text-lg">{habit.icon}</span>
           ) : (
-            <X className="w-5 h-5" />
+            <Shield className="w-5 h-5" />
           )}
         </button>
 
@@ -194,7 +194,7 @@ export default function HabitCard({
             ? 'bg-green-500 text-white'
             : isPositive
             ? 'bg-white/10 hover:bg-white/20 text-white'
-            : 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30'
+            : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30'
         } ${isLoading ? 'opacity-50 cursor-wait' : ''}`}
       >
         {isLoading ? (
@@ -211,8 +211,8 @@ export default function HabitCard({
           </>
         ) : (
           <>
-            <X className="w-5 h-5" />
-            Rückfall loggen
+            <Shield className="w-5 h-5" />
+            Widerstanden
           </>
         )}
       </button>
