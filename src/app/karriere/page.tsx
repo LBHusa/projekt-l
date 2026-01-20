@@ -7,9 +7,11 @@ import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/comp
 import { JobTimeline, SalaryChart, SalaryTimeline, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import { getJobHistory, getSalaryHistory, getKarriereStats, getCareerGoals, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
+import { useAuth } from '@/hooks/useAuth';
 import type { FactionWithStats, JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
 
 export default function KarrierePage() {
+  const { userId } = useAuth();
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [jobs, setJobs] = useState<JobHistory[]>([]);
   const [salaries, setSalaries] = useState<(SalaryEntry & { job?: JobHistory })[]>([]);
@@ -71,7 +73,7 @@ export default function KarrierePage() {
 
   const handleJobSubmit = async (data: JobFormData) => {
     const { createJob, updateJob } = await import('@/lib/data/karriere');
-    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+    if (!userId) return;
 
     if (editingJob) {
       await updateJob(editingJob.id, data);
@@ -102,7 +104,7 @@ export default function KarrierePage() {
 
   const handleSalarySubmit = async (data: SalaryFormData) => {
     const { createSalaryEntry, updateSalaryEntry } = await import('@/lib/data/karriere');
-    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+    if (!userId) return;
 
     if (editingSalary) {
       await updateSalaryEntry(editingSalary.id, data);
@@ -128,7 +130,7 @@ export default function KarrierePage() {
 
   const handleGoalSubmit = async (data: CareerGoalFormData) => {
     const { createCareerGoal, updateCareerGoal } = await import('@/lib/data/karriere');
-    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+    if (!userId) return;
 
     if (editingGoal) {
       await updateCareerGoal(editingGoal.id, data);

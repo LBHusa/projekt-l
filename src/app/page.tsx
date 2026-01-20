@@ -68,6 +68,7 @@ const DEFAULT_MENTAL_STATS: MentalStats = {
 interface UserProfileState {
   username: string | null;
   avatarUrl: string | null;
+  avatarSeed: string | null;
   totalLevel: number;
   totalXp: number;
   attributes: UserAttributes;
@@ -88,6 +89,7 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState<UserProfileState>({
     username: null,
     avatarUrl: null,
+    avatarSeed: null,
     totalLevel: 1,
     totalXp: 0,
     attributes: DEFAULT_ATTRIBUTES,
@@ -149,6 +151,7 @@ export default function Dashboard() {
         setUserProfile({
           username: profile.username,
           avatarUrl: profile.avatar_url,
+          avatarSeed: profile.avatar_seed,
           totalLevel: profile.total_level,
           totalXp: profile.total_xp,
           attributes: calculatedAttrs || profile.attributes || DEFAULT_ATTRIBUTES,
@@ -255,6 +258,7 @@ export default function Dashboard() {
           <CharacterHeader
             username={userProfile.username}
             avatarUrl={userProfile.avatarUrl}
+            avatarSeed={userProfile.avatarSeed}
             totalLevel={userProfile.totalLevel}
             totalXp={userProfile.totalXp}
           />

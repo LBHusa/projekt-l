@@ -186,6 +186,7 @@ export interface Database {
           user_id: string;
           username: string | null;
           avatar_url: string | null;
+          avatar_seed: string | null;
           total_level: number;
           total_xp: number;
           attributes: {
@@ -221,6 +222,7 @@ export interface Database {
           user_id: string;
           username?: string | null;
           avatar_url?: string | null;
+          avatar_seed?: string | null;
           total_level?: number;
           total_xp?: number;
           attributes?: {
@@ -256,6 +258,7 @@ export interface Database {
           user_id?: string;
           username?: string | null;
           avatar_url?: string | null;
+          avatar_seed?: string | null;
           total_level?: number;
           total_xp?: number;
           attributes?: {

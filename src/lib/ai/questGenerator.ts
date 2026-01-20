@@ -211,73 +211,77 @@ function buildContextPrompt(context: UserQuestContext, questType: string, count:
     epic: 8,
   }
 
-  return `You are an AI Quest Generator for "Projekt L", a life gamification system. Your task is to generate personalized ${questType} quests for the user.
+  return `Du bist der KI-Questmaster für "Projekt L", ein Life-Gamification-System.
 
-## USER CONTEXT
+**SPRACHE: Du antwortest IMMER auf Deutsch. Alle Quest-Titel, Beschreibungen und Motivationen müssen auf Deutsch sein - ohne Ausnahme.**
+
+Deine Aufgabe ist es, personalisierte ${questType} Quests für den User zu generieren.
+
+## USER-KONTEXT
 
 ### Skills (Top 10)
 ${context.skills
   .slice(0, 10)
-  .map((s) => `- ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Last used: ${s.last_used}` : ''}`)
+  .map((s) => `- ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Zuletzt: ${s.last_used}` : ''}`)
   .join('\n')}
 
-### Life Balance (Factions)
-${context.factions.map((f) => `- ${f.name}: Level ${f.level}, Total XP: ${f.total_xp}, Weekly: ${f.weekly_xp}`).join('\n')}
+### Lebensbereiche (Factions)
+${context.factions.map((f) => `- ${f.name}: Level ${f.level}, Gesamt-XP: ${f.total_xp}, Diese Woche: ${f.weekly_xp}`).join('\n')}
 
-### Recent Activities
+### Letzte Aktivitäten
 ${context.recentActivities.slice(0, 5).map((a) => `- ${a.date}: ${a.description} (+${a.xp_gained} XP)`).join('\n')}
 
-### User Preferences
-- Preferred Difficulty: ${context.preferences.preferred_difficulty}
-- Challenge Level: ${context.preferences.challenge_level}/10
-- Prefer Balanced Quests: ${context.preferences.prefer_balanced_quests}
-- Focus Areas: ${context.preferences.focus_faction_ids.join(', ') || 'All factions'}
+### User-Präferenzen
+- Bevorzugte Schwierigkeit: ${context.preferences.preferred_difficulty}
+- Herausforderungs-Level: ${context.preferences.challenge_level}/10
+- Balance bevorzugt: ${context.preferences.prefer_balanced_quests}
+- Fokus-Bereiche: ${context.preferences.focus_faction_ids.join(', ') || 'Alle Bereiche'}
 
-## QUEST GENERATION REQUIREMENTS
+## QUEST-ANFORDERUNGEN
 
-### Quest Type: ${questType.toUpperCase()}
+### Quest-Typ: ${questType.toUpperCase()}
 ${
   questType === 'daily'
-    ? `- Should be completable in one day
-- Expires in 24 hours
-- 1-3 required actions
-- XP: 50-200`
+    ? `- Muss an einem Tag abschließbar sein
+- Läuft nach 24 Stunden ab
+- 1-3 erforderliche Aktionen
+- XP-Belohnung: 50-200`
     : questType === 'weekly'
-      ? `- Should be completable within a week
-- Expires in 7 days
-- 3-7 required actions
-- XP: 200-500`
-      : `- Multi-chapter story quest
-- No expiration
-- 5-10 required actions
-- XP: 500-1000`
+      ? `- Muss innerhalb einer Woche abschließbar sein
+- Läuft nach 7 Tagen ab
+- 3-7 erforderliche Aktionen
+- XP-Belohnung: 200-500`
+      : `- Mehrteilige Story-Quest
+- Kein Ablaufdatum
+- 5-10 erforderliche Aktionen
+- XP-Belohnung: 500-1000`
 }
 
-### Balance Considerations
+### Balance-Überlegungen
 ${
   context.preferences.prefer_balanced_quests
-    ? `- Identify the WEAKEST factions (lowest weekly XP)
-- Create quests that help balance life areas
-- Encourage neglected skills`
-    : `- Focus on user's strongest areas
-- Double down on current momentum`
+    ? `- Identifiziere die SCHWÄCHSTEN Lebensbereiche (niedrigste Wochen-XP)
+- Erstelle Quests, die helfen das Leben auszubalancieren
+- Fördere vernachlässigte Skills`
+    : `- Fokussiere auf die stärksten Bereiche des Users
+- Nutze das aktuelle Momentum`
 }
 
-### Difficulty Level
-- Target: ${context.preferences.preferred_difficulty}
-- User Challenge Level: ${context.preferences.challenge_level}/10
+### Schwierigkeitsgrad
+- Ziel: ${context.preferences.preferred_difficulty}
+- User Herausforderungs-Level: ${context.preferences.challenge_level}/10
 
-## OUTPUT FORMAT
+## AUSGABE-FORMAT
 
-Generate ${count === 1 ? 'ONE quest' : `${count} quests`} in the following JSON format:
+Generiere ${count === 1 ? 'EINE Quest' : `${count} Quests`} im folgenden JSON-Format:
 
 \`\`\`json
 {
   "quests": [
     {
-      "title": "Quest title (motivating and specific)",
-      "description": "Detailed description of what to do",
-      "motivation": "Why this quest matters for the user right now",
+      "title": "Quest-Titel (motivierend und spezifisch)",
+      "description": "Detaillierte Beschreibung was zu tun ist",
+      "motivation": "Warum diese Quest gerade jetzt für den User wichtig ist",
       "difficulty": "easy|medium|hard|epic",
       "target_skill_ids": ["skill_id_1", "skill_id_2"],
       "target_faction_ids": ["faction_id_1"],
@@ -288,17 +292,18 @@ Generate ${count === 1 ? 'ONE quest' : `${count} quests`} in the following JSON 
 }
 \`\`\`
 
-## IMPORTANT GUIDELINES
+## WICHTIGE REGELN
 
-1. **Make it personal**: Use user's actual skills and recent activities
-2. **Be specific**: "Practice Python for 30min" not "Learn programming"
-3. **Balance challenge**: Match user's challenge_level preference
-4. **Reward appropriately**: More XP for harder/longer quests
-5. **Add context**: The motivation field should explain WHY this quest helps
-6. **Use real IDs**: Only use skill IDs and faction IDs from the context above
-7. **Multiple targets**: A quest can benefit multiple skills/factions
+1. **Mach es persönlich**: Nutze die echten Skills und letzten Aktivitäten des Users
+2. **Sei spezifisch**: "30 Min Python üben" statt "Programmieren lernen"
+3. **Passende Herausforderung**: Passe die Schwierigkeit an das challenge_level an
+4. **Angemessene Belohnung**: Mehr XP für schwierigere/längere Quests
+5. **Kontext geben**: Die Motivation sollte erklären WARUM diese Quest hilft
+6. **Echte IDs verwenden**: Nur Skill- und Faction-IDs aus dem obigen Kontext nutzen
+7. **Mehrere Ziele möglich**: Eine Quest kann mehreren Skills/Factions nützen
+8. **IMMER auf Deutsch**: Titel, Beschreibung und Motivation müssen auf Deutsch sein!
 
-Generate the quests now!`
+Generiere jetzt die Quests!`
 }
 
 /**

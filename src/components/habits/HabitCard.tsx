@@ -212,7 +212,7 @@ export default function HabitCard({
         ) : (
           <>
             <X className="w-5 h-5" />
-            Heute vermieden
+            Rückfall loggen
           </>
         )}
       </button>

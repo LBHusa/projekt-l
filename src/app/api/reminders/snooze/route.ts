@@ -1,14 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
-// Snooze implementation (optional - can be implemented later)
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { reminderId, snoozeMinutes } = await request.json();
+    const supabase = await createClient();
+    
+    // Authentifizierung prüfen
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    // TODO: Implement snooze logic
-    // Could create a temporary reminder or store snooze state
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Nicht authentifiziert' },
+        { status: 401 }
+      );
+    }
 
-    return NextResponse.json({ success: true, message: 'Snoozed for 1 hour' });
+    const { reminderId, snoozeMinutes = 60 } = await request.json();
+
+    if (!reminderId) {
+      return NextResponse.json(
+        { error: 'reminderId ist erforderlich' },
+        { status: 400 }
+      );
+    }
+
+    // Berechne snoozed_until Zeitpunkt
+    const snoozedUntil = new Date(Date.now() + snoozeMinutes * 60 * 1000);
+
+    // Update reminder mit snoozed_until
+    const { error: updateError } = await supabase
+      .from('habit_reminders')
+      .update({ snoozed_until: snoozedUntil.toISOString() })
+      .eq('id', reminderId)
+      .eq('user_id', user.id);
+
+    if (updateError) {
+      console.error('Error snoozing reminder:', updateError);
+      return NextResponse.json(
+        { error: 'Snooze fehlgeschlagen' },
+        { status: 500 }
+      );
+    }
+
+    // Log the snooze action
+    await supabase.from('reminder_delivery_log').insert({
+      reminder_id: reminderId,
+      user_id: user.id,
+      scheduled_time: new Date().toISOString(),
+      action_taken: 'snoozed',
+      delivered: true,
+    });
+
+    return NextResponse.json({
+      success: true,
+      snoozedUntil: snoozedUntil.toISOString(),
+      message: `Reminder für ${snoozeMinutes} Minuten pausiert`
+    });
   } catch (error) {
     console.error('Error snoozing reminder:', error);
     return NextResponse.json(

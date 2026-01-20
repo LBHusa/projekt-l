@@ -19,6 +19,7 @@ import {
   deleteContact
 } from '@/lib/data/contacts';
 import { getEvents, createEvent, updateEvent, deleteEvent as deleteEventData } from '@/lib/data/soziales';
+import { useAuth } from '@/hooks/useAuth';
 import type { FactionWithStats, SocialEvent, SocialEventType } from '@/lib/database.types';
 import type { ContactWithStats, Contact, ContactFormData } from '@/lib/types/contacts';
 
@@ -35,6 +36,7 @@ const EVENT_TYPES: { value: SocialEventType; label: string; icon: string }[] = [
 ];
 
 export default function SozialesPage() {
+  const { userId } = useAuth();
   const [faction, setFaction] = useState<FactionWithStats | null>(null);
   const [familyContacts, setFamilyContacts] = useState<ContactWithStats[]>([]);
   const [friendContacts, setFriendContacts] = useState<ContactWithStats[]>([]);
@@ -111,7 +113,7 @@ export default function SozialesPage() {
   };
 
   const handleEventSubmit = async (data: EventFormData) => {
-    const userId = '00000000-0000-0000-0000-000000000001'; // TODO: Get from auth
+    if (!userId) return;
 
     if (editingEvent) {
       await updateEvent(editingEvent.id, data);
@@ -144,7 +146,7 @@ export default function SozialesPage() {
   };
 
   const handleContactSubmit = async (data: ContactFormData) => {
-    const userId = '00000000-0000-0000-0000-000000000001';
+    if (!userId) return;
 
     if (editingContact) {
       await updateContact(editingContact.id, data);

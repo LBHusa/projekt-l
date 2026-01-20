@@ -89,6 +89,7 @@ export interface UserProfile {
   email: string;
   username: string;
   avatar_url: string | null;
+  avatar_seed: string | null;
   total_level: number;
   total_xp: number;
   created_at: string;

@@ -6,6 +6,7 @@ import PixelAvatar from './character/PixelAvatar';
 interface CharacterHeaderProps {
   username: string | null;
   avatarUrl: string | null;
+  avatarSeed?: string | null;
   totalLevel: number;
   totalXp: number;
   xpForNextLevel?: number; // XP needed for next level (default: 1000)
@@ -14,6 +15,7 @@ interface CharacterHeaderProps {
 export default function CharacterHeader({
   username,
   avatarUrl,
+  avatarSeed,
   totalLevel,
   totalXp,
   xpForNextLevel = 1000,
@@ -32,6 +34,9 @@ export default function CharacterHeader({
     .join('')
     .toUpperCase()
     .slice(0, 2);
+
+  // Determine the seed for PixelAvatar: avatarSeed > username > default
+  const pixelAvatarSeed = avatarSeed || username || 'wise-old-wizard';
 
   return (
     <motion.div
@@ -53,7 +58,7 @@ export default function CharacterHeader({
           ) : (
             <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-2 border-[var(--accent-primary)] shadow-lg shadow-[var(--accent-primary)]/20 bg-gradient-to-br from-slate-700 to-slate-900">
               <PixelAvatar
-                seed={username || 'wise-old-wizard'}
+                seed={pixelAvatarSeed}
                 size={56}
                 className="w-full h-full flex items-center justify-center"
               />
