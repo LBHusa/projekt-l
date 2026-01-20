@@ -343,27 +343,83 @@ async function handleUpdateSkillLevel(
   userId: string
 ): Promise<string> {
   const skillId = input.skill_id as string;
-  const level = input.level as number;
+  const targetLevel = input.level as number;
 
-  if (level < 1 || level > 100) {
+  if (targetLevel < 1 || targetLevel > 100) {
     throw new Error('Level muss zwischen 1 und 100 liegen');
   }
 
-  // Get skill info for response
+  // Get skill info
   const skill = await getSkillById(skillId);
   if (!skill) {
     throw new Error('Skill nicht gefunden');
   }
 
-  // We need to calculate the XP for the new level and update user_skills
-  // For now, we'll use a simplified approach - just set the level directly
-  // Note: This is a simplified implementation. In production, you'd want to
-  // properly calculate XP based on the level formula
+  // Get user's current skill state
+  const userSkills = await getUserSkills(userId);
+  const userSkill = userSkills.find(s => s.skill_id === skillId);
+
+  if (!userSkill) {
+    throw new Error(`Du hast den Skill "${skill.name}" noch nicht. Füge zuerst XP hinzu um ihn zu aktivieren.`);
+  }
+
+  const currentLevel = userSkill.level || 1;
+  const currentXp = userSkill.current_xp || 0;
+
+  // Check if target level is lower
+  if (targetLevel < currentLevel) {
+    return JSON.stringify({
+      success: false,
+      message: `Level kann nicht von ${currentLevel} auf ${targetLevel} reduziert werden. Du kannst nur Levels erhöhen!`,
+      current_level: currentLevel,
+      skill_name: skill.name,
+    });
+  }
+
+  // If already at target level
+  if (targetLevel === currentLevel) {
+    return JSON.stringify({
+      success: true,
+      message: `${skill.icon || '⭐'} ${skill.name} ist bereits auf Level ${currentLevel}!`,
+      current_level: currentLevel,
+      current_xp: currentXp,
+      skill_name: skill.name,
+    });
+  }
+
+  // Calculate XP needed to reach target level
+  // Using 100 XP per level as base formula
+  const xpPerLevel = 100;
+  const targetXp = targetLevel * xpPerLevel;
+  const xpToAdd = targetXp - currentXp;
+
+  if (xpToAdd <= 0) {
+    return JSON.stringify({
+      success: true,
+      message: `${skill.icon || '⭐'} ${skill.name} hat bereits genug XP für Level ${targetLevel}!`,
+      current_level: currentLevel,
+      current_xp: currentXp,
+      skill_name: skill.name,
+    });
+  }
+
+  // Add the calculated XP to reach target level
+  const result = await addXpToSkill(
+    skillId,
+    xpToAdd,
+    `Level manuell auf ${targetLevel} gesetzt`,
+    userId
+  );
 
   return JSON.stringify({
     success: true,
-    message: `Level Update Feature noch nicht implementiert. Verwende stattdessen add_skill_xp um Skills zu leveln.`,
     skill_name: skill.name,
+    skill_icon: skill.icon,
+    previous_level: currentLevel,
+    new_level: result.userSkill.level,
+    current_xp: result.userSkill.current_xp,
+    xp_added: xpToAdd,
+    message: `🎉 ${skill.icon || '⭐'} ${skill.name} ist jetzt Level ${result.userSkill.level}! (+${xpToAdd} XP)`,
   });
 }
 
