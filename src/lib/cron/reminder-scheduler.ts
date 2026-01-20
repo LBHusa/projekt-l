@@ -85,6 +85,7 @@ async function checkDueReminders(): Promise<void> {
     console.log('[Reminder Scheduler] Checking due reminders...');
 
     // Get all enabled reminders with habit and user info
+    // Include snoozed_until to check for snoozed reminders
     const { data: reminders, error } = await supabase
       .from('habit_reminders')
       .select(`
@@ -93,6 +94,7 @@ async function checkDueReminders(): Promise<void> {
         user_id,
         reminder_time,
         days_of_week,
+        snoozed_until,
         habits!inner (
           name,
           icon,
@@ -142,6 +144,22 @@ async function processReminder(reminder: any): Promise<void> {
   // Check if reminder should fire today
   if (!reminder.days_of_week.includes(currentDay)) {
     return;
+  }
+
+  // Check if reminder is snoozed
+  if (reminder.snoozed_until) {
+    const snoozedUntil = new Date(reminder.snoozed_until);
+    const now = new Date();
+    if (snoozedUntil > now) {
+      console.log(`[Reminder Scheduler] Skipping snoozed reminder ${reminder.id} until ${reminder.snoozed_until}`);
+      return;
+    }
+    // Snooze expired - clear it
+    await supabase
+      .from('habit_reminders')
+      .update({ snoozed_until: null })
+      .eq('id', reminder.id);
+    console.log(`[Reminder Scheduler] Cleared expired snooze for reminder ${reminder.id}`);
   }
 
   // Get current time in user's timezone

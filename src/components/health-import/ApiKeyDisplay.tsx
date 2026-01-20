@@ -15,6 +15,7 @@ export default function ApiKeyDisplay({ userId }: ApiKeyDisplayProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isNewKey, setIsNewKey] = useState(false);
 
   useEffect(() => {
     loadApiKey();
@@ -22,13 +23,16 @@ export default function ApiKeyDisplay({ userId }: ApiKeyDisplayProps) {
 
   async function loadApiKey() {
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch('/api/health/api-key');
-      // const data = await response.json();
-      // setApiKey(data.apiKey);
+      const response = await fetch('/api/integrations/health-import/status');
+      const data = await response.json();
 
-      // Mock data for now
-      setApiKey(null);
+      if (data.success && data.status?.hasApiKey) {
+        // API gibt nur Prefix zurück (Sicherheit) - zeige maskiert an
+        setApiKey(data.status.apiKeyPrefix ? `${data.status.apiKeyPrefix}...` : null);
+        setIsNewKey(false);
+      } else {
+        setApiKey(null);
+      }
     } catch (error) {
       console.error('Error loading API key:', error);
     } finally {
@@ -47,19 +51,19 @@ export default function ApiKeyDisplay({ userId }: ApiKeyDisplayProps) {
     setMessage(null);
 
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch('/api/health/api-key', {
-      //   method: 'POST',
-      // });
-      // const data = await response.json();
-      // setApiKey(data.apiKey);
+      const response = await fetch('/api/integrations/health-import/generate-key', {
+        method: 'POST',
+      });
+      const data = await response.json();
 
-      // Mock generation
-      const mockKey = `plh_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-      setApiKey(mockKey);
-
-      setMessage('Neuer API-Schlüssel generiert!');
-      setTimeout(() => setMessage(null), 3000);
+      if (data.success && data.api_key) {
+        setApiKey(data.api_key); // Vollständiger Key nur bei Generierung
+        setIsNewKey(true); // Markiere als neuer Key (sichtbar + kopierbar)
+        setIsVisible(true); // Zeige Key direkt an
+        setMessage('Neuer API-Schlüssel generiert! Speichere ihn jetzt - er wird nur einmal angezeigt.');
+      } else {
+        setMessage(data.error || 'Fehler beim Generieren');
+      }
     } catch (error) {
       console.error('Error generating API key:', error);
       setMessage('Fehler beim Generieren');
@@ -153,41 +157,50 @@ export default function ApiKeyDisplay({ userId }: ApiKeyDisplayProps) {
               <code className="flex-1 text-sm font-mono text-adaptive break-all">
                 {isVisible ? apiKey : maskApiKey(apiKey)}
               </code>
-              <button
-                onClick={() => setIsVisible(!isVisible)}
-                className="p-1.5 rounded hover:bg-white/10 transition-colors"
-              >
-                {isVisible ? (
-                  <EyeOff className="w-4 h-4 text-adaptive-muted" />
-                ) : (
-                  <Eye className="w-4 h-4 text-adaptive-muted" />
-                )}
-              </button>
+              {/* Nur Show/Hide wenn es ein neuer Key ist */}
+              {isNewKey && (
+                <button
+                  onClick={() => setIsVisible(!isVisible)}
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                >
+                  {isVisible ? (
+                    <EyeOff className="w-4 h-4 text-adaptive-muted" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-adaptive-muted" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <button
-              onClick={copyToClipboard}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 transition-colors"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-green-400" />
-                  Kopiert!
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  Kopieren
-                </>
-              )}
-            </button>
+            {/* Kopieren nur wenn neuer Key */}
+            {isNewKey && (
+              <button
+                onClick={copyToClipboard}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 transition-colors"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-400" />
+                    Kopiert!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Kopieren
+                  </>
+                )}
+              </button>
+            )}
             <button
               onClick={generateNewApiKey}
               disabled={isGenerating}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 disabled:opacity-50 transition-colors"
+              className={isNewKey
+                ? "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 disabled:opacity-50 transition-colors"
+                : "w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 text-adaptive font-medium hover:bg-white/10 disabled:opacity-50 transition-colors"
+              }
             >
               {isGenerating ? (
                 <>
@@ -212,6 +225,13 @@ export default function ApiKeyDisplay({ userId }: ApiKeyDisplayProps) {
             >
               {message}
             </div>
+          )}
+
+          {/* Hinweis wenn existierender Key */}
+          {!isNewKey && (
+            <p className="text-xs text-adaptive-dim text-center">
+              Ein API-Schlüssel existiert bereits. Generiere einen neuen, wenn du den alten verloren hast.
+            </p>
           )}
         </div>
       )}
