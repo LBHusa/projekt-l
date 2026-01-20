@@ -204,13 +204,6 @@ export async function generateQuests(
  * Build context prompt for Claude
  */
 function buildContextPrompt(context: UserQuestContext, questType: string, count: number = 1): string {
-  const difficultyMap = {
-    easy: 1,
-    medium: 3,
-    hard: 5,
-    epic: 8,
-  }
-
   return `Du bist der KI-Questmaster für "Projekt L", ein Life-Gamification-System.
 
 **SPRACHE: Du antwortest IMMER auf Deutsch. Alle Quest-Titel, Beschreibungen und Motivationen müssen auf Deutsch sein - ohne Ausnahme.**
@@ -219,14 +212,14 @@ Deine Aufgabe ist es, personalisierte ${questType} Quests für den User zu gener
 
 ## USER-KONTEXT
 
-### Skills (Top 10)
+### Skills (Top 10) - MIT IDs für target_skill_ids
 ${context.skills
   .slice(0, 10)
-  .map((s) => `- ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Zuletzt: ${s.last_used}` : ''}`)
+  .map((s) => `- [${s.id}] ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Zuletzt: ${s.last_used}` : ''}`)
   .join('\n')}
 
-### Lebensbereiche (Factions)
-${context.factions.map((f) => `- ${f.name}: Level ${f.level}, Gesamt-XP: ${f.total_xp}, Diese Woche: ${f.weekly_xp}`).join('\n')}
+### Lebensbereiche (Factions) - MIT IDs für target_faction_ids
+${context.factions.map((f) => `- [${f.id}] ${f.name}: Level ${f.level}, Gesamt-XP: ${f.total_xp}, Diese Woche: ${f.weekly_xp}`).join('\n')}
 
 ### Letzte Aktivitäten
 ${context.recentActivities.slice(0, 5).map((a) => `- ${a.date}: ${a.description} (+${a.xp_gained} XP)`).join('\n')}
@@ -283,8 +276,8 @@ Generiere ${count === 1 ? 'EINE Quest' : `${count} Quests`} im folgenden JSON-Fo
       "description": "Detaillierte Beschreibung was zu tun ist",
       "motivation": "Warum diese Quest gerade jetzt für den User wichtig ist",
       "difficulty": "easy|medium|hard|epic",
-      "target_skill_ids": ["skill_id_1", "skill_id_2"],
-      "target_faction_ids": ["faction_id_1"],
+      "target_skill_ids": ["uuid-aus-skills-liste-oben"],
+      "target_faction_ids": ["uuid-aus-factions-liste-oben"],
       "xp_reward": 150,
       "required_actions": 3
     }
@@ -299,11 +292,29 @@ Generiere ${count === 1 ? 'EINE Quest' : `${count} Quests`} im folgenden JSON-Fo
 3. **Passende Herausforderung**: Passe die Schwierigkeit an das challenge_level an
 4. **Angemessene Belohnung**: Mehr XP für schwierigere/längere Quests
 5. **Kontext geben**: Die Motivation sollte erklären WARUM diese Quest hilft
-6. **Echte IDs verwenden**: Nur Skill- und Faction-IDs aus dem obigen Kontext nutzen
+6. **ECHTE IDs VERWENDEN**: Nutze die UUIDs in eckigen Klammern [uuid] als target_skill_ids und target_faction_ids - NIEMALS erfundene IDs!
 7. **Mehrere Ziele möglich**: Eine Quest kann mehreren Skills/Factions nützen
 8. **IMMER auf Deutsch**: Titel, Beschreibung und Motivation müssen auf Deutsch sein!
 
 Generiere jetzt die Quests!`
+}
+
+/**
+ * Validate skill IDs against available skills
+ */
+function validateSkillIds(ids: string[] | undefined, skills: Array<{id: string}>): string[] {
+  if (!ids || !Array.isArray(ids)) return []
+  const validIds = new Set(skills.map(s => s.id))
+  return ids.filter(id => validIds.has(id))
+}
+
+/**
+ * Validate faction IDs against available factions
+ */
+function validateFactionIds(ids: string[] | undefined, factions: Array<{id: string}>): string[] {
+  if (!ids || !Array.isArray(ids)) return []
+  const validIds = new Set(factions.map(f => f.id))
+  return ids.filter(id => validIds.has(id))
 }
 
 /**
@@ -346,8 +357,9 @@ function parseQuestResponse(
           title: q.title || 'Quest',
           description: q.description || '',
           motivation: q.motivation || '',
-          target_skill_ids: [],
-          target_faction_ids: q.target_faction_ids || [],
+          // FIXED: Validate and use AI-generated IDs instead of empty array
+          target_skill_ids: validateSkillIds(q.target_skill_ids, context.skills),
+          target_faction_ids: validateFactionIds(q.target_faction_ids, context.factions),
           xp_reward: q.xp_reward || calculateDefaultXP(questType, q.difficulty),
           required_actions: q.required_actions || 1,
           expires_at: calculateExpiryDate(questType),
@@ -415,7 +427,8 @@ export async function saveQuests(quests: GeneratedQuest[], userId: string) {
     title: q.title,
     description: q.description,
     motivation: q.motivation,
-    target_skill_ids: [],
+    // FIXED: Use validated skill IDs from quest generation
+    target_skill_ids: q.target_skill_ids,
     target_faction_ids: q.target_faction_ids,
     xp_reward: q.xp_reward,
     required_actions: q.required_actions,

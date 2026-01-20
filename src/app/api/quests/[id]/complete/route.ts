@@ -90,48 +90,96 @@ export async function POST(
         console.error('Error updating user XP:', err);
       }
 
-      // Update faction stats
-      if (quest.faction_id) {
-        try {
-          const { data: factionStats } = await adminClient
-            .from('user_faction_stats')
-            .select('total_xp, weekly_xp, monthly_xp')
-            .eq('user_id', userId)
-            .eq('faction_id', quest.faction_id)
-            .single();
-
-          if (factionStats) {
-            await adminClient
+      // FIXED: Update faction stats using target_faction_ids array
+      const targetFactionIds = quest.target_faction_ids || [];
+      if (targetFactionIds.length > 0) {
+        const xpPerFaction = Math.round(xpReward / targetFactionIds.length);
+        for (const factionId of targetFactionIds) {
+          try {
+            const { data: factionStats } = await adminClient
               .from('user_faction_stats')
-              .update({
-                total_xp: (factionStats.total_xp || 0) + xpReward,
-                weekly_xp: (factionStats.weekly_xp || 0) + xpReward,
-                monthly_xp: (factionStats.monthly_xp || 0) + xpReward,
-              })
+              .select('total_xp, weekly_xp, monthly_xp')
               .eq('user_id', userId)
-              .eq('faction_id', quest.faction_id);
-          } else {
-            await adminClient
-              .from('user_faction_stats')
-              .insert({
-                user_id: userId,
-                faction_id: quest.faction_id,
-                total_xp: xpReward,
-                weekly_xp: xpReward,
-                monthly_xp: xpReward,
-              });
+              .eq('faction_id', factionId)
+              .single();
+
+            if (factionStats) {
+              await adminClient
+                .from('user_faction_stats')
+                .update({
+                  total_xp: (factionStats.total_xp || 0) + xpPerFaction,
+                  weekly_xp: (factionStats.weekly_xp || 0) + xpPerFaction,
+                  monthly_xp: (factionStats.monthly_xp || 0) + xpPerFaction,
+                })
+                .eq('user_id', userId)
+                .eq('faction_id', factionId);
+            } else {
+              await adminClient
+                .from('user_faction_stats')
+                .insert({
+                  user_id: userId,
+                  faction_id: factionId,
+                  total_xp: xpPerFaction,
+                  weekly_xp: xpPerFaction,
+                  monthly_xp: xpPerFaction,
+                });
+            }
+          } catch (err) {
+            console.error('Error updating faction stats for', factionId, ':', err);
           }
-        } catch (err) {
-          console.error('Error updating faction stats:', err);
+        }
+      }
+
+      // FIXED: Award XP to target skills
+      const targetSkillIds = quest.target_skill_ids || [];
+      if (targetSkillIds.length > 0) {
+        const xpPerSkill = Math.round(xpReward / targetSkillIds.length);
+        for (const skillId of targetSkillIds) {
+          try {
+            // Create experience entry for skill
+            await adminClient.from('experiences').insert({
+              user_id: userId,
+              skill_id: skillId,
+              description: `Quest abgeschlossen: ${quest.title}`,
+              xp_gained: xpPerSkill,
+              date: new Date().toISOString().split('T')[0],
+            });
+
+            // Update user_skills XP
+            const { data: userSkill } = await adminClient
+              .from('user_skills')
+              .select('current_xp, level')
+              .eq('user_id', userId)
+              .eq('skill_id', skillId)
+              .single();
+
+            if (userSkill) {
+              const newXp = (userSkill.current_xp || 0) + xpPerSkill;
+              // Simple level up logic: 100 XP per level
+              const newLevel = Math.floor(newXp / 100) + 1;
+              await adminClient
+                .from('user_skills')
+                .update({
+                  current_xp: newXp,
+                  level: Math.max(userSkill.level || 1, newLevel),
+                  last_used: new Date().toISOString(),
+                })
+                .eq('user_id', userId)
+                .eq('skill_id', skillId);
+            }
+          } catch (err) {
+            console.error('Error updating skill XP for', skillId, ':', err);
+          }
         }
       }
 
       // Log activity
       try {
+        const primaryFactionId = targetFactionIds[0] || 'karriere';
         await adminClient.from('activity_log').insert({
           user_id: userId,
           activity_type: 'quest_completed',
-          faction_id: quest.faction_id || 'karriere',
+          faction_id: primaryFactionId,
           title: 'Quest abgeschlossen: ' + quest.title,
           description: '+' + xpReward + ' XP',
           xp_amount: xpReward,
