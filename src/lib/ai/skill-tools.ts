@@ -1,15 +1,11 @@
 // ============================================
 // AI Chatbot Tools für Skill-Management
+// FIXED: Uses Server-Client directly for all DB operations
 // ============================================
 
 import type { Anthropic } from '@anthropic-ai/sdk';
-import { createSkill, updateSkill, getSkillById } from '@/lib/data/skills';
-import { getUserSkills, addXpToSkill } from '@/lib/data/user-skills';
-import { getAllDomains } from '@/lib/data/domains';
-import { createTransaction, getAccounts, getBudgetProgress } from '@/lib/data/finanzen';
-import { getHabits, logHabitCompletion } from '@/lib/data/habits';
-import { createWorkout, type WorkoutFormData } from '@/lib/data/koerper';
-import type { UserSkillFull, WorkoutType, WorkoutIntensity } from '@/lib/database.types';
+import { createClient } from '@/lib/supabase/server';
+import type { WorkoutType, WorkoutIntensity } from '@/lib/database.types';
 
 // ============================================
 // TOOL DEFINITIONS
@@ -229,7 +225,7 @@ export const skillTools: Anthropic.Tool[] = [
 ];
 
 // ============================================
-// TOOL EXECUTION
+// TOOL EXECUTION - Uses Server-Client directly
 // ============================================
 
 export async function executeSkillTool(
@@ -247,7 +243,7 @@ export async function executeSkillTool(
         return await handleListUserSkills(toolInput, userId);
 
       case 'create_skill':
-        return await handleCreateSkill(toolInput);
+        return await handleCreateSkill(toolInput, userId);
 
       case 'update_skill_level':
         return await handleUpdateSkillLevel(toolInput, userId);
@@ -286,20 +282,30 @@ export async function executeSkillTool(
 }
 
 // ============================================
-// TOOL HANDLERS - Skills
+// TOOL HANDLERS - Skills (Server-Client)
 // ============================================
 
 async function handleListUserSkills(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
-  const skills = await getUserSkills(userId);
+  const supabase = await createClient();
+
+  const { data: skills, error } = await supabase
+    .from('user_skills_full')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error fetching user skills:', error);
+    throw error;
+  }
 
   // Optional domain filter
   const domainFilter = input.domain_name as string | undefined;
   const filteredSkills = domainFilter
-    ? skills.filter((s) => s.domain_name?.toLowerCase() === domainFilter.toLowerCase())
-    : skills;
+    ? (skills || []).filter((s) => s.domain_name?.toLowerCase() === domainFilter.toLowerCase())
+    : skills || [];
 
   return JSON.stringify({
     success: true,
@@ -316,14 +322,28 @@ async function handleListUserSkills(
   });
 }
 
-async function handleCreateSkill(input: Record<string, unknown>): Promise<string> {
-  const skill = await createSkill({
-    domain_id: input.domain_id as string,
-    name: input.name as string,
-    icon: (input.icon as string) || '⭐',
-    description: input.description as string | undefined,
-    parent_skill_id: input.parent_skill_id as string | undefined,
-  });
+async function handleCreateSkill(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+
+  const { data: skill, error } = await supabase
+    .from('skills')
+    .insert({
+      domain_id: input.domain_id as string,
+      name: input.name as string,
+      icon: (input.icon as string) || '⭐',
+      description: input.description as string | undefined,
+      parent_skill_id: input.parent_skill_id as string | undefined,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating skill:', error);
+    throw error;
+  }
 
   return JSON.stringify({
     success: true,
@@ -342,6 +362,7 @@ async function handleUpdateSkillLevel(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
   const skillId = input.skill_id as string;
   const targetLevel = input.level as number;
 
@@ -350,23 +371,31 @@ async function handleUpdateSkillLevel(
   }
 
   // Get skill info
-  const skill = await getSkillById(skillId);
-  if (!skill) {
+  const { data: skill, error: skillError } = await supabase
+    .from('skills')
+    .select('*')
+    .eq('id', skillId)
+    .single();
+
+  if (skillError || !skill) {
     throw new Error('Skill nicht gefunden');
   }
 
   // Get user's current skill state
-  const userSkills = await getUserSkills(userId);
-  const userSkill = userSkills.find(s => s.skill_id === skillId);
+  const { data: userSkill, error: userSkillError } = await supabase
+    .from('user_skills')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('skill_id', skillId)
+    .single();
 
-  if (!userSkill) {
+  if (userSkillError?.code === 'PGRST116' || !userSkill) {
     throw new Error(`Du hast den Skill "${skill.name}" noch nicht. Füge zuerst XP hinzu um ihn zu aktivieren.`);
   }
 
   const currentLevel = userSkill.level || 1;
   const currentXp = userSkill.current_xp || 0;
 
-  // Check if target level is lower
   if (targetLevel < currentLevel) {
     return JSON.stringify({
       success: false,
@@ -376,7 +405,6 @@ async function handleUpdateSkillLevel(
     });
   }
 
-  // If already at target level
   if (targetLevel === currentLevel) {
     return JSON.stringify({
       success: true,
@@ -387,8 +415,7 @@ async function handleUpdateSkillLevel(
     });
   }
 
-  // Calculate XP needed to reach target level
-  // Using 100 XP per level as base formula
+  // Calculate XP needed to reach target level (100 XP per level)
   const xpPerLevel = 100;
   const targetXp = targetLevel * xpPerLevel;
   const xpToAdd = targetXp - currentXp;
@@ -403,23 +430,41 @@ async function handleUpdateSkillLevel(
     });
   }
 
-  // Add the calculated XP to reach target level
-  const result = await addXpToSkill(
-    skillId,
-    xpToAdd,
-    `Level manuell auf ${targetLevel} gesetzt`,
-    userId
-  );
+  // Add XP directly
+  const newXp = currentXp + xpToAdd;
+  const newLevel = Math.floor(newXp / xpPerLevel) + 1;
+
+  const { error: updateError } = await supabase
+    .from('user_skills')
+    .update({
+      current_xp: newXp,
+      level: newLevel,
+      last_used: new Date().toISOString(),
+    })
+    .eq('id', userSkill.id);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  // Log experience
+  await supabase.from('experiences').insert({
+    user_id: userId,
+    skill_id: skillId,
+    xp_gained: xpToAdd,
+    description: `Level manuell auf ${targetLevel} gesetzt`,
+    date: new Date().toISOString().split('T')[0],
+  });
 
   return JSON.stringify({
     success: true,
     skill_name: skill.name,
     skill_icon: skill.icon,
     previous_level: currentLevel,
-    new_level: result.userSkill.level,
-    current_xp: result.userSkill.current_xp,
+    new_level: newLevel,
+    current_xp: newXp,
     xp_added: xpToAdd,
-    message: `🎉 ${skill.icon || '⭐'} ${skill.name} ist jetzt Level ${result.userSkill.level}! (+${xpToAdd} XP)`,
+    message: `🎉 ${skill.icon || '⭐'} ${skill.name} ist jetzt Level ${newLevel}! (+${xpToAdd} XP)`,
   });
 }
 
@@ -427,35 +472,107 @@ async function handleAddSkillXp(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
-  const result = await addXpToSkill(
-    input.skill_id as string,
-    input.xp_amount as number,
-    input.description as string,
-    userId
-  );
+  const supabase = await createClient();
+  const skillId = input.skill_id as string;
+  const xpAmount = input.xp_amount as number;
+  const description = input.description as string;
 
-  const skill = await getSkillById(input.skill_id as string);
+  // Get skill info
+  const { data: skill, error: skillError } = await supabase
+    .from('skills')
+    .select('*')
+    .eq('id', skillId)
+    .single();
+
+  if (skillError || !skill) {
+    throw new Error('Skill nicht gefunden');
+  }
+
+  // Get or create user skill
+  let userSkill;
+  const { data: existingUserSkill, error: fetchError } = await supabase
+    .from('user_skills')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('skill_id', skillId)
+    .single();
+
+  if (fetchError?.code === 'PGRST116' || !existingUserSkill) {
+    // Create new user skill
+    const { data: newUserSkill, error: createError } = await supabase
+      .from('user_skills')
+      .insert({
+        user_id: userId,
+        skill_id: skillId,
+        level: 1,
+        current_xp: 0,
+      })
+      .select()
+      .single();
+
+    if (createError) throw createError;
+    userSkill = newUserSkill;
+  } else {
+    userSkill = existingUserSkill;
+  }
+
+  // Calculate new XP and level
+  const xpPerLevel = 100;
+  const newXp = userSkill.current_xp + xpAmount;
+  const newLevel = Math.floor(newXp / xpPerLevel) + 1;
+  const leveledUp = newLevel > userSkill.level;
+
+  // Update user skill
+  const { error: updateError } = await supabase
+    .from('user_skills')
+    .update({
+      current_xp: newXp,
+      level: newLevel,
+      last_used: new Date().toISOString(),
+    })
+    .eq('id', userSkill.id);
+
+  if (updateError) throw updateError;
+
+  // Log experience
+  await supabase.from('experiences').insert({
+    user_id: userId,
+    skill_id: skillId,
+    xp_gained: xpAmount,
+    description,
+    date: new Date().toISOString().split('T')[0],
+  });
 
   return JSON.stringify({
     success: true,
-    skill_name: skill?.name || 'Unknown',
-    new_level: result.userSkill.level,
-    current_xp: result.userSkill.current_xp,
-    xp_gained: input.xp_amount,
-    leveled_up: result.leveledUp,
-    message: result.leveledUp
-      ? `🎉 Skill "${skill?.name}" ist auf Level ${result.userSkill.level} aufgestiegen!`
-      : `+${input.xp_amount} XP zu "${skill?.name}" hinzugefügt`,
+    skill_name: skill.name,
+    new_level: newLevel,
+    current_xp: newXp,
+    xp_gained: xpAmount,
+    leveled_up: leveledUp,
+    message: leveledUp
+      ? `🎉 Skill "${skill.name}" ist auf Level ${newLevel} aufgestiegen!`
+      : `+${xpAmount} XP zu "${skill.name}" hinzugefügt`,
   });
 }
 
 async function handleGetAvailableDomains(): Promise<string> {
-  const domains = await getAllDomains();
+  const supabase = await createClient();
+
+  const { data: domains, error } = await supabase
+    .from('domains')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching domains:', error);
+    throw error;
+  }
 
   return JSON.stringify({
     success: true,
-    count: domains.length,
-    domains: domains.map((d) => ({
+    count: (domains || []).length,
+    domains: (domains || []).map((d) => ({
       id: d.id,
       name: d.name,
       icon: d.icon,
@@ -468,17 +585,25 @@ async function handleSuggestSkills(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
+
   // Get user's current skills
-  const userSkills = await getUserSkills(userId);
-  const domains = await getAllDomains();
+  const { data: userSkills } = await supabase
+    .from('user_skills_full')
+    .select('*')
+    .eq('user_id', userId);
+
+  const { data: domains } = await supabase
+    .from('domains')
+    .select('*');
 
   // Analyze which domains have few skills
   const domainSkillCounts = new Map<string, number>();
-  domains.forEach((d) => {
+  (domains || []).forEach((d) => {
     domainSkillCounts.set(d.name, 0);
   });
 
-  userSkills.forEach((s) => {
+  (userSkills || []).forEach((s) => {
     if (s.domain_name) {
       domainSkillCounts.set(s.domain_name, (domainSkillCounts.get(s.domain_name) || 0) + 1);
     }
@@ -489,7 +614,7 @@ async function handleSuggestSkills(
   // Suggest domains that are underrepresented
   for (const [domainName, count] of domainSkillCounts.entries()) {
     if (count < 3) {
-      const domain = domains.find((d) => d.name === domainName);
+      const domain = (domains || []).find((d) => d.name === domainName);
       if (domain) {
         suggestions.push({
           type: 'domain',
@@ -518,51 +643,65 @@ async function handleSuggestSkills(
 }
 
 // ============================================
-// TOOL HANDLERS - Finanzen
+// TOOL HANDLERS - Finanzen (Server-Client)
 // ============================================
 
 async function handleLogIncome(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
   const amount = input.amount as number;
   const category = (input.category as string) || 'Gehalt';
   const description = input.description as string | undefined;
   const isRecurring = input.is_recurring as boolean | undefined;
 
-  // Get first account (or we could add account selection logic)
-  const accounts = await getAccounts(userId);
-  if (accounts.length === 0) {
+  // Get first account
+  const { data: accounts, error: accountError } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (accountError || !accounts || accounts.length === 0) {
     return JSON.stringify({
       success: false,
       error: 'Kein Konto gefunden. Bitte erstelle zuerst ein Konto.',
     });
   }
 
-  const defaultAccount = accounts[0]; // Use first account
+  const defaultAccount = accounts[0];
 
   // Create income transaction
-  const transaction = await createTransaction({
-    account_id: defaultAccount.id,
-    transaction_type: 'income',
-    category,
-    amount,
-    description: description || `Einkommen: ${category}`,
-    occurred_at: new Date().toISOString(),
-    to_account_id: null,
-    tags: [],
-    is_recurring: isRecurring || false,
-    recurring_frequency: isRecurring ? 'monthly' : null,
-    next_occurrence: isRecurring ? new Date().toISOString().split('T')[0] : null,
-    recurrence_end_date: null,
-  }, userId);
+  const { data: transaction, error: txError } = await supabase
+    .from('transactions')
+    .insert({
+      user_id: userId,
+      account_id: defaultAccount.id,
+      transaction_type: 'income',
+      category,
+      amount,
+      description: description || `Einkommen: ${category}`,
+      occurred_at: new Date().toISOString(),
+      is_recurring: isRecurring || false,
+      recurring_frequency: isRecurring ? 'monthly' : null,
+    })
+    .select()
+    .single();
 
-  if (!transaction) {
+  if (txError || !transaction) {
+    console.error('Error creating transaction:', txError);
     return JSON.stringify({
       success: false,
       error: 'Fehler beim Erstellen der Transaktion',
     });
   }
+
+  // Update account balance
+  await supabase
+    .from('accounts')
+    .update({ balance: defaultAccount.balance + amount })
+    .eq('id', defaultAccount.id);
 
   return JSON.stringify({
     success: true,
@@ -579,13 +718,19 @@ async function handleLogExpense(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
   const amount = input.amount as number;
   const category = (input.category as string | undefined) || 'Sonstiges';
   const description = (input.description as string | undefined) || '';
 
-  // Get first active account (default account)
-  const accounts = await getAccounts(userId);
-  if (accounts.length === 0) {
+  // Get first account
+  const { data: accounts, error: accountError } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1);
+
+  if (accountError || !accounts || accounts.length === 0) {
     return JSON.stringify({
       success: false,
       error: 'Keine Konten gefunden. Bitte erstelle zuerst ein Konto.',
@@ -594,39 +739,68 @@ async function handleLogExpense(
 
   const defaultAccount = accounts[0];
 
-  // Create transaction
-  const transaction = await createTransaction({
-    account_id: defaultAccount.id,
-    transaction_type: 'expense',
-    category,
-    amount,
-    description,
-    occurred_at: new Date().toISOString(),
-    to_account_id: null,
-    tags: [],
-    is_recurring: false,
-    recurring_frequency: null,
-    next_occurrence: null,
-    recurrence_end_date: null,
-  }, userId);
+  // Create expense transaction
+  const { data: transaction, error: txError } = await supabase
+    .from('transactions')
+    .insert({
+      user_id: userId,
+      account_id: defaultAccount.id,
+      transaction_type: 'expense',
+      category,
+      amount,
+      description,
+      occurred_at: new Date().toISOString(),
+      is_recurring: false,
+    })
+    .select()
+    .single();
 
-  if (!transaction) {
+  if (txError || !transaction) {
+    console.error('Error creating transaction:', txError);
     return JSON.stringify({
       success: false,
       error: 'Fehler beim Erstellen der Transaktion',
     });
   }
 
+  // Update account balance
+  await supabase
+    .from('accounts')
+    .update({ balance: defaultAccount.balance - amount })
+    .eq('id', defaultAccount.id);
+
   // Check budget status
   const now = new Date();
-  const budgetProgress = await getBudgetProgress(now.getFullYear(), now.getMonth() + 1);
-  const categoryBudget = budgetProgress.find((b) => b.category === category);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+
+  const { data: budget } = await supabase
+    .from('budgets')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('category', category)
+    .single();
 
   let budgetWarning = null;
-  if (categoryBudget && categoryBudget.remaining < 0) {
-    budgetWarning = `⚠️ Budget für ${category} überschritten! Noch ${Math.abs(categoryBudget.remaining).toFixed(2)}€ über dem Limit.`;
-  } else if (categoryBudget && categoryBudget.remaining < categoryBudget.budget * 0.2) {
-    budgetWarning = `💡 Budget für ${category} fast aufgebraucht. Noch ${categoryBudget.remaining.toFixed(2)}€ verfügbar.`;
+  if (budget) {
+    // Get month's spending for this category
+    const { data: monthlySpending } = await supabase
+      .from('transactions')
+      .select('amount')
+      .eq('user_id', userId)
+      .eq('transaction_type', 'expense')
+      .eq('category', category)
+      .gte('occurred_at', startOfMonth)
+      .lte('occurred_at', endOfMonth);
+
+    const spent = (monthlySpending || []).reduce((sum, t) => sum + t.amount, 0);
+    const remaining = budget.amount - spent;
+
+    if (remaining < 0) {
+      budgetWarning = `⚠️ Budget für ${category} überschritten! Noch ${Math.abs(remaining).toFixed(2)}€ über dem Limit.`;
+    } else if (remaining < budget.amount * 0.2) {
+      budgetWarning = `💡 Budget für ${category} fast aufgebraucht. Noch ${remaining.toFixed(2)}€ verfügbar.`;
+    }
   }
 
   return JSON.stringify({
@@ -641,19 +815,37 @@ async function handleLogExpense(
 }
 
 // ============================================
-// TOOL HANDLERS - Körper/Fitness
+// TOOL HANDLERS - Körper/Fitness (Server-Client)
 // ============================================
+
+function calculateWorkoutXP(workoutType: WorkoutType, durationMinutes: number, intensity?: WorkoutIntensity): number {
+  let baseXP = 15;
+
+  // Duration bonus
+  if (durationMinutes >= 60) baseXP += 20;
+  else if (durationMinutes >= 30) baseXP += 10;
+  else if (durationMinutes >= 15) baseXP += 5;
+
+  // Intensity bonus
+  if (intensity === 'high') baseXP += 10;
+  else if (intensity === 'medium') baseXP += 5;
+
+  // Type bonus
+  if (['hiit', 'strength'].includes(workoutType)) baseXP += 5;
+
+  return baseXP;
+}
 
 async function handleLogWorkout(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
   const workoutType = input.workout_type as WorkoutType;
   const durationMinutes = input.duration_minutes as number;
   const intensity = (input.intensity as WorkoutIntensity | undefined) || undefined;
   const notes = input.notes as string | undefined;
 
-  // Determine workout name based on type
   const workoutNames: Record<WorkoutType, string> = {
     cardio: 'Cardio Training',
     strength: 'Krafttraining',
@@ -664,20 +856,57 @@ async function handleLogWorkout(
     other: 'Training',
   };
 
-  const workoutData: WorkoutFormData = {
-    name: workoutNames[workoutType] || 'Training',
-    workout_type: workoutType,
-    duration_minutes: durationMinutes,
-    intensity,
-    notes,
-    occurred_at: new Date().toISOString(),
-  };
+  const xpGained = calculateWorkoutXP(workoutType, durationMinutes, intensity);
 
-  const workout = await createWorkout(workoutData, userId);
+  const { data: workout, error } = await supabase
+    .from('workouts')
+    .insert({
+      user_id: userId,
+      name: workoutNames[workoutType] || 'Training',
+      workout_type: workoutType,
+      duration_minutes: durationMinutes,
+      intensity,
+      notes,
+      occurred_at: new Date().toISOString(),
+      xp_gained: xpGained,
+    })
+    .select()
+    .single();
 
-  if (!workout) {
+  if (error || !workout) {
+    console.error('Error creating workout:', error);
     throw new Error('Fehler beim Erstellen des Workouts');
   }
+
+  // Log activity
+  await supabase.from('activity_log').insert({
+    user_id: userId,
+    activity_type: 'workout_logged',
+    title: `${workout.name} absolviert`,
+    description: `${durationMinutes} Minuten ${workoutType}`,
+    xp_amount: xpGained,
+    faction_id: 'koerper',
+    related_entity_type: 'workout',
+    related_entity_id: workout.id,
+  });
+
+  // Update faction stats (UPSERT - erstellt Zeile falls nicht vorhanden)
+  const { data: currentStats } = await supabase
+    .from('user_faction_stats')
+    .select('total_xp')
+    .eq('user_id', userId)
+    .eq('faction_id', 'koerper')
+    .maybeSingle();
+
+  const newXP = (currentStats?.total_xp || 0) + xpGained;
+  await supabase
+    .from('user_faction_stats')
+    .upsert({
+      user_id: userId,
+      faction_id: 'koerper',
+      total_xp: newXP,
+      level: Math.floor(newXP / 100) + 1,
+    }, { onConflict: 'user_id,faction_id' });
 
   return JSON.stringify({
     success: true,
@@ -686,26 +915,32 @@ async function handleLogWorkout(
       name: workout.name,
       type: workout.workout_type,
       duration: workout.duration_minutes,
-      xp_earned: workout.xp_gained,
+      xp_earned: xpGained,
     },
-    message: `🏋️ Workout erfolgreich eingetragen! Du hast ${workout.xp_gained} XP verdient.`,
+    message: `🏋️ Workout erfolgreich eingetragen! Du hast ${xpGained} XP verdient.`,
   });
 }
 
 // ============================================
-// TOOL HANDLERS - Habits
+// TOOL HANDLERS - Habits (Server-Client)
 // ============================================
 
 async function handleLogHabit(
   input: Record<string, unknown>,
   userId: string
 ): Promise<string> {
+  const supabase = await createClient();
   const habitName = input.habit_name as string;
   const notes = (input.notes as string | undefined) || undefined;
 
   // Get all habits
-  const habits = await getHabits(userId);
-  if (habits.length === 0) {
+  const { data: habits, error: habitsError } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true);
+
+  if (habitsError || !habits || habits.length === 0) {
     return JSON.stringify({
       success: false,
       error: 'Keine Habits gefunden. Bitte erstelle zuerst ein Habit.',
@@ -726,25 +961,96 @@ async function handleLogHabit(
     });
   }
 
-  // Log habit completion
-  try {
-    const result = await logHabitCompletion(matchedHabit.id, true, notes, userId);
+  // Check if already completed today
+  const today = new Date().toISOString().split('T')[0];
+  const { data: existingLog } = await supabase
+    .from('habit_logs')
+    .select('id')
+    .eq('habit_id', matchedHabit.id)
+    .eq('user_id', userId)
+    .gte('logged_at', `${today}T00:00:00`)
+    .lt('logged_at', `${today}T23:59:59`)
+    .single();
 
-    return JSON.stringify({
-      success: true,
-      habit_name: matchedHabit.name,
-      habit_icon: matchedHabit.icon,
-      xp_gained: result.xpGained,
-      current_streak: result.newStreak,
-      message:
-        result.newStreak > 1
-          ? `${matchedHabit.icon} ${matchedHabit.name} erledigt! ${result.newStreak} Tage Streak 🔥 (+${result.xpGained} XP)`
-          : `${matchedHabit.icon} ${matchedHabit.name} erledigt! (+${result.xpGained} XP)`,
-    });
-  } catch (error) {
+  if (existingLog) {
     return JSON.stringify({
       success: false,
-      error: error instanceof Error ? error.message : 'Unbekannter Fehler beim Loggen des Habits',
+      error: `${matchedHabit.icon || '✓'} ${matchedHabit.name} wurde heute bereits abgehakt!`,
     });
   }
+
+  // Calculate new streak
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  const { data: yesterdayLog } = await supabase
+    .from('habit_logs')
+    .select('id')
+    .eq('habit_id', matchedHabit.id)
+    .eq('user_id', userId)
+    .eq('completed', true)
+    .gte('logged_at', `${yesterdayStr}T00:00:00`)
+    .lt('logged_at', `${yesterdayStr}T23:59:59`)
+    .single();
+
+  const newStreak = yesterdayLog ? matchedHabit.current_streak + 1 : 1;
+  const xpGained = matchedHabit.xp_per_completion || 10;
+
+  // Log the completion
+  const { error: logError } = await supabase.from('habit_logs').insert({
+    habit_id: matchedHabit.id,
+    user_id: userId,
+    completed: true,
+    notes,
+    logged_at: new Date().toISOString(),
+  });
+
+  if (logError) {
+    throw logError;
+  }
+
+  // Update habit stats
+  await supabase
+    .from('habits')
+    .update({
+      current_streak: newStreak,
+      longest_streak: Math.max(newStreak, matchedHabit.longest_streak),
+      total_completions: matchedHabit.total_completions + 1,
+      last_completed_at: new Date().toISOString(),
+    })
+    .eq('id', matchedHabit.id);
+
+  // Update faction XP if faction assigned (UPSERT - erstellt Zeile falls nicht vorhanden)
+  if (matchedHabit.faction_id) {
+    const { data: factionStats } = await supabase
+      .from('user_faction_stats')
+      .select('total_xp')
+      .eq('user_id', userId)
+      .eq('faction_id', matchedHabit.faction_id)
+      .maybeSingle();
+
+    const newXP = (factionStats?.total_xp || 0) + xpGained;
+    await supabase
+      .from('user_faction_stats')
+      .upsert({
+        user_id: userId,
+        faction_id: matchedHabit.faction_id,
+        total_xp: newXP,
+        level: Math.floor(newXP / 100) + 1,
+      }, { onConflict: 'user_id,faction_id' });
+  }
+
+
+  return JSON.stringify({
+    success: true,
+    habit_name: matchedHabit.name,
+    habit_icon: matchedHabit.icon,
+    xp_gained: xpGained,
+    current_streak: newStreak,
+    message:
+      newStreak > 1
+        ? `${matchedHabit.icon || '✓'} ${matchedHabit.name} erledigt! ${newStreak} Tage Streak 🔥 (+${xpGained} XP)`
+        : `${matchedHabit.icon || '✓'} ${matchedHabit.name} erledigt! (+${xpGained} XP)`,
+  });
 }
