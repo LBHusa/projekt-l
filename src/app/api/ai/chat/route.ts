@@ -6,11 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { skillTools, executeSkillTool } from '@/lib/ai/skill-tools';
 import { createClient } from '@/lib/supabase/server';
-
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import { getApiKeyForUser } from '@/lib/data/llm-keys';
 
 // ============================================
 // SYSTEM PROMPT
@@ -90,6 +86,25 @@ Nutze diese Daten AKTIV - rufe zuerst list_user_skills auf um zu sehen was der U
 **WICHTIG: Du antwortest IMMER auf Deutsch, auch wenn der User auf Englisch oder einer anderen Sprache schreibt.**`;
 
 // ============================================
+// ANTHROPIC CLIENT FACTORY
+// ============================================
+
+async function createAnthropicClient(userId: string): Promise<Anthropic | null> {
+  const keyResult = await getApiKeyForUser(userId, 'anthropic');
+  
+  if (!keyResult) {
+    console.error('[AI Chat] No API key available for user:', userId);
+    return null;
+  }
+  
+  console.log(`[AI Chat] Using ${keyResult.source} API key`);
+  
+  return new Anthropic({
+    apiKey: keyResult.apiKey,
+  });
+}
+
+// ============================================
 // API ROUTE
 // ============================================
 
@@ -111,6 +126,19 @@ export async function POST(request: NextRequest) {
 
     const currentUserId = user.id;
 
+    // Create Anthropic client with user's key or fallback
+    const anthropic = await createAnthropicClient(currentUserId);
+    
+    if (!anthropic) {
+      return NextResponse.json(
+        { 
+          error: 'Kein API Key konfiguriert. Bitte hinterlege deinen Anthropic API Key unter Einstellungen > Integrationen.',
+          requiresApiKey: true 
+        },
+        { status: 400 }
+      );
+    }
+
     const { messages } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -121,13 +149,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Create initial request to Claude
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
-      system: SYSTEM_PROMPT,
-      messages: messages as Anthropic.MessageParam[],
-      tools: skillTools,
-    });
+    let response;
+    try {
+      response = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 4096,
+        system: SYSTEM_PROMPT,
+        messages: messages as Anthropic.MessageParam[],
+        tools: skillTools,
+      });
+    } catch (error: any) {
+      // Handle authentication errors
+      if (error.status === 401) {
+        return NextResponse.json(
+          { 
+            error: 'API Key ungültig. Bitte überprüfe deinen Anthropic API Key unter Einstellungen > Integrationen.',
+            requiresApiKey: true 
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
 
     // Handle tool use
     if (response.stop_reason === 'tool_use') {

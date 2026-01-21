@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowLeft, Filter } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Filter, Settings } from 'lucide-react'
 import { QuestList, QuestProgress, QuestGenerator } from '@/components/quests'
 
 interface Quest {
@@ -28,6 +29,7 @@ interface QuestStats {
 }
 
 export default function QuestsPage() {
+  const router = useRouter()
   const [quests, setQuests] = useState<Quest[]>([])
   const [stats, setStats] = useState<QuestStats>({ active: 0, completed: 0 })
   const [loading, setLoading] = useState(true)
@@ -93,6 +95,10 @@ export default function QuestsPage() {
     }
   }
 
+  const handleViewQuest = (questId: string) => {
+    router.push(`/quests/${questId}`)
+  }
+
   const filteredQuests = quests.filter((quest) => {
     if (filter !== 'all' && quest.status !== filter) return false
     if (typeFilter !== 'all' && quest.type !== typeFilter) return false
@@ -115,10 +121,19 @@ export default function QuestsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-adaptive-muted hover:text-adaptive transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            Zurück zum Dashboard
-          </Link>
+          <div className="flex items-center justify-between mb-4">
+            <Link href="/" className="inline-flex items-center gap-2 text-adaptive-muted hover:text-adaptive transition-colors">
+              <ArrowLeft className="w-4 h-4" />
+              Zurück zum Dashboard
+            </Link>
+            <Link
+              href="/settings/quest-preferences"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 dark:bg-black/20 hover:bg-white/10 dark:hover:bg-black/30 border border-white/10 rounded-lg transition-colors text-sm text-adaptive-muted hover:text-adaptive"
+            >
+              <Settings className="w-4 h-4" />
+              Quest-Einstellungen
+            </Link>
+          </div>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -204,6 +219,7 @@ export default function QuestsPage() {
         <QuestList
           quests={filteredQuests}
           onComplete={handleCompleteQuest}
+          onView={handleViewQuest}
           emptyMessage={
             filter === 'active'
               ? 'Keine aktiven Quests. Generiere neue Quests mit dem AI Generator!'

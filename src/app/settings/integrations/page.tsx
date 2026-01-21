@@ -7,6 +7,7 @@ import HealthImportCard from '@/components/health-import/HealthImportCard';
 import ApiKeyDisplay from '@/components/health-import/ApiKeyDisplay';
 import ShortcutInstructions from '@/components/health-import/ShortcutInstructions';
 import ImportHistoryList from '@/components/health-import/ImportHistoryList';
+import ApiKeySettings from '@/components/ai/ApiKeySettings';
 
 export default function IntegrationsPage() {
   return (
@@ -29,6 +30,14 @@ export default function IntegrationsPage() {
 
       {/* Content */}
       <div className="space-y-6">
+        {/* AI / LLM Integration Section */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-adaptive px-2">
+            KI-Assistent
+          </h2>
+          <ApiKeySettings />
+        </div>
+
         {/* Apple Health Integration Section */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-adaptive px-2">

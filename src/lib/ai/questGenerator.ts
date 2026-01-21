@@ -5,6 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
+import { getApiKeyForUser } from '@/lib/data/llm-keys'
 
 // Types for quest generation context
 interface UserQuestContext {
@@ -54,14 +55,27 @@ interface GeneratedQuest {
   expires_at?: Date
 }
 
-// Anthropic Client Setup with timeout
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-  timeout: 25000, // 25 seconds timeout
-})
-
 const QUEST_GENERATION_MODEL = 'claude-sonnet-4-5-20250929'
 const MAX_RETRIES = 1
+
+/**
+ * Create Anthropic client with user's key or fallback to env
+ */
+async function createAnthropicClient(userId: string): Promise<Anthropic | null> {
+  const keyResult = await getApiKeyForUser(userId, 'anthropic')
+  
+  if (!keyResult) {
+    console.error('[Quest Generator] No API key available for user:', userId)
+    return null
+  }
+  
+  console.log(`[Quest Generator] Using ${keyResult.source} API key`)
+  
+  return new Anthropic({
+    apiKey: keyResult.apiKey,
+    timeout: 25000,
+  })
+}
 
 /**
  * Fetch user context for quest generation
@@ -163,6 +177,12 @@ export async function generateQuests(
   questType: 'daily' | 'weekly' | 'story',
   count: number = 1
 ): Promise<GeneratedQuest[]> {
+  const anthropic = await createAnthropicClient(context.userId)
+  
+  if (!anthropic) {
+    throw new Error('Kein API Key konfiguriert. Bitte hinterlege deinen Anthropic API Key in den Einstellungen.')
+  }
+  
   const contextPrompt = buildContextPrompt(context, questType, count)
 
   let lastError: Error | null = null
@@ -192,6 +212,11 @@ export async function generateQuests(
         continue
       }
 
+      // Check for authentication errors
+      if (error.status === 401) {
+        throw new Error('API Key ungültig. Bitte überprüfe deinen Anthropic API Key in den Einstellungen.')
+      }
+
       console.error(`[Quest Generator] Error on attempt ${attempt + 1}:`, error.message)
       throw error
     }
@@ -204,37 +229,21 @@ export async function generateQuests(
  * Build context prompt for Claude
  */
 function buildContextPrompt(context: UserQuestContext, questType: string, count: number = 1): string {
-  return `Du bist der KI-Questmaster für "Projekt L", ein Life-Gamification-System.
+  const skillsList = context.skills
+    .slice(0, 10)
+    .map((s) => `- [${s.id}] ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Zuletzt: ${s.last_used}` : ''}`)
+    .join('\n')
 
-**SPRACHE: Du antwortest IMMER auf Deutsch. Alle Quest-Titel, Beschreibungen und Motivationen müssen auf Deutsch sein - ohne Ausnahme.**
+  const factionsList = context.factions
+    .map((f) => `- [${f.id}] ${f.name}: Level ${f.level}, Gesamt-XP: ${f.total_xp}, Diese Woche: ${f.weekly_xp}`)
+    .join('\n')
 
-Deine Aufgabe ist es, personalisierte ${questType} Quests für den User zu generieren.
+  const activitiesList = context.recentActivities
+    .slice(0, 5)
+    .map((a) => `- ${a.date}: ${a.description} (+${a.xp_gained} XP)`)
+    .join('\n')
 
-## USER-KONTEXT
-
-### Skills (Top 10) - MIT IDs für target_skill_ids
-${context.skills
-  .slice(0, 10)
-  .map((s) => `- [${s.id}] ${s.name} (${s.domain}): Level ${s.level}, ${s.current_xp} XP${s.last_used ? `, Zuletzt: ${s.last_used}` : ''}`)
-  .join('\n')}
-
-### Lebensbereiche (Factions) - MIT IDs für target_faction_ids
-${context.factions.map((f) => `- [${f.id}] ${f.name}: Level ${f.level}, Gesamt-XP: ${f.total_xp}, Diese Woche: ${f.weekly_xp}`).join('\n')}
-
-### Letzte Aktivitäten
-${context.recentActivities.slice(0, 5).map((a) => `- ${a.date}: ${a.description} (+${a.xp_gained} XP)`).join('\n')}
-
-### User-Präferenzen
-- Bevorzugte Schwierigkeit: ${context.preferences.preferred_difficulty}
-- Herausforderungs-Level: ${context.preferences.challenge_level}/10
-- Balance bevorzugt: ${context.preferences.prefer_balanced_quests}
-- Fokus-Bereiche: ${context.preferences.focus_faction_ids.join(', ') || 'Alle Bereiche'}
-
-## QUEST-ANFORDERUNGEN
-
-### Quest-Typ: ${questType.toUpperCase()}
-${
-  questType === 'daily'
+  const questTypeReqs = questType === 'daily'
     ? `- Muss an einem Tag abschließbar sein
 - Läuft nach 24 Stunden ab
 - 1-3 erforderliche Aktionen
@@ -248,17 +257,46 @@ ${
 - Kein Ablaufdatum
 - 5-10 erforderliche Aktionen
 - XP-Belohnung: 500-1000`
-}
 
-### Balance-Überlegungen
-${
-  context.preferences.prefer_balanced_quests
+  const balanceText = context.preferences.prefer_balanced_quests
     ? `- Identifiziere die SCHWÄCHSTEN Lebensbereiche (niedrigste Wochen-XP)
 - Erstelle Quests, die helfen das Leben auszubalancieren
 - Fördere vernachlässigte Skills`
     : `- Fokussiere auf die stärksten Bereiche des Users
 - Nutze das aktuelle Momentum`
-}
+
+  const countText = count === 1 ? 'EINE Quest' : `${count} Quests`
+
+  return `Du bist der KI-Questmaster für "Projekt L", ein Life-Gamification-System.
+
+**SPRACHE: Du antwortest IMMER auf Deutsch. Alle Quest-Titel, Beschreibungen und Motivationen müssen auf Deutsch sein - ohne Ausnahme.**
+
+Deine Aufgabe ist es, personalisierte ${questType} Quests für den User zu generieren.
+
+## USER-KONTEXT
+
+### Skills (Top 10) - MIT IDs für target_skill_ids
+${skillsList}
+
+### Lebensbereiche (Factions) - MIT IDs für target_faction_ids
+${factionsList}
+
+### Letzte Aktivitäten
+${activitiesList}
+
+### User-Präferenzen
+- Bevorzugte Schwierigkeit: ${context.preferences.preferred_difficulty}
+- Herausforderungs-Level: ${context.preferences.challenge_level}/10
+- Balance bevorzugt: ${context.preferences.prefer_balanced_quests}
+- Fokus-Bereiche: ${context.preferences.focus_faction_ids.join(', ') || 'Alle Bereiche'}
+
+## QUEST-ANFORDERUNGEN
+
+### Quest-Typ: ${questType.toUpperCase()}
+${questTypeReqs}
+
+### Balance-Überlegungen
+${balanceText}
 
 ### Schwierigkeitsgrad
 - Ziel: ${context.preferences.preferred_difficulty}
@@ -266,7 +304,7 @@ ${
 
 ## AUSGABE-FORMAT
 
-Generiere ${count === 1 ? 'EINE Quest' : `${count} Quests`} im folgenden JSON-Format:
+Generiere ${countText} im folgenden JSON-Format:
 
 \`\`\`json
 {
@@ -357,7 +395,6 @@ function parseQuestResponse(
           title: q.title || 'Quest',
           description: q.description || '',
           motivation: q.motivation || '',
-          // FIXED: Validate and use AI-generated IDs instead of empty array
           target_skill_ids: validateSkillIds(q.target_skill_ids, context.skills),
           target_faction_ids: validateFactionIds(q.target_faction_ids, context.factions),
           xp_reward: q.xp_reward || calculateDefaultXP(questType, q.difficulty),
@@ -403,13 +440,13 @@ function calculateDefaultXP(
  * Calculate expiry date based on quest type
  */
 function calculateExpiryDate(questType: 'daily' | 'weekly' | 'story'): Date | undefined {
-  if (questType === 'story') return undefined // Story quests don't expire
+  if (questType === 'story') return undefined
 
   const now = new Date()
   if (questType === 'daily') {
-    return new Date(now.getTime() + 24 * 60 * 60 * 1000) // +24 hours
+    return new Date(now.getTime() + 24 * 60 * 60 * 1000)
   } else if (questType === 'weekly') {
-    return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // +7 days
+    return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
   }
 }
 
@@ -427,7 +464,6 @@ export async function saveQuests(quests: GeneratedQuest[], userId: string) {
     title: q.title,
     description: q.description,
     motivation: q.motivation,
-    // FIXED: Use validated skill IDs from quest generation
     target_skill_ids: q.target_skill_ids,
     target_faction_ids: q.target_faction_ids,
     xp_reward: q.xp_reward,

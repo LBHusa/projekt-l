@@ -1,6 +1,7 @@
 // ============================================
 // AI Chatbot Tools für Skill-Management
 // FIXED: Uses Server-Client directly for all DB operations
+// UPDATED: XP für alle Lebensbereiche (Finanzen, Geist, Karriere, Soziales, Wissen, Hobbys)
 // ============================================
 
 import type { Anthropic } from '@anthropic-ai/sdk';
@@ -124,7 +125,7 @@ export const skillTools: Anthropic.Tool[] = [
   // ============================================
   {
     name: 'log_income',
-    description: 'Füge ein Einkommen hinzu (Gehalt, Bonus, Freelance, etc.). Nutze dies wenn der User sagt "ich verdiene X Euro", "ich habe Y bekommen", etc.',
+    description: 'Füge ein Einkommen hinzu (Gehalt, Bonus, Freelance, etc.). Nutze dies wenn der User sagt "ich verdiene X Euro", "ich habe Y bekommen", etc. Gibt XP für Finanzen.',
     input_schema: {
       type: 'object',
       properties: {
@@ -150,7 +151,7 @@ export const skillTools: Anthropic.Tool[] = [
   },
   {
     name: 'log_expense',
-    description: 'Füge eine Ausgabe hinzu. Nutze dies wenn der User sagt "ich habe X für Y bezahlt", "ich habe Z ausgegeben", etc.',
+    description: 'Füge eine Ausgabe hinzu. Nutze dies wenn der User sagt "ich habe X für Y bezahlt", "ich habe Z ausgegeben", etc. Gibt XP für Finanzen.',
     input_schema: {
       type: 'object',
       properties: {
@@ -222,6 +223,165 @@ export const skillTools: Anthropic.Tool[] = [
       required: ['habit_name'],
     },
   },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Geist & Seele
+  // ============================================
+  {
+    name: 'log_meditation',
+    description: 'Logge eine Meditation oder Achtsamkeitsübung. Gibt XP für Geist & Seele. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Atemübungen gemacht", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        type: {
+          type: 'string',
+          description: 'Art der Übung (z.B. "Meditation", "Atemübung", "Body Scan", "Yoga Nidra")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen oder Beobachtungen',
+        },
+      },
+      required: ['duration_minutes'],
+    },
+  },
+  {
+    name: 'log_journaling',
+    description: 'Logge Tagebuch schreiben oder Reflexion. Gibt XP für Geist & Seele. Nutze dies wenn der User sagt "ich habe Tagebuch geschrieben", "ich habe reflektiert", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        type: {
+          type: 'string',
+          description: 'Art (z.B. "Tagebuch", "Dankbarkeit", "Reflexion", "Morgenroutine")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Thema oder Notizen',
+        },
+      },
+      required: ['duration_minutes'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Karriere
+  // ============================================
+  {
+    name: 'log_work_session',
+    description: 'Logge Arbeit an Karriere/Job/Projekten. Gibt XP für Karriere. Nutze dies wenn der User sagt "ich habe gearbeitet", "ich habe an meinem Projekt gearbeitet", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        task: {
+          type: 'string',
+          description: 'Was wurde gemacht (z.B. "Meeting", "Coding", "E-Mails", "Präsentation")',
+        },
+        project: {
+          type: 'string',
+          description: 'Optional: Projektname',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen',
+        },
+      },
+      required: ['duration_minutes'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Soziales
+  // ============================================
+  {
+    name: 'log_social_interaction',
+    description: 'Logge soziale Interaktion (Freunde, Familie, Networking). Gibt XP für Soziales. Nutze dies wenn der User sagt "ich habe mit Freunden telefoniert", "ich war mit Familie essen", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        with_whom: {
+          type: 'string',
+          description: 'Mit wem (z.B. "Freund", "Familie", "Kollegen")',
+        },
+        activity: {
+          type: 'string',
+          description: 'Was gemacht (z.B. "Telefoniert", "Getroffen", "Video-Call", "Essen")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen',
+        },
+      },
+      required: ['duration_minutes'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Wissen
+  // ============================================
+  {
+    name: 'log_learning',
+    description: 'Logge Lernzeit (Buch lesen, Online-Kurs, Tutorial, Podcast). Gibt XP für Wissen. Nutze dies wenn der User sagt "ich habe gelesen", "ich habe einen Kurs gemacht", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        topic: {
+          type: 'string',
+          description: 'Was gelernt/gelesen (z.B. "Python Buch", "Marketing Kurs", "Podcast über Psychologie")',
+        },
+        type: {
+          type: 'string',
+          description: 'Art (z.B. "Buch", "Online-Kurs", "Podcast", "Video", "Artikel")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Was gelernt/Notizen',
+        },
+      },
+      required: ['duration_minutes'],
+    },
+  },
+  // ============================================
+  // LIFE DOMAIN TOOLS - Hobbys
+  // ============================================
+  {
+    name: 'log_hobby',
+    description: 'Logge Hobby-Zeit (Musik, Kunst, Gaming, Handwerk, etc.). Gibt XP für Hobbys. Nutze dies wenn der User sagt "ich habe Gitarre gespielt", "ich habe gemalt", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        duration_minutes: {
+          type: 'number',
+          description: 'Dauer in Minuten',
+        },
+        hobby: {
+          type: 'string',
+          description: 'Welches Hobby (z.B. "Gitarre", "Malen", "Gaming", "Kochen", "Gärtnern")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Was gemacht/Notizen',
+        },
+      },
+      required: ['duration_minutes', 'hobby'],
+    },
+  },
 ];
 
 // ============================================
@@ -269,6 +429,25 @@ export async function executeSkillTool(
       case 'log_habit':
         return await handleLogHabit(toolInput, userId);
 
+      // Neue Tools für alle Lebensbereiche
+      case 'log_meditation':
+        return await handleLogMeditation(toolInput, userId);
+
+      case 'log_journaling':
+        return await handleLogJournaling(toolInput, userId);
+
+      case 'log_work_session':
+        return await handleLogWorkSession(toolInput, userId);
+
+      case 'log_social_interaction':
+        return await handleLogSocialInteraction(toolInput, userId);
+
+      case 'log_learning':
+        return await handleLogLearning(toolInput, userId);
+
+      case 'log_hobby':
+        return await handleLogHobby(toolInput, userId);
+
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }
@@ -279,6 +458,34 @@ export async function executeSkillTool(
       message: error instanceof Error ? error.message : 'Unknown error',
     });
   }
+}
+
+// ============================================
+// HELPER: Faction XP Update (UPSERT)
+// ============================================
+
+async function updateFactionXP(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  factionId: string,
+  xpGained: number
+): Promise<void> {
+  const { data: currentStats } = await supabase
+    .from('user_faction_stats')
+    .select('total_xp')
+    .eq('user_id', userId)
+    .eq('faction_id', factionId)
+    .maybeSingle();
+
+  const newXP = (currentStats?.total_xp || 0) + xpGained;
+  await supabase
+    .from('user_faction_stats')
+    .upsert({
+      user_id: userId,
+      faction_id: factionId,
+      total_xp: newXP,
+      level: Math.floor(newXP / 100) + 1,
+    }, { onConflict: 'user_id,faction_id' });
 }
 
 // ============================================
@@ -643,7 +850,7 @@ async function handleSuggestSkills(
 }
 
 // ============================================
-// TOOL HANDLERS - Finanzen (Server-Client)
+// TOOL HANDLERS - Finanzen (Server-Client) - MIT XP!
 // ============================================
 
 async function handleLogIncome(
@@ -703,6 +910,24 @@ async function handleLogIncome(
     .update({ balance: defaultAccount.balance + amount })
     .eq('id', defaultAccount.id);
 
+  // XP für Finanzen-Fraktion (10 XP Basis)
+  const xpGained = 10;
+
+  // Activity Log
+  await supabase.from('activity_log').insert({
+    user_id: userId,
+    activity_type: 'income_logged',
+    title: `${amount}€ ${category} eingetragen`,
+    description: description || `Einkommen erfasst`,
+    xp_amount: xpGained,
+    faction_id: 'finanzen',
+    related_entity_type: 'transaction',
+    related_entity_id: transaction.id,
+  });
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'finanzen', xpGained);
+
   return JSON.stringify({
     success: true,
     transaction_id: transaction.id,
@@ -710,7 +935,8 @@ async function handleLogIncome(
     category,
     account_name: defaultAccount.name,
     is_recurring: isRecurring || false,
-    message: `💰 ${amount}€ Einkommen (${category}) auf ${defaultAccount.name} eingetragen!`,
+    xp_gained: xpGained,
+    message: `💰 ${amount}€ Einkommen (${category}) auf ${defaultAccount.name} eingetragen! (+${xpGained} XP Finanzen)`,
   });
 }
 
@@ -769,6 +995,24 @@ async function handleLogExpense(
     .update({ balance: defaultAccount.balance - amount })
     .eq('id', defaultAccount.id);
 
+  // XP für Finanzen-Fraktion (10 XP Basis)
+  const xpGained = 10;
+
+  // Activity Log
+  await supabase.from('activity_log').insert({
+    user_id: userId,
+    activity_type: 'expense_logged',
+    title: `${amount}€ ${category} ausgegeben`,
+    description: description || `Ausgabe erfasst`,
+    xp_amount: xpGained,
+    faction_id: 'finanzen',
+    related_entity_type: 'transaction',
+    related_entity_id: transaction.id,
+  });
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'finanzen', xpGained);
+
   // Check budget status
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -809,7 +1053,8 @@ async function handleLogExpense(
     amount: transaction.amount,
     category: transaction.category,
     account: defaultAccount.name,
-    message: `Ausgabe von ${amount}€ für ${category} erfolgreich gespeichert`,
+    xp_gained: xpGained,
+    message: `💸 Ausgabe von ${amount}€ für ${category} erfolgreich gespeichert! (+${xpGained} XP Finanzen)`,
     budget_warning: budgetWarning,
   });
 }
@@ -890,23 +1135,8 @@ async function handleLogWorkout(
     related_entity_id: workout.id,
   });
 
-  // Update faction stats (UPSERT - erstellt Zeile falls nicht vorhanden)
-  const { data: currentStats } = await supabase
-    .from('user_faction_stats')
-    .select('total_xp')
-    .eq('user_id', userId)
-    .eq('faction_id', 'koerper')
-    .maybeSingle();
-
-  const newXP = (currentStats?.total_xp || 0) + xpGained;
-  await supabase
-    .from('user_faction_stats')
-    .upsert({
-      user_id: userId,
-      faction_id: 'koerper',
-      total_xp: newXP,
-      level: Math.floor(newXP / 100) + 1,
-    }, { onConflict: 'user_id,faction_id' });
+  // Update faction stats (UPSERT)
+  await updateFactionXP(supabase, userId, 'koerper', xpGained);
 
   return JSON.stringify({
     success: true,
@@ -1021,26 +1251,10 @@ async function handleLogHabit(
     })
     .eq('id', matchedHabit.id);
 
-  // Update faction XP if faction assigned (UPSERT - erstellt Zeile falls nicht vorhanden)
+  // Update faction XP if faction assigned (UPSERT)
   if (matchedHabit.faction_id) {
-    const { data: factionStats } = await supabase
-      .from('user_faction_stats')
-      .select('total_xp')
-      .eq('user_id', userId)
-      .eq('faction_id', matchedHabit.faction_id)
-      .maybeSingle();
-
-    const newXP = (factionStats?.total_xp || 0) + xpGained;
-    await supabase
-      .from('user_faction_stats')
-      .upsert({
-        user_id: userId,
-        faction_id: matchedHabit.faction_id,
-        total_xp: newXP,
-        level: Math.floor(newXP / 100) + 1,
-      }, { onConflict: 'user_id,faction_id' });
+    await updateFactionXP(supabase, userId, matchedHabit.faction_id, xpGained);
   }
-
 
   return JSON.stringify({
     success: true,
@@ -1052,5 +1266,299 @@ async function handleLogHabit(
       newStreak > 1
         ? `${matchedHabit.icon || '✓'} ${matchedHabit.name} erledigt! ${newStreak} Tage Streak 🔥 (+${xpGained} XP)`
         : `${matchedHabit.icon || '✓'} ${matchedHabit.name} erledigt! (+${xpGained} XP)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Geist & Seele (NEU)
+// ============================================
+
+async function handleLogMeditation(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const type = (input.type as string) || 'Meditation';
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  // Activity Log
+  const { data: activity, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'meditation_logged',
+      title: `${durationMinutes} min ${type}`,
+      description: notes || `${type} absolviert`,
+      xp_amount: xpGained,
+      faction_id: 'geist',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging meditation:', activityError);
+    throw new Error('Fehler beim Loggen der Meditation');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'geist', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activity?.id,
+    duration_minutes: durationMinutes,
+    type,
+    xp_gained: xpGained,
+    message: `🧘 ${durationMinutes} Minuten ${type} geloggt! (+${xpGained} XP Geist & Seele)`,
+  });
+}
+
+async function handleLogJournaling(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const type = (input.type as string) || 'Tagebuch';
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  // Activity Log
+  const { data: activity, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'journaling_logged',
+      title: `${durationMinutes} min ${type}`,
+      description: notes || `${type} geschrieben`,
+      xp_amount: xpGained,
+      faction_id: 'geist',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging journaling:', activityError);
+    throw new Error('Fehler beim Loggen des Journalings');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'geist', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activity?.id,
+    duration_minutes: durationMinutes,
+    type,
+    xp_gained: xpGained,
+    message: `📝 ${durationMinutes} Minuten ${type} geloggt! (+${xpGained} XP Geist & Seele)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Karriere (NEU)
+// ============================================
+
+async function handleLogWorkSession(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const task = (input.task as string) || 'Arbeit';
+  const project = input.project as string | undefined;
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  const title = project
+    ? `${durationMinutes} min ${task} (${project})`
+    : `${durationMinutes} min ${task}`;
+
+  // Activity Log
+  const { data: activity, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'work_session_logged',
+      title,
+      description: notes || `Arbeitssession: ${task}`,
+      xp_amount: xpGained,
+      faction_id: 'karriere',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging work session:', activityError);
+    throw new Error('Fehler beim Loggen der Arbeitssession');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'karriere', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activity?.id,
+    duration_minutes: durationMinutes,
+    task,
+    project: project || null,
+    xp_gained: xpGained,
+    message: `💼 ${durationMinutes} Minuten ${task} geloggt! (+${xpGained} XP Karriere)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Soziales (NEU)
+// ============================================
+
+async function handleLogSocialInteraction(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const withWhom = (input.with_whom as string) || 'Freunde/Familie';
+  const activity = (input.activity as string) || 'Zeit verbracht';
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  // Activity Log
+  const { data: activityLog, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'social_interaction_logged',
+      title: `${durationMinutes} min mit ${withWhom}`,
+      description: notes || `${activity} mit ${withWhom}`,
+      xp_amount: xpGained,
+      faction_id: 'soziales',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging social interaction:', activityError);
+    throw new Error('Fehler beim Loggen der sozialen Interaktion');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'soziales', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activityLog?.id,
+    duration_minutes: durationMinutes,
+    with_whom: withWhom,
+    activity,
+    xp_gained: xpGained,
+    message: `👥 ${durationMinutes} Minuten ${activity} mit ${withWhom} geloggt! (+${xpGained} XP Soziales)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Wissen (NEU)
+// ============================================
+
+async function handleLogLearning(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const topic = (input.topic as string) || 'Lernen';
+  const type = (input.type as string) || 'Lernzeit';
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  // Activity Log
+  const { data: activity, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'learning_logged',
+      title: `${durationMinutes} min ${type}: ${topic}`,
+      description: notes || `${type} über ${topic}`,
+      xp_amount: xpGained,
+      faction_id: 'wissen',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging learning:', activityError);
+    throw new Error('Fehler beim Loggen der Lernzeit');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'wissen', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activity?.id,
+    duration_minutes: durationMinutes,
+    topic,
+    type,
+    xp_gained: xpGained,
+    message: `📚 ${durationMinutes} Minuten ${type} (${topic}) geloggt! (+${xpGained} XP Wissen)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Hobbys (NEU)
+// ============================================
+
+async function handleLogHobby(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const durationMinutes = input.duration_minutes as number;
+  const hobby = input.hobby as string;
+  const notes = input.notes as string | undefined;
+
+  // XP-Berechnung: 0.5 XP pro Minute, mindestens 5 XP
+  const xpGained = Math.max(5, Math.round(durationMinutes * 0.5));
+
+  // Activity Log
+  const { data: activity, error: activityError } = await supabase
+    .from('activity_log')
+    .insert({
+      user_id: userId,
+      activity_type: 'hobby_logged',
+      title: `${durationMinutes} min ${hobby}`,
+      description: notes || `${hobby} gemacht`,
+      xp_amount: xpGained,
+      faction_id: 'hobby',
+    })
+    .select()
+    .single();
+
+  if (activityError) {
+    console.error('Error logging hobby:', activityError);
+    throw new Error('Fehler beim Loggen des Hobbys');
+  }
+
+  // Faction XP (UPSERT)
+  await updateFactionXP(supabase, userId, 'hobby', xpGained);
+
+  return JSON.stringify({
+    success: true,
+    activity_id: activity?.id,
+    duration_minutes: durationMinutes,
+    hobby,
+    xp_gained: xpGained,
+    message: `🎨 ${durationMinutes} Minuten ${hobby} geloggt! (+${xpGained} XP Hobbys)`,
   });
 }
