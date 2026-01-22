@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { habitCreateSchema, sanitizeText } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,30 +22,65 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = user.id;
-    const input = await request.json();
+    const rawInput = await request.json();
     const adminClient = createAdminClient();
 
     console.log('[createHabit API] Creating habit for user:', userId);
 
-    const habitType = input.isNegative ? 'negative' : 'positive';
-    const targetDays = input.frequencyDays || [];
-    
+    // Transform legacy input to validation schema format
+    const validationInput = {
+      name: rawInput.name,
+      description: rawInput.description,
+      icon: rawInput.icon,
+      xp_per_completion: rawInput.xpReward,
+      frequency: rawInput.frequency || 'daily',
+      habit_type: rawInput.isNegative ? 'negative' as const : 'positive' as const,
+      factions: rawInput.factions?.map((f: { factionId: string; weight: number }) => ({
+        faction_id: f.factionId,
+        weight: f.weight,
+      })) || [],
+    };
+
+    // Validate input
+    const validation = habitCreateSchema.safeParse(validationInput);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validation.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize text fields
+    const sanitized = {
+      ...validation.data,
+      name: sanitizeText(validation.data.name),
+      description: validation.data.description
+        ? sanitizeText(validation.data.description)
+        : undefined,
+    };
+
+    const targetDays = rawInput.frequencyDays || [];
+
     // Get primary faction from input (first faction in the list)
-    const primaryFactionId = input.factions?.[0]?.factionId || null;
+    const primaryFactionId = sanitized.factions[0].faction_id;
 
     // Insert habit with faction_id
     const { data: habit, error: habitError } = await adminClient
       .from('habits')
       .insert({
         user_id: userId,
-        name: input.name,
-        description: input.description || null,
-        icon: input.icon || '✅',
-        color: input.color || '#10B981',
-        habit_type: habitType,
-        frequency: input.frequency || 'daily',
+        name: sanitized.name,
+        description: sanitized.description || null,
+        icon: sanitized.icon || '✅',
+        color: rawInput.color || '#10B981',
+        habit_type: sanitized.habit_type,
+        frequency: sanitized.frequency,
         target_days: targetDays,
-        xp_per_completion: input.xpReward || 10,
+        xp_per_completion: sanitized.xp_per_completion,
         current_streak: 0,
         longest_streak: 0,
         total_completions: 0,
@@ -63,10 +99,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert habit_factions for weighted distribution (if multiple factions)
-    if (input.factions && Array.isArray(input.factions) && input.factions.length > 0) {
-      const factionInserts = input.factions.map((f: { factionId: string; weight: number }) => ({
+    if (sanitized.factions && sanitized.factions.length > 0) {
+      const factionInserts = sanitized.factions.map((f) => ({
         habit_id: habit.id,
-        faction_id: f.factionId,
+        faction_id: f.faction_id,
         weight: f.weight,
       }));
 
@@ -84,9 +120,9 @@ export async function POST(request: NextRequest) {
       await adminClient.from('activity_log').insert({
         user_id: userId,
         activity_type: 'habit_created',
-        faction_id: primaryFactionId || 'karriere',
-        title: `${input.icon || '✅'} Neuer Habit erstellt`,
-        description: input.name,
+        faction_id: primaryFactionId,
+        title: `${sanitized.icon || '✅'} Neuer Habit erstellt`,
+        description: sanitized.name,
         xp_amount: 0,
         related_entity_type: 'habit',
         related_entity_id: habit.id,
