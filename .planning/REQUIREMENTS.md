@@ -14,16 +14,16 @@ Must be implemented before Beta release. No compromises on data security.
 
 | REQ-ID | Requirement | Rationale | Phase |
 |--------|-------------|-----------|-------|
-| SEC-01 | User can access soziales page with correct user-specific data (no hardcoded User IDs) | Current hardcoded ID exposes wrong user's data | TBD |
-| SEC-02 | User can access karriere page with correct user-specific data (no hardcoded User IDs) | Current hardcoded ID exposes wrong user's data | TBD |
-| SEC-03 | System prevents unauthorized access to other users' data via RLS policies on all tables (quests, habits, skills, factions, user_stats, notifications, ai_conversations, journal_entries) | CVE-2025-48757: 170+ exposed Supabase databases due to RLS misconfigurations | TBD |
-| SEC-04 | Unauthenticated users cannot bypass auth to access protected pages | CVE-2025-29927: Next.js middleware authorization bypass vulnerability | TBD |
-| SEC-05 | System sanitizes Quest title/description input to prevent XSS attacks | User-generated content can execute malicious scripts | TBD |
-| SEC-06 | System sanitizes Habit input to prevent XSS attacks | User-generated content can execute malicious scripts | TBD |
-| SEC-07 | System sanitizes Profile edit input to prevent XSS attacks | User-generated content can execute malicious scripts | TBD |
-| SEC-08 | API routes verify authentication using getUser() pattern (not just middleware) | Defense-in-depth: middleware-only auth is vulnerable to bypass | TBD |
-| SEC-09 | Health Import webhook validates API key before processing requests | Prevent unauthorized access to health data import | TBD |
-| SEC-10 | Error messages do not leak sensitive data (stack traces, user IDs, tokens) | Data leakage through verbose errors is common vulnerability | TBD |
+| SEC-01 | User can access soziales page with correct user-specific data (no hardcoded User IDs) | Current hardcoded ID exposes wrong user's data | Phase 1 |
+| SEC-02 | User can access karriere page with correct user-specific data (no hardcoded User IDs) | Current hardcoded ID exposes wrong user's data | Phase 1 |
+| SEC-03 | System prevents unauthorized access to other users' data via RLS policies on all tables (quests, habits, skills, factions, user_stats, notifications, ai_conversations, journal_entries) | CVE-2025-48757: 170+ exposed Supabase databases due to RLS misconfigurations | Phase 1 |
+| SEC-04 | Unauthenticated users cannot bypass auth to access protected pages | CVE-2025-29927: Next.js middleware authorization bypass vulnerability | Phase 2 |
+| SEC-05 | System sanitizes Quest title/description input to prevent XSS attacks | User-generated content can execute malicious scripts | Phase 1 |
+| SEC-06 | System sanitizes Habit input to prevent XSS attacks | User-generated content can execute malicious scripts | Phase 1 |
+| SEC-07 | System sanitizes Profile edit input to prevent XSS attacks | User-generated content can execute malicious scripts | Phase 1 |
+| SEC-08 | API routes verify authentication using getUser() pattern (not just middleware) | Defense-in-depth: middleware-only auth is vulnerable to bypass | Phase 2 |
+| SEC-09 | Health Import webhook validates API key before processing requests | Prevent unauthorized access to health data import | Phase 2 |
+| SEC-10 | Error messages do not leak sensitive data (stack traces, user IDs, tokens) | Data leakage through verbose errors is common vulnerability | Phase 2 |
 
 ### XP System (P0 - Critical)
 
@@ -31,12 +31,12 @@ Core gamification logic must work correctly. If XP is broken, the entire app val
 
 | REQ-ID | Requirement | Rationale | Phase |
 |--------|-------------|-----------|-------|
-| XP-01 | Quest completion triggers correct XP update in user_stats table | Known bug: Quest XP not always triggering | TBD |
-| XP-02 | Habit tracking triggers correct Faction XP update | Known bug: Habit XP not always triggering | TBD |
-| XP-03 | Skill XP accumulation persists correctly across sessions | XP must not be lost on logout/login | TBD |
-| XP-04 | Faction XP correctly aggregates from all Skills in that faction | Faction weights must be calculated accurately | TBD |
-| XP-05 | Level Up threshold triggers correctly when XP crosses boundary | Users expect immediate level up notification | TBD |
-| XP-06 | user_stats table reflects current XP state after all XP-generating actions | Single source of truth for user progression | TBD |
+| XP-01 | Quest completion triggers correct XP update in user_stats table | Known bug: Quest XP not always triggering | Phase 5 |
+| XP-02 | Habit tracking triggers correct Faction XP update | Known bug: Habit XP not always triggering | Phase 5 |
+| XP-03 | Skill XP accumulation persists correctly across sessions | XP must not be lost on logout/login | Phase 5 |
+| XP-04 | Faction XP correctly aggregates from all Skills in that faction | Faction weights must be calculated accurately | Phase 5 |
+| XP-05 | Level Up threshold triggers correctly when XP crosses boundary | Users expect immediate level up notification | Phase 5 |
+| XP-06 | user_stats table reflects current XP state after all XP-generating actions | Single source of truth for user progression | Phase 5 |
 
 ### E2E Testing (P1 - High)
 
@@ -44,16 +44,16 @@ Comprehensive testing prevents regressions and validates fixes. Focuses on criti
 
 | REQ-ID | Requirement | Rationale | Phase |
 |--------|-------------|-----------|-------|
-| TEST-01 | Dashboard navigation to all sections (Quests, Habits, Skills, Factions, Profile, Settings) works correctly | Primary navigation must be functional | TBD |
-| TEST-02 | Quest workflows (Create, Complete, Fail) work end-to-end | Core feature - quests drive XP progression | TBD |
-| TEST-03 | Habit tracking (positive/negative) and streak counter work correctly | Core feature - habits drive daily engagement | TBD |
-| TEST-04 | Skills page displays all skills, opens details, shows correct XP bars | Users track progression via skills page | TBD |
-| TEST-05 | Factions page displays all 6 factions (Körper, Geist, Seele, Finanzen, Soziales, Karriere) with correct XP/Level | Factions are primary progression metric | TBD |
-| TEST-06 | Profile page displays data, Edit mode persists changes correctly | Users manage identity via profile | TBD |
-| TEST-07 | Settings page (all categories, toggles, theme switching) functions correctly | Settings control user experience | TBD |
-| TEST-08 | Soziales page displays correct user data (birthdays, social interactions) | Social features drive engagement | TBD |
-| TEST-09 | Karriere page displays correct user career data | Career tracking is core to life management | TBD |
-| TEST-10 | Geist/Journal page creates entries and displays history | Journaling is core to mental health tracking | TBD |
+| TEST-01 | Dashboard navigation to all sections (Quests, Habits, Skills, Factions, Profile, Settings) works correctly | Primary navigation must be functional | Phase 3, Phase 4 |
+| TEST-02 | Quest workflows (Create, Complete, Fail) work end-to-end | Core feature - quests drive XP progression | Phase 4 |
+| TEST-03 | Habit tracking (positive/negative) and streak counter work correctly | Core feature - habits drive daily engagement | Phase 4 |
+| TEST-04 | Skills page displays all skills, opens details, shows correct XP bars | Users track progression via skills page | Phase 4 |
+| TEST-05 | Factions page displays all 6 factions (Körper, Geist, Seele, Finanzen, Soziales, Karriere) with correct XP/Level | Factions are primary progression metric | Phase 4 |
+| TEST-06 | Profile page displays data, Edit mode persists changes correctly | Users manage identity via profile | Phase 4 |
+| TEST-07 | Settings page (all categories, toggles, theme switching) functions correctly | Settings control user experience | Phase 4 |
+| TEST-08 | Soziales page displays correct user data (birthdays, social interactions) | Social features drive engagement | Phase 4 |
+| TEST-09 | Karriere page displays correct user career data | Career tracking is core to life management | Phase 4 |
+| TEST-10 | Geist/Journal page creates entries and displays history | Journaling is core to mental health tracking | Phase 4 |
 
 ### Data Flow Validation (P1 - High)
 
@@ -61,17 +61,17 @@ Complex multi-table flows must be validated end-to-end. Unit tests cannot catch 
 
 | REQ-ID | Requirement | Rationale | Phase |
 |--------|-------------|-----------|-------|
-| FLOW-01 | Quest → XP → Skill → Faction flow completes correctly end-to-end | Critical data flow: Quest completion must update all downstream tables | TBD |
-| FLOW-02 | Habit → XP → Faction flow completes correctly end-to-end | Critical data flow: Habit tracking must update faction XP | TBD |
-| FLOW-03 | Level Up animation/notification triggers when threshold is crossed | User feedback for progression milestones | TBD |
-| FLOW-04 | Activity log captures all XP-generating actions for audit trail | Audit trail for debugging XP issues | TBD |
+| FLOW-01 | Quest → XP → Skill → Faction flow completes correctly end-to-end | Critical data flow: Quest completion must update all downstream tables | Phase 5 |
+| FLOW-02 | Habit → XP → Faction flow completes correctly end-to-end | Critical data flow: Habit tracking must update faction XP | Phase 5 |
+| FLOW-03 | Level Up animation/notification triggers when threshold is crossed | User feedback for progression milestones | Phase 5 |
+| FLOW-04 | Activity log captures all XP-generating actions for audit trail | Audit trail for debugging XP issues | Phase 5 |
 
 ### Build & Deployment (P2 - Medium)
 
 | REQ-ID | Requirement | Rationale | Phase |
 |--------|-------------|-----------|-------|
-| BUILD-01 | npm run build completes without TypeScript errors | TypeScript errors block deployment | TBD |
-| BUILD-02 | Production build runs without console errors | Console errors indicate underlying issues | TBD |
+| BUILD-01 | npm run build completes without TypeScript errors | TypeScript errors block deployment | Phase 6 |
+| BUILD-02 | Production build runs without console errors | Console errors indicate underlying issues | Phase 6 |
 
 ## v2 Requirements
 
@@ -103,12 +103,45 @@ Explicitly excluded from this audit/stabilization initiative.
 
 ## Traceability
 
-This section maps requirements to phases. Populated during roadmap creation.
+This section maps requirements to phases. Updated during roadmap creation.
 
-| Phase | Goal | Requirements Addressed |
-|-------|------|----------------------|
-| TBD | TBD | TBD |
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SEC-01 | Phase 1: Security Foundation | Pending |
+| SEC-02 | Phase 1: Security Foundation | Pending |
+| SEC-03 | Phase 1: Security Foundation | Pending |
+| SEC-05 | Phase 1: Security Foundation | Pending |
+| SEC-06 | Phase 1: Security Foundation | Pending |
+| SEC-07 | Phase 1: Security Foundation | Pending |
+| SEC-04 | Phase 2: API Security Audit | Pending |
+| SEC-08 | Phase 2: API Security Audit | Pending |
+| SEC-09 | Phase 2: API Security Audit | Pending |
+| SEC-10 | Phase 2: API Security Audit | Pending |
+| TEST-01 | Phase 3: E2E Testing Infrastructure (partial), Phase 4: Critical User Workflows | Pending |
+| TEST-02 | Phase 4: Critical User Workflows | Pending |
+| TEST-03 | Phase 4: Critical User Workflows | Pending |
+| TEST-04 | Phase 4: Critical User Workflows | Pending |
+| TEST-05 | Phase 4: Critical User Workflows | Pending |
+| TEST-06 | Phase 4: Critical User Workflows | Pending |
+| TEST-07 | Phase 4: Critical User Workflows | Pending |
+| TEST-08 | Phase 4: Critical User Workflows | Pending |
+| TEST-09 | Phase 4: Critical User Workflows | Pending |
+| TEST-10 | Phase 4: Critical User Workflows | Pending |
+| XP-01 | Phase 5: XP System Validation | Pending |
+| XP-02 | Phase 5: XP System Validation | Pending |
+| XP-03 | Phase 5: XP System Validation | Pending |
+| XP-04 | Phase 5: XP System Validation | Pending |
+| XP-05 | Phase 5: XP System Validation | Pending |
+| XP-06 | Phase 5: XP System Validation | Pending |
+| FLOW-01 | Phase 5: XP System Validation | Pending |
+| FLOW-02 | Phase 5: XP System Validation | Pending |
+| FLOW-03 | Phase 5: XP System Validation | Pending |
+| FLOW-04 | Phase 5: XP System Validation | Pending |
+| BUILD-01 | Phase 6: Database Testing & Security Hardening | Pending |
+| BUILD-02 | Phase 6: Database Testing & Security Hardening | Pending |
+
+**Coverage:** 32/32 requirements mapped (100%)
 
 ---
 
-*Last updated: 2026-01-22 during GSD project initialization*
+*Last updated: 2026-01-22 during roadmap creation*
