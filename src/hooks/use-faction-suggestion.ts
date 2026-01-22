@@ -7,13 +7,11 @@ import { useState, useEffect } from 'react';
 import { suggestFaction, storeFactionFeedback, type FactionSuggestion } from '@/lib/ai/faction-suggester';
 import { getRecentActivities } from '@/lib/data/ai-faction-feedback';
 import type { FactionId } from '@/lib/database.types';
-
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface UseFactionSuggestionOptions {
   activityDescription: string;
   enabled?: boolean;
-  userId?: string;
   autoSuggest?: boolean; // Auto-trigger suggestion on description change
 }
 
@@ -50,12 +48,25 @@ export interface UseFactionSuggestionResult {
 export function useFactionSuggestion({
   activityDescription,
   enabled = true,
-  userId = TEST_USER_ID,
   autoSuggest = false,
 }: UseFactionSuggestionOptions): UseFactionSuggestionResult {
+  const { userId, loading: authLoading } = useAuth();
   const [suggestions, setSuggestions] = useState<FactionSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // If not authenticated, return early with empty state
+  if (authLoading || !userId) {
+    return {
+      suggestions: [],
+      isLoading: authLoading,
+      error: authLoading ? null : 'Not authenticated',
+      getSuggestions: async () => {},
+      acceptSuggestion: async () => {},
+      rejectSuggestion: async () => {},
+      clearSuggestions: () => {},
+    };
+  }
 
   const getSuggestions = async () => {
     if (!enabled || !activityDescription.trim()) {
