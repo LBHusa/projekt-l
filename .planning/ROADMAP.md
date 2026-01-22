@@ -32,10 +32,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Quest creation with malicious title/description does not execute scripts (XSS prevented via Zod + sanitization)
   5. Habit tracking with malicious input does not execute scripts (XSS prevented via Zod + sanitization)
   6. Profile editing with malicious input does not execute scripts (XSS prevented via Zod + sanitization)
-**Plans**: TBD
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 01-01-PLAN.md — Install validation dependencies and create Zod schemas
+- [ ] 01-02-PLAN.md — Create RLS performance indexes for all 49 tables
+- [ ] 01-03-PLAN.md — Remove hardcoded user UUIDs from API routes
+- [ ] 01-04-PLAN.md — Remove hardcoded domain UUIDs from homepage and types
+- [ ] 01-05-PLAN.md — Integrate validation into Quest/Habit/Profile APIs
 
 ### Phase 2: API Security Audit
 **Goal**: All API routes verify authentication and errors never leak sensitive data
@@ -124,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security Foundation | 0/TBD | Not started | - |
+| 1. Security Foundation | 0/5 | Planning complete | - |
 | 2. API Security Audit | 0/TBD | Not started | - |
 | 3. E2E Testing Infrastructure | 0/TBD | Not started | - |
 | 4. Critical User Workflows | 0/TBD | Not started | - |
