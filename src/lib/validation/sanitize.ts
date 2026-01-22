@@ -1,4 +1,4 @@
-import * as DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Sanitize HTML content - allows basic formatting tags
