@@ -85,6 +85,15 @@ export async function getDomainByName(name: string, userId?: string): Promise<Sk
   return data;
 }
 
+/**
+ * Get domain ID by name (helper for mapping categories to domains).
+ * Returns null if not found.
+ */
+export async function getDomainIdByName(name: string, userId?: string): Promise<string | null> {
+  const domain = await getDomainByName(name, userId);
+  return domain?.id ?? null;
+}
+
 export async function createDomain(domain: {
   name: string;
   icon?: string;

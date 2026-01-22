@@ -343,14 +343,3 @@ export function calculateInteractionXp(
 export function getCategoryFromType(type: RelationshipType): RelationshipCategory {
   return RELATIONSHIP_TYPE_META[type].category;
 }
-
-export function getDomainIdFromCategory(category: RelationshipCategory): string | null {
-  switch (category) {
-    case 'family':
-      return '77777777-7777-7777-7777-777777777777'; // Familie Domain
-    case 'friend':
-      return 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'; // Soziales Domain
-    default:
-      return null;
-  }
-}

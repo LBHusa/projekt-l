@@ -5,6 +5,7 @@
 
 import { createBrowserClient } from '@/lib/supabase';
 import { getUserIdOrCurrent } from '@/lib/auth-helper';
+import { getDomainIdByName } from '@/lib/data/domains';
 import type {
   Contact,
   ContactWithStats,
@@ -15,9 +16,29 @@ import type {
 import {
   RELATIONSHIP_TYPE_META,
   getCategoryFromType,
-  getDomainIdFromCategory,
   calculateXpForNextLevel,
 } from '@/lib/types/contacts';
+
+// ============================================
+// HELPERS
+// ============================================
+
+/**
+ * Get domain ID from relationship category by looking up domain in database.
+ * Returns null if category doesn't map to a domain or domain not found.
+ */
+async function getDomainIdFromCategory(category: RelationshipCategory): Promise<string | null> {
+  switch (category) {
+    case 'family':
+      return await getDomainIdByName('Familie');
+    case 'friend':
+      return await getDomainIdByName('Soziales');
+    case 'professional':
+      return await getDomainIdByName('Karriere');
+    default:
+      return null;
+  }
+}
 
 // ============================================
 // CRUD Operations
@@ -211,7 +232,7 @@ export async function updateContact(
   if (sanitizedUpdates.relationship_type) {
     const category = getCategoryFromType(sanitizedUpdates.relationship_type);
     additionalUpdates.relationship_category = category;
-    additionalUpdates.domain_id = getDomainIdFromCategory(category);
+    additionalUpdates.domain_id = await getDomainIdFromCategory(category);
   }
 
   const { data, error } = await supabase
@@ -493,7 +514,7 @@ export async function bulkImportContacts(
     try {
       // Determine category and domain from relationship type
       const category = getCategoryFromType(contactData.relationship_type);
-      const domainId = getDomainIdFromCategory(category);
+      const domainId = await getDomainIdFromCategory(category);
 
       // Sanitize date fields
       const sanitizedData = { ...contactData };
