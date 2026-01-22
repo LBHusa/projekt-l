@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Worker CLAUDE.md files (each worker has its own)
 CLAUDE.md
+
+# GSD intel directory (auto-generated, always local)
+.planning/intel/
