@@ -232,7 +232,8 @@ export async function updateContact(
   if (sanitizedUpdates.relationship_type) {
     const category = getCategoryFromType(sanitizedUpdates.relationship_type);
     additionalUpdates.relationship_category = category;
-    additionalUpdates.domain_id = await getDomainIdFromCategory(category);
+    const domainId = await getDomainIdFromCategory(category);
+    additionalUpdates.domain_id = domainId ?? undefined;
   }
 
   const { data, error } = await supabase

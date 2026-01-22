@@ -14,7 +14,6 @@ export interface FactionSuggesterProps {
   onReject?: (suggestedFactionId: FactionId, actualFactionId: FactionId) => void;
   enabled?: boolean;
   autoSuggest?: boolean;
-  userId?: string;
 }
 
 /**
@@ -35,7 +34,6 @@ export function FactionSuggester({
   onReject,
   enabled = true,
   autoSuggest = false,
-  userId,
 }: FactionSuggesterProps) {
   const {
     suggestions,
@@ -48,7 +46,6 @@ export function FactionSuggester({
   } = useFactionSuggestion({
     activityDescription,
     enabled,
-    userId,
     autoSuggest,
   });
 
@@ -182,12 +179,10 @@ export function FactionSuggestionBadge({
   activityDescription,
   onAccept,
   enabled = true,
-  userId,
 }: Omit<FactionSuggesterProps, 'autoSuggest'>) {
   const { suggestions, acceptSuggestion } = useFactionSuggestion({
     activityDescription,
     enabled,
-    userId,
     autoSuggest: true,
   });
 
