@@ -47,6 +47,10 @@ Recent decisions affecting current work:
 - **01-01**: Use isomorphic-dompurify for server+client sanitization
 - **01-01**: Two-layer XSS prevention (Zod validation rejects malicious input, DOMPurify sanitizes before rendering)
 - **01-01**: Type-safe validation with TypeScript inference from Zod schemas
+- **01-03**: Use supabase.auth.getUser() in all API routes instead of accepting userId from query params
+- **01-03**: Test routes disabled in production via NODE_ENV check (404 response)
+- **01-03**: Domain IDs looked up dynamically from life_domains table by name instead of hardcoded UUIDs
+- **01-03**: useAuth hook provides userId to client components instead of hardcoded TEST_USER_ID
 - **01-04**: Move domain ID resolution from synchronous types file to async data layer
 - **01-04**: Create getDomainIdByName helper for category-to-domain mapping
 - **01-04**: Homepage dynamically filters Familie domain instead of using hardcoded UUID
@@ -65,8 +69,11 @@ None yet.
 - ✅ 01-01: Input validation foundation established with Zod v4 and DOMPurify
 - ✅ 01-01: Validation schemas ready for integration into API routes (Plan 01-05)
 - ✅ 01-02: Authentication layer complete with session verification
-- ✅ 01-03: Hardcoded user IDs removed from soziales/page.tsx and karriere/page.tsx
-- ✅ 01-04: All hardcoded domain UUIDs removed (SEC-01, SEC-02 addressed)
+- ✅ 01-03: All hardcoded user UUIDs removed from API routes (SEC-01, SEC-02 addressed)
+- ✅ 01-03: API routes now authenticate with auth.getUser() and return 401 for unauthorized requests
+- ✅ 01-03: Database lookup pattern established for domain IDs
+- ✅ 01-04: Hardcoded user IDs removed from UI components (soziales/page.tsx, karriere/page.tsx)
+- ✅ 01-04: All hardcoded domain UUIDs removed from UI components
 
 **Pending verification:**
 - Validation schemas need integration into API routes (Plan 01-05) before SEC-05, SEC-06, SEC-07 can be verified
