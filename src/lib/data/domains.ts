@@ -58,6 +58,33 @@ export async function getDomainById(id: string, userId?: string): Promise<SkillD
   return data;
 }
 
+/**
+ * Get a domain by name (case-insensitive).
+ * Returns null if not found.
+ */
+export async function getDomainByName(name: string, userId?: string): Promise<SkillDomain | null> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const supabase = createBrowserClient();
+
+  // Search for domain by name (templates OR user's own)
+  const { data, error } = await supabase
+    .from('skill_domains')
+    .select('*')
+    .ilike('name', name)
+    .or(`is_template.eq.true,created_by.eq.${resolvedUserId}`)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // Not found
+    }
+    console.error('Error fetching domain by name:', error);
+    throw error;
+  }
+
+  return data;
+}
+
 export async function createDomain(domain: {
   name: string;
   icon?: string;

@@ -19,14 +19,30 @@ function getCategoryFromType(type: string): string {
   return 'other';
 }
 
-function getDomainIdFromCategory(category: string): string | null {
+// Helper to get domain ID by name from database
+async function getDomainIdByName(
+  adminClient: ReturnType<typeof createAdminClient>,
+  domainName: string
+): Promise<string | null> {
+  const { data } = await adminClient
+    .from('life_domains')
+    .select('id')
+    .eq('name', domainName)
+    .single();
+  return data?.id ?? null;
+}
+
+async function getDomainIdFromCategory(
+  adminClient: ReturnType<typeof createAdminClient>,
+  category: string
+): Promise<string | null> {
   switch (category) {
     case 'family':
-      return '77777777-7777-7777-7777-777777777777'; // Familie Domain
+      return await getDomainIdByName(adminClient, 'Familie');
     case 'friend':
-      return 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'; // Soziales Domain
+      return await getDomainIdByName(adminClient, 'Soziales');
     case 'professional':
-      return '66666666-6666-6666-6666-666666666666'; // Karriere Domain
+      return await getDomainIdByName(adminClient, 'Karriere');
     default:
       return null;
   }
@@ -53,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Determine category and domain from relationship type
     const category = getCategoryFromType(formData.relationship_type);
-    const domainId = getDomainIdFromCategory(category);
+    const domainId = await getDomainIdFromCategory(adminClient, category);
 
     // Insert contact with admin client (bypasses RLS)
     const { data: contact, error: contactError } = await adminClient
@@ -92,10 +108,13 @@ export async function POST(request: NextRequest) {
 
     // Log activity
     try {
+      // Get fallback domain if domainId is null (default to Soziales)
+      const fallbackDomainId = domainId || await getDomainIdByName(adminClient, 'Soziales');
+
       await adminClient.from('activity_log').insert({
         user_id: userId,
         activity_type: 'contact_created',
-        faction_id: domainId || 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        faction_id: fallbackDomainId,
         title: '👤 Neuer Kontakt erstellt',
         description: `${formData.first_name} ${formData.last_name || ''}`.trim(),
         xp_amount: 0,

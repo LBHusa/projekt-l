@@ -24,7 +24,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords, Plus } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
-import { getAllDomains, createDomainWithFactions } from '@/lib/data/domains';
+import { getAllDomains, createDomainWithFactions, getDomainByName } from '@/lib/data/domains';
 import { getUserProfile, getDomainStats, getTotalSkillCount, calculateAttributes } from '@/lib/data/user-skills';
 import { getFactionsWithStats } from '@/lib/data/factions';
 import { getContactsStats, getUpcomingBirthdays, getContactsNeedingAttention } from '@/lib/data/contacts';
@@ -36,9 +36,6 @@ import type { SkillDomain, UserAttributes, MentalStats, FactionWithStats, Accoun
 import type { ContactWithStats } from '@/lib/types/contacts';
 import type { QuickTransactionData } from '@/components/dashboard/modals/QuickTransactionModal';
 import DomainForm, { type DomainFormData } from '@/components/DomainForm';
-
-// Familie-Domain ID - wird aus der Anzeige gefiltert
-const FAMILIE_DOMAIN_ID = '77777777-7777-7777-7777-777777777777';
 
 interface DomainWithLevel extends SkillDomain {
   level: number;
@@ -110,8 +107,9 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       // Load all data in parallel
-      const [domainsData, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData, calculatedAttrs] = await Promise.all([
+      const [domainsData, familieDomain, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData, calculatedAttrs] = await Promise.all([
         getAllDomains(),
+        getDomainByName('Familie'),
         getUserProfile(userId!),
         getTotalSkillCount(),
         getContactsStats(),
@@ -123,9 +121,9 @@ export default function Dashboard() {
       ]);
 
       // Filter out Familie domain (now replaced by Contacts button)
-      const filteredDomains = domainsData.filter(
-        (domain) => domain.id !== FAMILIE_DOMAIN_ID
-      );
+      const filteredDomains = familieDomain
+        ? domainsData.filter((domain) => domain.id !== familieDomain.id)
+        : domainsData;
 
       // Load user levels for each domain
       const domainsWithLevels = await Promise.all(
@@ -153,7 +151,8 @@ export default function Dashboard() {
           avatarUrl: profile.avatar_url,
           avatarSeed: profile.avatar_seed,
           totalLevel: profile.total_level,
-          totalXp: profile.total_xp,
+          // Compute totalXp from factions (single source of truth)
+          totalXp: factionsData.reduce((sum, f) => sum + (f.stats?.total_xp || 0), 0),
           attributes: calculatedAttrs || profile.attributes || DEFAULT_ATTRIBUTES,
           mentalStats: profile.mental_stats || DEFAULT_MENTAL_STATS,
         });
