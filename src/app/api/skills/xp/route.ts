@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { addXp } from '@/lib/xp';
+import { skillXpSchema } from '@/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,16 +24,22 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = user.id;
-    const input = await request.json();
-    const { skillId, xp, description, factionOverride } = input;
+    const rawInput = await request.json();
 
-    if (!skillId || !xp) {
+    // Validate input with Zod schema
+    const validation = skillXpSchema.safeParse(rawInput);
+
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'skillId and xp are required' },
+        {
+          error: 'Validation failed',
+          details: validation.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
 
+    const { skillId, xp, description, factionOverride } = validation.data;
     const adminClient = createAdminClient();
 
     // 1. Get or create user_skill record

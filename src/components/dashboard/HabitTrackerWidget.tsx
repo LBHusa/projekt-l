@@ -1,22 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Flame, ChevronRight, Check, X } from 'lucide-react';
+import { Flame, ChevronRight, Check, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { getTodaysHabits, logHabitCompletion } from '@/lib/data/habits';
 import type { HabitWithLogs } from '@/lib/database.types';
 
 export default function HabitTrackerWidget() {
   const [habits, setHabits] = useState<HabitWithLogs[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadHabits = async () => {
+    setError(null);
     try {
       const data = await getTodaysHabits();
       setHabits(data);
     } catch (err) {
       console.error('Error loading habits:', err);
+      setError('Habits konnten nicht geladen werden');
     } finally {
       setLoading(false);
     }
@@ -35,9 +38,19 @@ export default function HabitTrackerWidget() {
     }
   };
 
-  const positiveHabits = habits.filter(h => h.habit_type === 'positive');
-  const negativeHabits = habits.filter(h => h.habit_type === 'negative');
-  const completedCount = positiveHabits.filter(h => h.completedToday).length;
+  // Memoize filtered arrays to prevent unnecessary recalculations
+  const positiveHabits = useMemo(
+    () => habits.filter(h => h.habit_type === 'positive'),
+    [habits]
+  );
+  const negativeHabits = useMemo(
+    () => habits.filter(h => h.habit_type === 'negative'),
+    [habits]
+  );
+  const completedCount = useMemo(
+    () => positiveHabits.filter(h => h.completedToday).length,
+    [positiveHabits]
+  );
   const totalPositive = positiveHabits.length;
 
   if (loading) {
@@ -50,6 +63,33 @@ export default function HabitTrackerWidget() {
             <div className="h-12 bg-white/5 rounded-lg" />
             <div className="h-12 bg-white/5 rounded-lg" />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-red-500/30 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Flame className="w-5 h-5 text-orange-400" />
+          <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
+            Habits heute
+          </h3>
+        </div>
+        <div className="flex flex-col items-center justify-center py-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+          <p className="text-sm text-red-400 mb-3">{error}</p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              loadHabits();
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg transition"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Erneut versuchen
+          </button>
         </div>
       </div>
     );
@@ -162,7 +202,8 @@ interface HabitItemProps {
   isNegative?: boolean;
 }
 
-function HabitItem({ habit, onToggle, isNegative }: HabitItemProps) {
+// Memoized HabitItem to prevent unnecessary re-renders
+const HabitItem = memo(function HabitItem({ habit, onToggle, isNegative }: HabitItemProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isCompleted = habit.completedToday;
 
@@ -227,4 +268,4 @@ function HabitItem({ habit, onToggle, isNegative }: HabitItemProps) {
       )}
     </motion.button>
   );
-}
+});

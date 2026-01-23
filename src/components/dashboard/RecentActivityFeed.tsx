@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Activity,
@@ -17,6 +17,8 @@ import {
   Smile,
   DollarSign,
   ChevronDown,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { getRecentActivity } from '@/lib/data/activity-log';
 import type { ActivityLog, FactionId } from '@/lib/database.types';
@@ -94,6 +96,7 @@ interface RecentActivityFeedProps {
 export default function RecentActivityFeed({ limit = 8, factionId }: RecentActivityFeedProps) {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FactionId | 'all'>('all');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(
     new Set(['today', 'yesterday'])
@@ -111,23 +114,29 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
     });
   };
 
+  const loadActivities = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const data = await getRecentActivity(limit);
+      setActivities(data);
+    } catch (err) {
+      console.error('Error loading activities:', err);
+      setError('Aktivitäten konnten nicht geladen werden');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadActivities = async () => {
-      try {
-        const data = await getRecentActivity(limit);
-        setActivities(data);
-      } catch (err) {
-        console.error('Error loading activities:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadActivities();
   }, [limit]);
 
-  const filteredActivities = filter === 'all'
-    ? activities
-    : activities.filter(a => a.faction_id === filter);
+  // Memoize filtered activities to prevent unnecessary recalculations
+  const filteredActivities = useMemo(
+    () => filter === 'all' ? activities : activities.filter(a => a.faction_id === filter),
+    [activities, filter]
+  );
 
   const formatTimeAgo = (date: string) => {
     const now = new Date();
@@ -161,6 +170,30 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[var(--background-secondary)]/80 backdrop-blur-sm rounded-xl border border-red-500/30 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Activity className="w-5 h-5 text-adaptive-muted" />
+          <h3 className="text-sm font-medium text-adaptive-muted uppercase tracking-wider">
+            Letzte Aktivitäten
+          </h3>
+        </div>
+        <div className="flex flex-col items-center justify-center py-4 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mb-2" />
+          <p className="text-sm text-red-400 mb-3">{error}</p>
+          <button
+            onClick={loadActivities}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg transition"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Erneut versuchen
+          </button>
         </div>
       </div>
     );
@@ -324,7 +357,8 @@ interface FilterButtonProps {
   color?: string;
 }
 
-function FilterButton({ children, active, onClick, color }: FilterButtonProps) {
+// Memoized FilterButton to prevent unnecessary re-renders
+const FilterButton = memo(function FilterButton({ children, active, onClick, color }: FilterButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -338,4 +372,4 @@ function FilterButton({ children, active, onClick, color }: FilterButtonProps) {
       {children}
     </button>
   );
-}
+});

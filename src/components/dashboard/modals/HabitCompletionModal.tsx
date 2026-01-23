@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Modal from '@/components/Modal';
 import { getTodaysHabits, logHabitCompletion } from '@/lib/data/habits';
 import type { HabitWithLogs } from '@/lib/database.types';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, AlertCircle, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface HabitCompletionModalProps {
@@ -24,6 +24,7 @@ export default function HabitCompletionModal({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [totalXpGained, setTotalXpGained] = useState(0);
 
   // Load habits when modal opens
@@ -32,6 +33,7 @@ export default function HabitCompletionModal({
       loadHabits();
       setSelectedIds(new Set());
       setSuccess(false);
+      setError(null);
       setTotalXpGained(0);
     }
   }, [isOpen]);
@@ -109,7 +111,11 @@ export default function HabitCompletionModal({
       }, 2000);
     } catch (error) {
       console.error('Error completing habits:', error);
-      // TODO: Show error message
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Fehler beim Speichern der Habits. Bitte versuche es erneut.'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -125,6 +131,26 @@ export default function HabitCompletionModal({
           <div className="flex justify-center items-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
           </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-300 transition"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
         )}
 
         {/* Success State */}

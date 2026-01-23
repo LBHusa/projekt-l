@@ -27,6 +27,14 @@ export {
   type ProfileUpdateInput,
 } from './profile';
 
+// Skill validation
+export {
+  skillXpSchema,
+  skillCreateSchema,
+  type SkillXpInput,
+  type SkillCreateInput,
+} from './skill';
+
 // Sanitization utilities (will be added in Task 3)
 export {
   sanitizeHtml,
