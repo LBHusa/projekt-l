@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { addXp, levelFromXp } from '@/lib/xp';
 
 export async function POST(
   request: NextRequest,
@@ -98,18 +99,25 @@ export async function POST(
           try {
             const { data: factionStats } = await adminClient
               .from('user_faction_stats')
-              .select('total_xp, weekly_xp, monthly_xp')
+              .select('total_xp, weekly_xp, monthly_xp, level')
               .eq('user_id', userId)
               .eq('faction_id', factionId)
               .single();
+
+            const oldTotalXp = factionStats?.total_xp || 0;
+            const newTotalXp = oldTotalXp + xpPerFaction;
+            const oldLevel = factionStats?.level || levelFromXp(oldTotalXp);
+            const newLevel = levelFromXp(newTotalXp);
+            const factionLeveledUp = newLevel > oldLevel;
 
             if (factionStats) {
               await adminClient
                 .from('user_faction_stats')
                 .update({
-                  total_xp: (factionStats.total_xp || 0) + xpPerFaction,
+                  total_xp: newTotalXp,
                   weekly_xp: (factionStats.weekly_xp || 0) + xpPerFaction,
                   monthly_xp: (factionStats.monthly_xp || 0) + xpPerFaction,
+                  level: newLevel,
                 })
                 .eq('user_id', userId)
                 .eq('faction_id', factionId);
@@ -122,7 +130,32 @@ export async function POST(
                   total_xp: xpPerFaction,
                   weekly_xp: xpPerFaction,
                   monthly_xp: xpPerFaction,
+                  level: newLevel,
                 });
+            }
+
+            // Log faction level up if it occurred
+            if (factionLeveledUp) {
+              try {
+                const { data: factionData } = await adminClient
+                  .from('factions')
+                  .select('name')
+                  .eq('id', factionId)
+                  .single();
+
+                await adminClient.from('activity_log').insert({
+                  user_id: userId,
+                  activity_type: 'level_up',
+                  faction_id: factionId,
+                  title: `Fraktion Level Up! ${factionData?.name || factionId}`,
+                  description: `Deine ${factionData?.name || factionId}-Fraktion ist jetzt Level ${newLevel}!`,
+                  xp_amount: 0,
+                  related_entity_type: 'faction',
+                  related_entity_id: factionId,
+                });
+              } catch (err) {
+                console.error('Error logging faction level up:', err);
+              }
             }
           } catch (err) {
             console.error('Error updating faction stats for', factionId, ':', err);
@@ -154,18 +187,45 @@ export async function POST(
               .single();
 
             if (userSkill) {
-              const newXp = (userSkill.current_xp || 0) + xpPerSkill;
-              // Simple level up logic: 100 XP per level
-              const newLevel = Math.floor(newXp / 100) + 1;
+              // Use unified level calculation from xp.ts
+              const result = addXp(
+                userSkill.level || 1,
+                userSkill.current_xp || 0,
+                xpPerSkill
+              );
               await adminClient
                 .from('user_skills')
                 .update({
-                  current_xp: newXp,
-                  level: Math.max(userSkill.level || 1, newLevel),
+                  current_xp: result.newXp,
+                  level: result.newLevel,
                   last_used: new Date().toISOString(),
                 })
                 .eq('user_id', userId)
                 .eq('skill_id', skillId);
+
+              // Log level up if it occurred
+              if (result.leveledUp) {
+                const { data: skillData } = await adminClient
+                  .from('skills')
+                  .select('name')
+                  .eq('id', skillId)
+                  .single();
+
+                try {
+                  await adminClient.from('activity_log').insert({
+                    user_id: userId,
+                    activity_type: 'level_up',
+                    faction_id: targetFactionIds[0] || 'karriere',
+                    title: `Level Up! ${skillData?.name || 'Skill'} ist jetzt Level ${result.newLevel}`,
+                    description: `${skillData?.name || 'Skill'} hat Level ${result.newLevel} erreicht!`,
+                    xp_amount: 0,
+                    related_entity_type: 'skill',
+                    related_entity_id: skillId,
+                  });
+                } catch (err) {
+                  console.error('Error logging skill level up:', err);
+                }
+              }
             }
           } catch (err) {
             console.error('Error updating skill XP for', skillId, ':', err);

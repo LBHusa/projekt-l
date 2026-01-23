@@ -233,6 +233,48 @@ export async function POST(request: NextRequest) {
       console.error('Error logging activity:', err);
     }
 
+    // 8. Log level up if it occurred
+    if (leveledUp && userSkill) {
+      try {
+        await adminClient.from('activity_log').insert({
+          user_id: userId,
+          activity_type: 'level_up',
+          faction_id: factionId || 'karriere',
+          title: `Level Up! ${skillInfo?.name || 'Skill'} ist jetzt Level ${userSkill.level}`,
+          description: `${skillInfo?.name || 'Skill'} hat Level ${userSkill.level} erreicht!`,
+          xp_amount: 0,
+          related_entity_type: 'skill',
+          related_entity_id: skillId,
+        });
+      } catch (err) {
+        console.error('Error logging skill level up:', err);
+      }
+    }
+
+    // 9. Log faction level up if it occurred
+    if (factionLeveledUp && factionId) {
+      try {
+        const { data: factionData } = await adminClient
+          .from('factions')
+          .select('name')
+          .eq('id', factionId)
+          .single();
+
+        await adminClient.from('activity_log').insert({
+          user_id: userId,
+          activity_type: 'level_up',
+          faction_id: factionId,
+          title: `Fraktion Level Up! ${factionData?.name || factionId}`,
+          description: `Deine ${factionData?.name || factionId}-Fraktion ist aufgestiegen!`,
+          xp_amount: 0,
+          related_entity_type: 'faction',
+          related_entity_id: factionId,
+        });
+      } catch (err) {
+        console.error('Error logging faction level up:', err);
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
       data: {

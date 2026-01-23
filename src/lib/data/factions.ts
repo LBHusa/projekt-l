@@ -194,32 +194,78 @@ export async function initUserFactionStats(userId?: string): Promise<void> {
 
 // ============================================
 // LEVEL CALCULATION
+// Matches src/lib/xp.ts formula for consistency with database
+// Formula: 100 * level^1.5 per level (accumulated)
 // ============================================
 
 /**
- * Calculate faction level from total XP
+ * Calculate XP needed for a specific level
+ * Formula: floor(100 * level^1.5)
  */
-export function calculateFactionLevel(totalXp: number): number {
-  if (totalXp <= 0) return 1;
-  return Math.max(1, Math.floor(Math.sqrt(totalXp / 100)) + 1);
+export function xpForFactionLevel(level: number): number {
+  if (level <= 0) return 0;
+  return Math.floor(100 * Math.pow(level, 1.5));
 }
 
 /**
- * Calculate XP needed for a specific level
+ * Calculate total XP needed to reach a specific level
+ * (sum of xpForFactionLevel for all levels up to and including the target)
  */
-export function xpForFactionLevel(level: number): number {
-  return Math.pow(level, 2) * 100;
+export function totalXpForFactionLevel(level: number): number {
+  let total = 0;
+  for (let i = 1; i <= level; i++) {
+    total += xpForFactionLevel(i);
+  }
+  return total;
+}
+
+/**
+ * Calculate faction level from total XP
+ * Uses iterative calculation matching database function
+ */
+export function calculateFactionLevel(totalXp: number): number {
+  if (totalXp <= 0) return 1;
+
+  let level = 1;
+  let accumulatedXp = 0;
+
+  while (accumulatedXp + xpForFactionLevel(level) <= totalXp) {
+    accumulatedXp += xpForFactionLevel(level);
+    level++;
+  }
+
+  return Math.max(1, level - 1);
 }
 
 /**
  * Calculate progress to next level (0-100%)
+ * Progress is calculated as: xpInLevel / xpForNextLevel
+ *
+ * The model is:
+ * - At level 1, you have totalXp XP
+ * - You need xpForLevel(2) = 282 XP to reach level 2
+ * - Progress = totalXp / 282
+ *
+ * At level 2 (382+ totalXp):
+ * - You have (totalXp - 382) XP in level 2
+ * - You need xpForLevel(3) = 519 XP to reach level 3
+ * - Progress = (totalXp - 382) / 519
  */
 export function factionLevelProgress(totalXp: number): number {
+  if (totalXp <= 0) return 0;
+
   const currentLevel = calculateFactionLevel(totalXp);
-  const currentLevelXp = xpForFactionLevel(currentLevel);
-  const nextLevelXp = xpForFactionLevel(currentLevel + 1);
-  const xpInLevel = totalXp - currentLevelXp;
-  const xpNeeded = nextLevelXp - currentLevelXp;
+
+  // Calculate XP threshold for current level (total XP to reach this level)
+  const levelThreshold = totalXpForFactionLevel(currentLevel);
+
+  // XP within current level
+  const xpInLevel = totalXp - levelThreshold;
+
+  // XP needed to reach next level
+  const xpNeeded = xpForFactionLevel(currentLevel + 1);
+
+  if (xpNeeded <= 0) return 100;
   return Math.min(100, Math.max(0, Math.round((xpInLevel / xpNeeded) * 100)));
 }
 

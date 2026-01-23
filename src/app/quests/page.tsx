@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Filter, Settings } from 'lucide-react'
+import { ArrowLeft, Filter, Settings, Search, Plus } from 'lucide-react'
 import { QuestList, QuestProgress, QuestGenerator } from '@/components/quests'
 
 interface Quest {
@@ -36,6 +36,7 @@ export default function QuestsPage() {
   const [isConfigured, setIsConfigured] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('active')
   const [typeFilter, setTypeFilter] = useState<'all' | 'daily' | 'weekly' | 'story'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const loadQuests = async () => {
     try {
@@ -102,8 +103,20 @@ export default function QuestsPage() {
   const filteredQuests = quests.filter((quest) => {
     if (filter !== 'all' && quest.status !== filter) return false
     if (typeFilter !== 'all' && quest.type !== typeFilter) return false
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      const titleMatch = quest.title.toLowerCase().includes(query)
+      const descMatch = quest.description?.toLowerCase().includes(query)
+      if (!titleMatch && !descMatch) return false
+    }
     return true
   })
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Search is already reactive via state
+  }
 
   if (loading) {
     return (
@@ -126,13 +139,22 @@ export default function QuestsPage() {
               <ArrowLeft className="w-4 h-4" />
               Zurück zum Dashboard
             </Link>
-            <Link
-              href="/settings/quest-preferences"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 dark:bg-black/20 hover:bg-white/10 dark:hover:bg-black/30 border border-white/10 rounded-lg transition-colors text-sm text-adaptive-muted hover:text-adaptive"
-            >
-              <Settings className="w-4 h-4" />
-              Quest-Einstellungen
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/quests/new"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg transition-colors text-sm text-purple-400 hover:text-purple-300"
+              >
+                <Plus className="w-4 h-4" />
+                Neue Quest
+              </Link>
+              <Link
+                href="/settings/quest-preferences"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 dark:bg-black/20 hover:bg-white/10 dark:hover:bg-black/30 border border-white/10 rounded-lg transition-colors text-sm text-adaptive-muted hover:text-adaptive"
+              >
+                <Settings className="w-4 h-4" />
+                Quest-Einstellungen
+              </Link>
+            </div>
           </div>
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -156,13 +178,27 @@ export default function QuestsPage() {
           />
         </div>
 
-        {/* Filters */}
+        {/* Search and Filters */}
         <div className="mb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 rounded-xl p-4"
           >
+            {/* Search Bar */}
+            <div className="mb-4">
+              <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-adaptive-muted" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Quests durchsuchen..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 dark:bg-black/20 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-adaptive placeholder:text-adaptive-muted"
+                />
+              </form>
+            </div>
+
             <div className="flex items-center gap-3 mb-4">
               <Filter className="w-5 h-5 text-adaptive-muted" />
               <h3 className="font-semibold text-adaptive">Filter</h3>

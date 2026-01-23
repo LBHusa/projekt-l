@@ -3,9 +3,51 @@ import {
   calculateFactionLevel,
   xpForFactionLevel,
   factionLevelProgress,
+  totalXpForFactionLevel,
 } from '@/lib/data/factions';
 
 describe('Faction Level System', () => {
+  describe('xpForFactionLevel', () => {
+    it('returns 0 for level 0 or negative', () => {
+      expect(xpForFactionLevel(0)).toBe(0);
+      expect(xpForFactionLevel(-1)).toBe(0);
+    });
+
+    it('uses floor(100 * level^1.5) formula', () => {
+      // Level 1: 100 * 1^1.5 = 100
+      expect(xpForFactionLevel(1)).toBe(100);
+
+      // Level 2: 100 * 2^1.5 ≈ 282
+      expect(xpForFactionLevel(2)).toBe(282);
+
+      // Level 5: 100 * 5^1.5 ≈ 1118
+      expect(xpForFactionLevel(5)).toBe(1118);
+
+      // Level 10: 100 * 10^1.5 ≈ 3162
+      expect(xpForFactionLevel(10)).toBe(3162);
+
+      // Level 25: 100 * 25^1.5 = 12,500
+      expect(xpForFactionLevel(25)).toBe(12500);
+    });
+  });
+
+  describe('totalXpForFactionLevel', () => {
+    it('returns 0 for level 0', () => {
+      expect(totalXpForFactionLevel(0)).toBe(0);
+    });
+
+    it('returns XP for level 1 only when level is 1', () => {
+      expect(totalXpForFactionLevel(1)).toBe(100);
+    });
+
+    it('sums XP correctly for multiple levels', () => {
+      // Level 3 = xpForLevel(1) + xpForLevel(2) + xpForLevel(3)
+      // = 100 + 282 + 519 = 901
+      const expected = xpForFactionLevel(1) + xpForFactionLevel(2) + xpForFactionLevel(3);
+      expect(totalXpForFactionLevel(3)).toBe(expected);
+    });
+  });
+
   describe('calculateFactionLevel', () => {
     it('returns level 1 for 0 XP', () => {
       expect(calculateFactionLevel(0)).toBe(1);
@@ -15,39 +57,28 @@ describe('Faction Level System', () => {
       expect(calculateFactionLevel(-100)).toBe(1);
     });
 
-    it('uses floor(sqrt(xp/100)) formula correctly', () => {
-      // Level 1: 0-99 XP (sqrt(99/100) = 0.99 → floor = 0 → max(1,0) = 1)
+    it('calculates level correctly using iterative formula', () => {
+      // Need 100 XP to complete level 1
+      // Level 1: 0-99 XP
       expect(calculateFactionLevel(0)).toBe(1);
       expect(calculateFactionLevel(99)).toBe(1);
 
-      // Level 1: 100 XP (sqrt(100/100) = 1 → floor = 1)
+      // At 100 XP, completed level 1 (100 XP)
       expect(calculateFactionLevel(100)).toBe(1);
 
-      // Level 2: 400 XP (sqrt(400/100) = 2 → floor = 2)
-      expect(calculateFactionLevel(400)).toBe(2);
+      // Level 2 requires 100 + 282 = 382 accumulated XP
+      expect(calculateFactionLevel(381)).toBe(1);
+      expect(calculateFactionLevel(382)).toBe(2);
+      expect(calculateFactionLevel(383)).toBe(2);
 
-      // Level 3: 900 XP (sqrt(900/100) = 3 → floor = 3)
-      expect(calculateFactionLevel(900)).toBe(3);
-
-      // Level 5: 2,500 XP (sqrt(2500/100) = 5 → floor = 5)
-      expect(calculateFactionLevel(2500)).toBe(5);
-
-      // Level 10: 10,000 XP (sqrt(10000/100) = 10 → floor = 10)
-      expect(calculateFactionLevel(10000)).toBe(10);
-
-      // Level 50: 250,000 XP
-      expect(calculateFactionLevel(250000)).toBe(50);
+      // Level 3 requires 100 + 282 + 519 = 901 accumulated XP
+      expect(calculateFactionLevel(900)).toBe(2);
+      expect(calculateFactionLevel(901)).toBe(3);
     });
 
-    it('handles boundary cases correctly', () => {
-      // Just below level 2 threshold (399 XP)
-      expect(calculateFactionLevel(399)).toBe(1);
-
-      // Exactly at level 2 threshold (400 XP)
-      expect(calculateFactionLevel(400)).toBe(2);
-
-      // Just above level 2 threshold
-      expect(calculateFactionLevel(401)).toBe(2);
+    it('handles high XP values', () => {
+      const totalXp = totalXpForFactionLevel(10);
+      expect(calculateFactionLevel(totalXp)).toBe(10);
     });
 
     it('never returns less than 1', () => {
@@ -57,50 +88,28 @@ describe('Faction Level System', () => {
     });
   });
 
-  describe('xpForFactionLevel', () => {
-    it('uses level^2 * 100 formula', () => {
-      // Level 1: 1^2 * 100 = 100
-      expect(xpForFactionLevel(1)).toBe(100);
-
-      // Level 2: 2^2 * 100 = 400
-      expect(xpForFactionLevel(2)).toBe(400);
-
-      // Level 5: 5^2 * 100 = 2,500
-      expect(xpForFactionLevel(5)).toBe(2500);
-
-      // Level 10: 10^2 * 100 = 10,000
-      expect(xpForFactionLevel(10)).toBe(10000);
-
-      // Level 50: 50^2 * 100 = 250,000
-      expect(xpForFactionLevel(50)).toBe(250000);
-    });
-
-    it('is inverse of calculateFactionLevel', () => {
-      for (let level = 1; level <= 20; level++) {
-        const xp = xpForFactionLevel(level);
-        expect(calculateFactionLevel(xp)).toBe(level);
-      }
-    });
-  });
-
   describe('factionLevelProgress', () => {
-    it('returns 0 for exactly at level threshold', () => {
-      // At exactly 400 XP (level 2 threshold), progress should be 0%
-      expect(factionLevelProgress(400)).toBe(0);
+    it('returns 0 for 0 XP', () => {
+      expect(factionLevelProgress(0)).toBe(0);
     });
 
     it('calculates progress correctly within a level', () => {
-      // Level 2 starts at 400 XP, level 3 at 900 XP
-      // So 500 XP needed for level 3, range is 400-900
+      // At level 1 (totalXp < 382), threshold is totalXpForFactionLevel(1) = 100
+      // So XP in level = totalXp - 100, progress against xpForLevel(2) = 282
+      // At 200 totalXp: (200-100) / 282 = 100/282 ≈ 35%
+      const progress200 = factionLevelProgress(200);
+      expect(progress200).toBeGreaterThan(30);
+      expect(progress200).toBeLessThan(40);
 
-      // At 550 XP: (550-400) / (900-400) = 150/500 = 30%
-      expect(factionLevelProgress(550)).toBe(30);
+      // At level 2 (382+ XP), threshold is totalXpForFactionLevel(2) = 382
+      // XP in level = totalXp - 382, progress against xpForLevel(3) = 519
+      // At 382 XP: (382-382) / 519 = 0%
+      expect(factionLevelProgress(382)).toBe(0);
 
-      // At 650 XP: (650-400) / (900-400) = 250/500 = 50%
-      expect(factionLevelProgress(650)).toBe(50);
-
-      // At 850 XP: (850-400) / (900-400) = 450/500 = 90%
-      expect(factionLevelProgress(850)).toBe(90);
+      // At 640 XP: (640-382) / 519 = 258/519 ≈ 50%
+      const progress640 = factionLevelProgress(640);
+      expect(progress640).toBeGreaterThan(45);
+      expect(progress640).toBeLessThan(55);
     });
 
     it('caps at 100%', () => {
@@ -109,36 +118,38 @@ describe('Faction Level System', () => {
       expect(result).toBeLessThanOrEqual(100);
     });
 
-    it('handles level 1 correctly', () => {
-      // Level 1: 0-399 XP, Level 2 at 400 XP
-      // XP needed: 400 - 100 = 300 (from threshold to next)
-      // Actually: Level 1 threshold is 100, Level 2 is 400
-      // So at 200 XP: (200-100) / (400-100) = 100/300 ≈ 33%
-      const progress = factionLevelProgress(200);
-      expect(progress).toBeGreaterThan(0);
-      expect(progress).toBeLessThan(100);
+    it('never goes below 0', () => {
+      expect(factionLevelProgress(-100)).toBe(0);
     });
   });
 });
 
 describe('Level Formulas Consistency', () => {
-  it('faction levels scale quadratically', () => {
-    // Each level requires level^2 * 100 XP
-    // This means higher levels require exponentially more XP
+  it('faction levels scale with 1.5 exponent', () => {
+    // Each level requires 100 * level^1.5 XP
+    // This means higher levels require more than linear but less than quadratic XP
     const level5Xp = xpForFactionLevel(5);
     const level10Xp = xpForFactionLevel(10);
 
-    // Level 10 should require 4x the XP of level 5 (10^2 / 5^2 = 4)
-    expect(level10Xp / level5Xp).toBe(4);
+    // Level 10 should require ~2.83x the XP of level 5 (10^1.5 / 5^1.5 ≈ 2.83)
+    const ratio = level10Xp / level5Xp;
+    expect(ratio).toBeGreaterThan(2.5);
+    expect(ratio).toBeLessThan(3.2);
   });
 
   it('XP requirements grow predictably', () => {
-    const xpRequirements = [];
-    for (let level = 1; level <= 10; level++) {
-      xpRequirements.push(xpForFactionLevel(level));
-    }
+    // Verify first few levels
+    expect(xpForFactionLevel(1)).toBe(100);
+    expect(xpForFactionLevel(2)).toBe(282);
+    // Level 3: floor(100 * 3^1.5) = floor(519.615) = 519
+    expect(xpForFactionLevel(3)).toBe(519);
+  });
 
-    // Each should be level^2 * 100
-    expect(xpRequirements).toEqual([100, 400, 900, 1600, 2500, 3600, 4900, 6400, 8100, 10000]);
+  it('level calculation is consistent with XP requirements', () => {
+    // For each level, totalXpForLevel should result in that level
+    for (let level = 1; level <= 10; level++) {
+      const totalXp = totalXpForFactionLevel(level);
+      expect(calculateFactionLevel(totalXp)).toBe(level);
+    }
   });
 });

@@ -20,21 +20,21 @@ const FACTION_MIGRATION_MAP: Record<string, FactionId> = {
   freunde: 'soziales',
   gesundheit: 'koerper',
   lernen: 'wissen',
-  // Bleiben gleich
+  // Bleiben gleich (mit neuen IDs)
   karriere: 'karriere',
-  hobbys: 'hobby',
+  hobby: 'hobby',
   finanzen: 'finanzen',
 };
 
-// Faction Metadata für Validierung
+// Faction Metadata für Validierung (matches constants.ts)
 const FACTION_METADATA: Record<FactionId, { icon: string; color: string }> = {
-  karriere: { icon: '💼', color: '#3b82f6' },
-  hobbys: { icon: '🎨', color: '#f59e0b' },
-  koerper: { icon: '💪', color: '#22c55e' },
-  geist: { icon: '🧠', color: '#a855f7' },
-  finanzen: { icon: '💰', color: '#eab308' },
-  soziales: { icon: '👥', color: '#ec4899' },
-  weisheit: { icon: '📚', color: '#6366f1' },
+  karriere: { icon: '💼', color: '#3B82F6' },
+  hobby: { icon: '🎨', color: '#8B5CF6' },
+  koerper: { icon: '💪', color: '#10B981' },
+  geist: { icon: '🧠', color: '#F59E0B' },
+  finanzen: { icon: '💰', color: '#14B8A6' },
+  soziales: { icon: '👥', color: '#EC4899' },
+  wissen: { icon: '📚', color: '#6366F1' },
 };
 
 describe('FactionId Type System', () => {
@@ -90,7 +90,7 @@ describe('FactionId Type System', () => {
       expect(FACTION_MIGRATION_MAP['lernen']).toBe('wissen');
     });
 
-    it('keeps karriere, hobbys, finanzen unchanged', () => {
+    it('keeps karriere, hobby, finanzen unchanged', () => {
       expect(FACTION_MIGRATION_MAP['karriere']).toBe('karriere');
       expect(FACTION_MIGRATION_MAP['hobby']).toBe('hobby');
       expect(FACTION_MIGRATION_MAP['finanzen']).toBe('finanzen');
@@ -176,7 +176,7 @@ describe('FactionId Type System', () => {
       expect(FACTION_METADATA['soziales'].icon).toBe('👥');
     });
 
-    it('weisheit has learning-related icon', () => {
+    it('wissen has learning-related icon', () => {
       expect(FACTION_METADATA['wissen'].icon).toBe('📚');
     });
   });
