@@ -3,7 +3,7 @@
  * POST /api/integrations/telegram/send
  *
  * Internal API for sending notifications to users via Telegram
- * Should only be called from server-side code
+ * Should only be called from server-side code with valid INTERNAL_API_KEY
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -24,12 +24,21 @@ interface SendRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify internal API key
+    // 1. Verify internal API key (REQUIRED - not optional)
     const apiKey = request.headers.get('x-internal-api-key');
     const expectedKey = process.env.INTERNAL_API_KEY;
 
-    // If INTERNAL_API_KEY is set, require it
-    if (expectedKey && apiKey !== expectedKey) {
+    // SECURITY: API key is REQUIRED, not optional
+    // If not configured, fail closed (503) instead of allowing open access
+    if (!expectedKey) {
+      console.error('[Telegram Send] INTERNAL_API_KEY not configured');
+      return NextResponse.json(
+        { error: 'Service not configured' },
+        { status: 503 }
+      );
+    }
+
+    if (!apiKey || apiKey !== expectedKey) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -82,9 +91,9 @@ export async function POST(request: NextRequest) {
       messageId: result.message_id,
     });
   } catch (error) {
-    console.error('Telegram send error:', error);
+    console.error('[Telegram Send] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to send message' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

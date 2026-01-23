@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { error: error.message || 'Failed to generate quests' },
+        { error: 'Failed to generate quests' },
         { status: 500 }
       )
     }

@@ -99,10 +99,9 @@ export async function GET(request: NextRequest) {
       }))
     });
   } catch (error: unknown) {
-    console.error('Google Calendar events fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Google Calendar Events] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch calendar events', details: errorMessage },
+      { error: 'Failed to fetch calendar events' },
       { status: 500 }
     );
   }

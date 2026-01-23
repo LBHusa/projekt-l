@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching habits:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[Habits List] Error fetching habits:', error);
+      return NextResponse.json({ error: 'Failed to fetch habits' }, { status: 500 });
     }
 
     return NextResponse.json({ data: data || [] });

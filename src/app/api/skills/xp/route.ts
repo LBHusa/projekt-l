@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (fetchError) {
-      console.error('Error fetching user skill:', fetchError);
-      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+      console.error('[Skill XP] Error fetching user skill:', fetchError);
+      return NextResponse.json({ error: 'Failed to update skill XP' }, { status: 500 });
     }
 
     let userSkill;
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Error updating user skill:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('[Skill XP] Error updating user skill:', error);
+        return NextResponse.json({ error: 'Failed to update skill XP' }, { status: 500 });
       }
       userSkill = data;
     } else {
@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error('Error creating user skill:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('[Skill XP] Error creating user skill:', error);
+        return NextResponse.json({ error: 'Failed to update skill XP' }, { status: 500 });
       }
       userSkill = data;
     }

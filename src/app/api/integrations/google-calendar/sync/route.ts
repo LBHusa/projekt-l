@@ -209,10 +209,9 @@ export async function POST(request: NextRequest) {
       categorizedEvents
     });
   } catch (error: unknown) {
-    console.error('Google Calendar sync error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[Google Calendar Sync] Error:', error);
     return NextResponse.json(
-      { error: 'Failed to sync calendar events', details: errorMessage },
+      { error: 'Failed to sync calendar events' },
       { status: 500 }
     );
   }

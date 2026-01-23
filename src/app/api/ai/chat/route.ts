@@ -225,11 +225,11 @@ export async function POST(request: NextRequest) {
       response,
     });
   } catch (error) {
-    console.error('AI Chat Error:', error);
+    console.error('[AI Chat] Error:', error);
     return NextResponse.json(
       {
         error: true,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Failed to process chat request',
       },
       { status: 500 }
     );

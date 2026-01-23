@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Auth check - user must be logged in
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { reminderId, habitId, action } = await request.json();
 
     if (!reminderId || !action) {
@@ -12,13 +20,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Update the most recent delivery log entry
-    await supabase
+    // 2. Update the most recent delivery log entry
+    // Note: Using authenticated client - RLS will ensure user owns the reminder
+    const { error: updateError } = await supabase
       .from('reminder_delivery_log')
       .update({
         clicked: true,
@@ -28,12 +32,14 @@ export async function POST(request: NextRequest) {
       .order('sent_at', { ascending: false })
       .limit(1);
 
+    if (updateError) {
+      console.error('[Reminder Log Action] Error:', updateError);
+      return NextResponse.json({ error: 'Failed to log action' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error logging reminder action:', error);
-    return NextResponse.json(
-      { error: 'Failed to log action' },
-      { status: 500 }
-    );
+    console.error('[Reminder Log Action] Error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

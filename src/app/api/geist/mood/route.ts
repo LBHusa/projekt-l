@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error saving mood log:', error);
+      console.error('[Geist Mood] Error saving mood log:', error);
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Failed to save mood log' },
         { status: 500 }
       );
     }
@@ -156,8 +156,9 @@ export async function GET(request: NextRequest) {
       .limit(limit);
 
     if (error) {
+      console.error('[Geist Mood] Error fetching mood logs:', error);
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Failed to fetch mood logs' },
         { status: 500 }
       );
     }

@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Error fetching mood stats:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("[Geist Stats] Error fetching mood stats:", error);
+      return NextResponse.json({ error: 'Failed to fetch mood stats' }, { status: 500 });
     }
 
     return NextResponse.json({ data: data?.[0] || null });

@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
     .limit(10);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[Test Mood Logs] Error:', error);
+    return NextResponse.json({ error: 'Failed to fetch mood logs' }, { status: 500 });
   }
 
   return NextResponse.json({ logs });
