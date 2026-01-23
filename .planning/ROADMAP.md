@@ -51,10 +51,11 @@ Plans:
   2. API routes return 401 Unauthorized when called without valid session (getUser() pattern enforced, not just middleware)
   3. Health Import webhook rejects requests without valid API key
   4. Error messages displayed to users contain generic messages only (no stack traces, user IDs, or tokens visible)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD during phase planning
+- [ ] 02-01-PLAN.md — Sanitize error responses in all API routes (Wave 1)
+- [ ] 02-02-PLAN.md — Create E2E tests for Phase 2 security requirements (Wave 2)
 
 ### Phase 3: E2E Testing Infrastructure
 **Goal**: Playwright testing environment is ready to validate security and features
@@ -130,7 +131,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Security Foundation | 6/6 | COMPLETE | 2026-01-23 |
-| 2. API Security Audit | 0/TBD | Not started | - |
+| 2. API Security Audit | 0/2 | Planned | - |
 | 3. E2E Testing Infrastructure | 0/TBD | Not started | - |
 | 4. Critical User Workflows | 0/TBD | Not started | - |
 | 5. XP System Validation | 0/TBD | Not started | - |
