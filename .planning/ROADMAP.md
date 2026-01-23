@@ -13,7 +13,7 @@ This roadmap delivers a security-hardened, fully functional gamification system 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Security Foundation** - RLS policies, input validation, remove hardcoded IDs
-- [ ] **Phase 2: API Security Audit** - Auth checks, error sanitization, service role cleanup
+- [x] **Phase 2: API Security Audit** - Auth checks, error sanitization, service role cleanup
 - [ ] **Phase 3: E2E Testing Infrastructure** - Playwright setup, auth helpers, test fixtures
 - [ ] **Phase 4: Critical User Workflows** - Test Dashboard, Quests, Habits, Skills, Factions
 - [ ] **Phase 5: XP System Validation** - End-to-end data flow testing, Level Up triggers
@@ -131,7 +131,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Security Foundation | 6/6 | COMPLETE | 2026-01-23 |
-| 2. API Security Audit | 0/2 | Planned | - |
+| 2. API Security Audit | 2/2 | COMPLETE | 2026-01-23 |
 | 3. E2E Testing Infrastructure | 0/TBD | Not started | - |
 | 4. Critical User Workflows | 0/TBD | Not started | - |
 | 5. XP System Validation | 0/TBD | Not started | - |
