@@ -12,7 +12,7 @@ This roadmap delivers a security-hardened, fully functional gamification system 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Security Foundation** - RLS policies, input validation, remove hardcoded IDs
+- [x] **Phase 1: Security Foundation** - RLS policies, input validation, remove hardcoded IDs
 - [ ] **Phase 2: API Security Audit** - Auth checks, error sanitization, service role cleanup
 - [ ] **Phase 3: E2E Testing Infrastructure** - Playwright setup, auth helpers, test fixtures
 - [ ] **Phase 4: Critical User Workflows** - Test Dashboard, Quests, Habits, Skills, Factions
@@ -35,12 +35,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 6 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Install validation dependencies and create Zod schemas (Wave 1)
-- [ ] 01-02-PLAN.md — Verify RLS on all 49 tables and create performance indexes (Wave 1)
-- [ ] 01-03-PLAN.md — Remove hardcoded user UUIDs from API routes (Wave 2)
-- [ ] 01-04-PLAN.md — Remove hardcoded domain UUIDs from homepage and types (Wave 2)
-- [ ] 01-05-PLAN.md — Integrate validation into Quest/Habit/Profile APIs (Wave 3)
-- [ ] 01-06-PLAN.md — Verify soziales/karriere pages and E2E XSS tests (Wave 4)
+- [x] 01-01-PLAN.md — Install validation dependencies and create Zod schemas (Wave 1)
+- [x] 01-02-PLAN.md — Verify RLS on all 49 tables and create performance indexes (Wave 1)
+- [x] 01-03-PLAN.md — Remove hardcoded user UUIDs from API routes (Wave 2)
+- [x] 01-04-PLAN.md — Remove hardcoded domain UUIDs from homepage and types (Wave 2)
+- [x] 01-05-PLAN.md — Integrate validation into Quest/Habit/Profile APIs (Wave 3)
+- [x] 01-06-PLAN.md — Verify soziales/karriere pages and E2E XSS tests (Wave 4)
 
 ### Phase 2: API Security Audit
 **Goal**: All API routes verify authentication and errors never leak sensitive data
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security Foundation | 0/6 | Planning complete (revised) | - |
+| 1. Security Foundation | 6/6 | COMPLETE | 2026-01-23 |
 | 2. API Security Audit | 0/TBD | Not started | - |
 | 3. E2E Testing Infrastructure | 0/TBD | Not started | - |
 | 4. Critical User Workflows | 0/TBD | Not started | - |
