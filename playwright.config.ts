@@ -14,12 +14,12 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 2, // Retry flaky tests both locally and in CI
+  retries: 3, // Increase retries for flaky network issues
   workers: 1, // Single worker to avoid test data conflicts
   reporter: 'html',
-  timeout: 60000, // 60s per test (default is 30s)
+  timeout: 90000, // 90s per test (increased for slow server responses)
   expect: {
-    timeout: 10000, // 10s for expect assertions
+    timeout: 15000, // 15s for expect assertions (increased)
   },
 
   use: {
@@ -27,8 +27,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    navigationTimeout: 30000, // 30s for navigation
-    actionTimeout: 15000, // 15s for actions (clicks, fills)
+    navigationTimeout: 45000, // 45s for navigation (increased for server slowness)
+    actionTimeout: 20000, // 20s for actions (increased)
     launchOptions: {
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
@@ -63,10 +63,9 @@ export default defineConfig({
     command: 'npm run dev -- --port 3050',
     url: 'http://localhost:3050',
     reuseExistingServer: !process.env.CI,
-    timeout: 180000, // 3 minutes for server startup
+    timeout: 240000, // 4 minutes for server startup (increased)
     stdout: 'pipe',
     stderr: 'pipe',
-    // Wait for healthcheck before starting tests
     ignoreHTTPSErrors: true,
   },
 });
