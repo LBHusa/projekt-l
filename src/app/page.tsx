@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import Orb from '@/components/Orb';
 import CharacterHeader from '@/components/CharacterHeader';
 import AttributesPanel from '@/components/AttributesPanel';
@@ -103,11 +103,11 @@ export default function Dashboard() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showDomainForm, setShowDomainForm] = useState(false);
 
-  // Load data function
+  // Load data function - uses Promise.allSettled to prevent cascade failures
   const loadData = async () => {
     try {
-      // Load all data in parallel
-      const [domainsData, familieDomain, profile, skillCount, contactStats, birthdays, attention, factionsData, accountsData, calculatedAttrs] = await Promise.all([
+      // Load all data in parallel with graceful error handling
+      const results = await Promise.allSettled([
         getAllDomains(),
         getDomainByName('Familie'),
         getUserProfile(userId!),
@@ -120,13 +120,32 @@ export default function Dashboard() {
         calculateAttributes(userId!),
       ]);
 
+      // Extract values with fallbacks for failed requests
+      const domainsData = results[0].status === 'fulfilled' ? results[0].value : [];
+      const familieDomain = results[1].status === 'fulfilled' ? results[1].value : null;
+      const profile = results[2].status === 'fulfilled' ? results[2].value : null;
+      const skillCount = results[3].status === 'fulfilled' ? results[3].value : 0;
+      const contactStats = results[4].status === 'fulfilled' ? results[4].value : null;
+      const birthdays = results[5].status === 'fulfilled' ? results[5].value : [];
+      const attention = results[6].status === 'fulfilled' ? results[6].value : [];
+      const factionsData = results[7].status === 'fulfilled' ? results[7].value : [];
+      const accountsData = results[8].status === 'fulfilled' ? results[8].value : [];
+      const calculatedAttrs = results[9].status === 'fulfilled' ? results[9].value : null;
+
+      // Log any failed requests for debugging
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Dashboard data load failed for index ${index}:`, result.reason);
+        }
+      });
+
       // Filter out Familie domain (now replaced by Contacts button)
       const filteredDomains = familieDomain
         ? domainsData.filter((domain) => domain.id !== familieDomain.id)
         : domainsData;
 
-      // Load user levels for each domain
-      const domainsWithLevels = await Promise.all(
+      // Load user levels for each domain with graceful error handling
+      const domainResults = await Promise.allSettled(
         filteredDomains.map(async (domain) => {
           const stats = await getDomainStats(domain.id);
           return {
@@ -135,6 +154,10 @@ export default function Dashboard() {
           };
         })
       );
+
+      const domainsWithLevels = domainResults
+        .filter((r): r is PromiseFulfilledResult<DomainWithLevel> => r.status === 'fulfilled')
+        .map(r => r.value);
 
       setDomains(domainsWithLevels);
       setFactions(factionsData);

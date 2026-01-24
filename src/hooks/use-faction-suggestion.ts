@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { suggestFaction, storeFactionFeedback, type FactionSuggestion } from '@/lib/ai/faction-suggester';
 import { getRecentActivities } from '@/lib/data/ai-faction-feedback';
 import type { FactionId } from '@/lib/database.types';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 
 export interface UseFactionSuggestionOptions {
   activityDescription: string;

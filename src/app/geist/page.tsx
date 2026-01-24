@@ -49,10 +49,14 @@ export default function GeistPage() {
 
   const loadData = async () => {
     try {
-      const [factionData, factionStats] = await Promise.all([
+      // Use Promise.allSettled to prevent cascade failures
+      const factionResults = await Promise.allSettled([
         getFaction('geist'),
         getUserFactionStat('geist'),
       ]);
+
+      const factionData = factionResults[0].status === 'fulfilled' ? factionResults[0].value : null;
+      const factionStats = factionResults[1].status === 'fulfilled' ? factionResults[1].value : null;
 
       if (factionData) {
         setFaction({
@@ -61,12 +65,24 @@ export default function GeistPage() {
         });
       }
 
-      const [geistStats, moods, journals, mentalStats] = await Promise.all([
+      const dataResults = await Promise.allSettled([
         getGeistStats(),
         getMoodHistory(7, 7),
         getJournalEntries(5),
         getMentalStatsHistory(90),
       ]);
+
+      const geistStats = dataResults[0].status === 'fulfilled' ? dataResults[0].value : null;
+      const moods = dataResults[1].status === 'fulfilled' ? dataResults[1].value : [];
+      const journals = dataResults[2].status === 'fulfilled' ? dataResults[2].value : [];
+      const mentalStats = dataResults[3].status === 'fulfilled' ? dataResults[3].value : [];
+
+      // Log any failed requests for debugging
+      [...factionResults, ...dataResults].forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Geist data load failed for index ${index}:`, result.reason);
+        }
+      });
 
       setStats(geistStats);
       setMoodHistory(moods);
@@ -74,7 +90,7 @@ export default function GeistPage() {
       setMentalStatsHistory(mentalStats);
 
       // Set initial mood if already logged today
-      if (geistStats.todaysMood) {
+      if (geistStats?.todaysMood) {
         setSelectedMood(geistStats.todaysMood.mood);
       }
     } catch (err) {

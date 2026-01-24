@@ -93,21 +93,8 @@ export default function FinanzenPage() {
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth() + 1; // 1-12
 
-      const [
-        factionData,
-        factionStats,
-        netWorthData,
-        accountsData,
-        cashflowData,
-        moneyFlowData,
-        goalsData,
-        recurringFlowsData,
-        achievementsData,
-        streaksData,
-        tipsData,
-        budgetData,
-        investmentsData,
-      ] = await Promise.all([
+      // Use Promise.allSettled to prevent cascade failures
+      const results = await Promise.allSettled([
         getFaction('finanzen'),
         getUserFactionStat('finanzen'),
         getNetWorthExtended(),
@@ -122,6 +109,28 @@ export default function FinanzenPage() {
         getBudgetProgress(currentYear, currentMonth),
         getInvestments(),
       ]);
+
+      // Extract values with fallbacks for failed requests
+      const factionData = results[0].status === 'fulfilled' ? results[0].value : null;
+      const factionStats = results[1].status === 'fulfilled' ? results[1].value : null;
+      const netWorthData = results[2].status === 'fulfilled' ? results[2].value : null;
+      const accountsData = results[3].status === 'fulfilled' ? results[3].value : [];
+      const cashflowData = results[4].status === 'fulfilled' ? results[4].value : null;
+      const moneyFlowData = results[5].status === 'fulfilled' ? results[5].value : null;
+      const goalsData = results[6].status === 'fulfilled' ? results[6].value : [];
+      const recurringFlowsData = results[7].status === 'fulfilled' ? results[7].value : [];
+      const achievementsData = results[8].status === 'fulfilled' ? results[8].value : [];
+      const streaksData = results[9].status === 'fulfilled' ? results[9].value : [];
+      const tipsData = results[10].status === 'fulfilled' ? results[10].value : [];
+      const budgetData = results[11].status === 'fulfilled' ? results[11].value : [];
+      const investmentsData = results[12].status === 'fulfilled' ? results[12].value : [];
+
+      // Log any failed requests for debugging
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Finanzen data load failed for index ${index}:`, result.reason);
+        }
+      });
 
       if (factionData) {
         setFaction({

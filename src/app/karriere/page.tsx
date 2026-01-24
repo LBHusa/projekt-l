@@ -7,7 +7,7 @@ import { FactionPageHeader, FactionStatsBar, FactionSkillsSection } from '@/comp
 import { JobTimeline, SalaryChart, SalaryTimeline, JobForm, SalaryForm, CareerGoalsList, CareerGoalForm, type JobFormData, type SalaryFormData, type CareerGoalFormData } from '@/components/karriere';
 import { getFaction, getUserFactionStat } from '@/lib/data/factions';
 import { getJobHistory, getSalaryHistory, getKarriereStats, getCareerGoals, getCurrentSalary, type KarriereStats } from '@/lib/data/karriere';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import type { FactionWithStats, JobHistory, SalaryEntry, CareerGoal } from '@/lib/database.types';
 
 export default function KarrierePage() {
@@ -29,7 +29,8 @@ export default function KarrierePage() {
 
   const loadData = async () => {
     try {
-      const [factionData, factionStats, jobsData, salariesData, karriereStats, goalsData] = await Promise.all([
+      // Use Promise.allSettled to prevent cascade failures
+      const results = await Promise.allSettled([
         getFaction('karriere'),
         getUserFactionStat('karriere'),
         getJobHistory(),
@@ -37,6 +38,20 @@ export default function KarrierePage() {
         getKarriereStats(),
         getCareerGoals(),
       ]);
+
+      const factionData = results[0].status === 'fulfilled' ? results[0].value : null;
+      const factionStats = results[1].status === 'fulfilled' ? results[1].value : null;
+      const jobsData = results[2].status === 'fulfilled' ? results[2].value : [];
+      const salariesData = results[3].status === 'fulfilled' ? results[3].value : [];
+      const karriereStats = results[4].status === 'fulfilled' ? results[4].value : null;
+      const goalsData = results[5].status === 'fulfilled' ? results[5].value : [];
+
+      // Log any failed requests for debugging
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Karriere data load failed for index ${index}:`, result.reason);
+        }
+      });
 
       if (factionData) {
         setFaction({

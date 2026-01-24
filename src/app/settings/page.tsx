@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Bell, Link as LinkIcon, ChevronRight, User, Upload, Trash2, Camera, Check } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 import { getUserProfile } from "@/lib/data/user-skills";
 import PixelAvatar from "@/components/character/PixelAvatar";
 

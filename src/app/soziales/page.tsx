@@ -19,7 +19,7 @@ import {
   deleteContact
 } from '@/lib/data/contacts';
 import { getEvents, createEvent, updateEvent, deleteEvent as deleteEventData } from '@/lib/data/soziales';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import type { FactionWithStats, SocialEvent, SocialEventType } from '@/lib/database.types';
 import type { ContactWithStats, Contact, ContactFormData } from '@/lib/types/contacts';
 

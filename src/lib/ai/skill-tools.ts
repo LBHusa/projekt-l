@@ -767,7 +767,7 @@ async function handleGetAvailableDomains(): Promise<string> {
   const supabase = await createClient();
 
   const { data: domains, error } = await supabase
-    .from('domains')
+    .from('skill_domains')
     .select('*')
     .order('name');
 
@@ -801,7 +801,7 @@ async function handleSuggestSkills(
     .eq('user_id', userId);
 
   const { data: domains } = await supabase
-    .from('domains')
+    .from('skill_domains')
     .select('*');
 
   // Analyze which domains have few skills
