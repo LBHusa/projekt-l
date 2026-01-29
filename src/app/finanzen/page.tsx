@@ -348,7 +348,7 @@ export default function FinanzenPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-wrap gap-2 mb-6"
+          className="flex flex-wrap gap-2 sm:gap-3 mb-6"
         >
           <button
             onClick={() => {
@@ -399,7 +399,7 @@ export default function FinanzenPage() {
 
         {/* Investment Portfolio Section */}
         {investments.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
             {/* Portfolio Overview */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -453,8 +453,8 @@ export default function FinanzenPage() {
           </motion.div>
         )}
 
-        {/* Konten, Sparziele, Streaks - 3 Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Konten, Sparziele, Streaks - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
           {/* Accounts List */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -494,7 +494,7 @@ export default function FinanzenPage() {
         </div>
 
         {/* Cashflow & Calculator - 2 Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* Cashflow Summary */}
           {cashflow && (
             <motion.div
@@ -539,7 +539,7 @@ export default function FinanzenPage() {
         </motion.div>
 
         {/* Smart Tips & Achievements */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
           {/* Smart Tips */}
           {tips.length > 0 && (
             <motion.div

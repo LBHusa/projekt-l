@@ -73,29 +73,29 @@ export function NetWorthWidget({ netWorth, previousNetWorth }: NetWorthWidgetPro
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-white/10">
-        <div className="text-center">
-          <p className="text-lg font-semibold text-blue-400">
+        <div className="text-center min-w-0">
+          <p className="text-lg font-semibold text-blue-400 truncate">
             {formatCurrency(netWorth.cash_total)}
           </p>
-          <p className="text-xs text-adaptive-dim">Bargeld</p>
+          <p className="text-xs text-adaptive-dim truncate">Bargeld</p>
         </div>
-        <div className="text-center">
-          <p className="text-lg font-semibold text-purple-400">
+        <div className="text-center min-w-0">
+          <p className="text-lg font-semibold text-purple-400 truncate">
             {formatCurrency(netWorth.investments_total)}
           </p>
-          <p className="text-xs text-adaptive-dim">Investments</p>
+          <p className="text-xs text-adaptive-dim truncate">Investments</p>
         </div>
-        <div className="text-center">
-          <p className="text-lg font-semibold text-orange-400">
+        <div className="text-center min-w-0">
+          <p className="text-lg font-semibold text-orange-400 truncate">
             {formatCurrency(netWorth.crypto_total)}
           </p>
-          <p className="text-xs text-adaptive-dim">Crypto</p>
+          <p className="text-xs text-adaptive-dim truncate">Crypto</p>
         </div>
-        <div className="text-center">
-          <p className="text-lg font-semibold text-red-400">
+        <div className="text-center min-w-0">
+          <p className="text-lg font-semibold text-red-400 truncate">
             {formatCurrency(Math.abs(netWorth.debt_total))}
           </p>
-          <p className="text-xs text-adaptive-dim">Schulden</p>
+          <p className="text-xs text-adaptive-dim truncate">Schulden</p>
         </div>
       </div>
     </div>

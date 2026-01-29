@@ -16,9 +16,19 @@ export function SignupForm() {
     setError(null);
     setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
-    if (error) { setError(error.message); setLoading(false); }
-    else { router.push('/auth/login?registered=true'); }
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else if (data.user && !data.session) {
+      // Email confirmation required
+      router.push('/auth/login?registered=true');
+    } else if (data.session) {
+      // Auto-logged in, redirect to onboarding
+      router.push('/onboarding');
+    } else {
+      router.push('/auth/login?registered=true');
+    }
   };
 
   return (

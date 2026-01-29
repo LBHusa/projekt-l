@@ -214,6 +214,7 @@ export interface Database {
             kreativitaet: number;
             soziale_batterie: number;
           } | null;
+          trial_started_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -250,6 +251,7 @@ export interface Database {
             kreativitaet: number;
             soziale_batterie: number;
           } | null;
+          trial_started_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -286,6 +288,7 @@ export interface Database {
             kreativitaet: number;
             soziale_batterie: number;
           } | null;
+          trial_started_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -565,6 +568,10 @@ export interface Habit {
   mental_stress_impact: number;
   mental_focus_impact: number;
   is_active: boolean;
+  // Negative habit specific fields
+  streak_start_date: string | null;      // For "days clean" calculation
+  resistance_count: number;              // Number of active resistance confirmations
+  last_resistance_at: string | null;     // Prevents duplicate daily confirmations
   created_at: string;
   updated_at: string;
 }
@@ -1450,7 +1457,9 @@ export type AchievementRequirementType =
   | 'faction_xp'
   | 'total_xp'
   | 'level'
-  | 'custom';
+  | 'custom'
+  | 'negative_habit_streak'   // Days clean from negative habit
+  | 'negative_habit_avoided'; // Number of successful resistances
 
 export type AchievementCategory = 'habit' | 'learning' | 'finance' | 'social' | 'general';
 export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -1518,4 +1527,34 @@ export interface SkillDomainWithFactions extends SkillDomain {
 export interface XpDistributionResult {
   faction_id: FactionId;
   xp_distributed: number;
+}
+
+// =============================================
+// Habit-Specific Achievements (Personalized)
+// For negative habits: "7 Tage ohne Rauchen", etc.
+// =============================================
+
+export interface HabitAchievement {
+  id: string;
+  habit_id: string;
+  user_id: string;
+  achievement_template: string;  // 'streak_7', 'streak_30', etc.
+  name: string;                  // "7 Tage ohne Rauchen"
+  description: string | null;
+  icon: string;
+  target_value: number;          // 7, 30, etc.
+  current_progress: number;
+  is_unlocked: boolean;
+  unlocked_at: string | null;
+  xp_reward: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HabitAchievementWithHabit extends HabitAchievement {
+  habit: {
+    name: string;
+    icon: string;
+    color: string;
+  };
 }

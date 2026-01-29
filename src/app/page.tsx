@@ -4,8 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import Orb from '@/components/Orb';
 import CharacterHeader from '@/components/CharacterHeader';
-import AttributesPanel from '@/components/AttributesPanel';
-import MentalStatsPanel from '@/components/MentalStatsPanel';
 import {
   AchievementBadgeWidget,
   ClickableLifeBalanceRadar,
@@ -15,6 +13,7 @@ import {
   FactionStatsWidget,
   StreakHighlightWidget,
   TimeTrackingWidget,
+  TodaysGoalsWidget,
   WeeklySummary,
   HabitCompletionModal,
   MoodLogModal,
@@ -22,17 +21,21 @@ import {
 } from '@/components/dashboard';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, Heart, AlertCircle, Settings, Flame, Download, Bot, Swords, Plus } from 'lucide-react';
+import { Users, Heart, AlertCircle, Settings, Flame, Bot, Swords, Plus } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { getAllDomains, createDomainWithFactions, getDomainByName } from '@/lib/data/domains';
-import { getUserProfile, getDomainStats, getTotalSkillCount, calculateAttributes } from '@/lib/data/user-skills';
+import { getUserProfile, getDomainStats, getTotalSkillCount } from '@/lib/data/user-skills';
 import { getFactionsWithStats } from '@/lib/data/factions';
 import { getContactsStats, getUpcomingBirthdays, getContactsNeedingAttention } from '@/lib/data/contacts';
 import { UpcomingBirthdays, NeedingAttention } from '@/components/contacts';
-import { logHabitCompletion } from '@/lib/data/habits';
+import { logHabitCompletion, getTodaysHabits, getHabitsWithLogs } from '@/lib/data/habits';
 import { saveMoodLog } from '@/lib/data/geist';
+import { getAchievementStats } from '@/lib/data/achievements';
+import { getRecentActivity } from '@/lib/data/activity-log';
+import type { HabitWithLogs, ActivityLog } from '@/lib/database.types';
+import type { AchievementStats } from '@/lib/data/achievements';
 import { createTransaction, getAccounts } from '@/lib/data/finanzen';
-import type { SkillDomain, UserAttributes, MentalStats, FactionWithStats, Account, MoodValue } from '@/lib/database.types';
+import type { SkillDomain, FactionWithStats, Account, MoodValue } from '@/lib/database.types';
 import type { ContactWithStats } from '@/lib/types/contacts';
 import type { QuickTransactionData } from '@/components/dashboard/modals/QuickTransactionModal';
 import DomainForm, { type DomainFormData } from '@/components/DomainForm';
@@ -41,35 +44,12 @@ interface DomainWithLevel extends SkillDomain {
   level: number;
 }
 
-// Default attributes for fallback
-const DEFAULT_ATTRIBUTES: UserAttributes = {
-  str: 10,
-  dex: 10,
-  int: 10,
-  cha: 10,
-  wis: 10,
-  vit: 10,
-};
-
-
-// Default mental stats for fallback
-const DEFAULT_MENTAL_STATS: MentalStats = {
-  stimmung: 50,
-  motivation: 50,
-  stress: 50,
-  fokus: 50,
-  kreativitaet: 50,
-  soziale_batterie: 50,
-};
-
 interface UserProfileState {
   username: string | null;
   avatarUrl: string | null;
   avatarSeed: string | null;
   totalLevel: number;
   totalXp: number;
-  attributes: UserAttributes;
-  mentalStats: MentalStats;
 }
 
 export default function Dashboard() {
@@ -89,8 +69,6 @@ export default function Dashboard() {
     avatarSeed: null,
     totalLevel: 1,
     totalXp: 0,
-    attributes: DEFAULT_ATTRIBUTES,
-    mentalStats: DEFAULT_MENTAL_STATS,
   });
   const [totalSkillCount, setTotalSkillCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -103,21 +81,32 @@ export default function Dashboard() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showDomainForm, setShowDomainForm] = useState(false);
 
+  // Widget data states (consolidated loading to reduce requests)
+  const [todaysHabits, setTodaysHabits] = useState<HabitWithLogs[]>([]);
+  const [allHabits, setAllHabits] = useState<HabitWithLogs[]>([]);
+  const [achievementStats, setAchievementStats] = useState<AchievementStats | null>(null);
+  const [recentActivities, setRecentActivities] = useState<ActivityLog[]>([]);
+
   // Load data function - uses Promise.allSettled to prevent cascade failures
   const loadData = async () => {
     try {
       // Load all data in parallel with graceful error handling
+      // Pass userId to all functions to avoid redundant getUser() calls
       const results = await Promise.allSettled([
-        getAllDomains(),
-        getDomainByName('Familie'),
-        getUserProfile(userId!),
-        getTotalSkillCount(),
-        getContactsStats(),
-        getUpcomingBirthdays(14),
-        getContactsNeedingAttention(5),
-        getFactionsWithStats(userId!),
-        getAccounts(userId!),
-        calculateAttributes(userId!),
+        getAllDomains(),                           // 0
+        getDomainByName('Familie'),                // 1
+        getUserProfile(userId!),                   // 2
+        getTotalSkillCount(userId!),               // 3
+        getContactsStats(userId!),                 // 4
+        getUpcomingBirthdays(14, userId!),         // 5
+        getContactsNeedingAttention(5, userId!),   // 6
+        getFactionsWithStats(userId!),             // 7
+        getAccounts(userId!),                      // 8
+        // Widget data (consolidated to reduce separate widget requests)
+        getTodaysHabits(userId!),                  // 9
+        getHabitsWithLogs(userId!, 1),             // 10 - for streak widget
+        getAchievementStats(userId!),              // 11
+        getRecentActivity(8, userId!),             // 12
       ]);
 
       // Extract values with fallbacks for failed requests
@@ -130,7 +119,11 @@ export default function Dashboard() {
       const attention = results[6].status === 'fulfilled' ? results[6].value : [];
       const factionsData = results[7].status === 'fulfilled' ? results[7].value : [];
       const accountsData = results[8].status === 'fulfilled' ? results[8].value : [];
-      const calculatedAttrs = results[9].status === 'fulfilled' ? results[9].value : null;
+      // Widget data
+      const todaysHabitsData = results[9].status === 'fulfilled' ? results[9].value : [];
+      const allHabitsData = results[10].status === 'fulfilled' ? results[10].value : [];
+      const achievementStatsData = results[11].status === 'fulfilled' ? results[11].value : null;
+      const recentActivitiesData = results[12].status === 'fulfilled' ? results[12].value : [];
 
       // Log any failed requests for debugging
       results.forEach((result, index) => {
@@ -166,8 +159,13 @@ export default function Dashboard() {
       setUpcomingBirthdays(birthdays);
       setAttentionContacts(attention);
       setAccounts(accountsData);
+      // Widget data
+      setTodaysHabits(todaysHabitsData);
+      setAllHabits(allHabitsData);
+      setAchievementStats(achievementStatsData);
+      setRecentActivities(recentActivitiesData);
 
-      // Set user profile with attributes and mental stats
+      // Set user profile
       if (profile) {
         setUserProfile({
           username: profile.username,
@@ -176,8 +174,6 @@ export default function Dashboard() {
           totalLevel: profile.total_level,
           // Compute totalXp from factions (single source of truth)
           totalXp: factionsData.reduce((sum, f) => sum + (f.stats?.total_xp || 0), 0),
-          attributes: calculatedAttrs || profile.attributes || DEFAULT_ATTRIBUTES,
-          mentalStats: profile.mental_stats || DEFAULT_MENTAL_STATS,
         });
       }
     } catch (err) {
@@ -300,11 +296,15 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Character Stats: Attributes + Life Balance + Mental Stats */}
+          {/* Quick Actions + Life Balance + Today's Goals */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-            <AttributesPanel attributes={userProfile.attributes} />
+            <QuickActionsWidget
+              onOpenHabitModal={() => setHabitModalOpen(true)}
+              onOpenMoodModal={() => setMoodModalOpen(true)}
+              onOpenTransactionModal={() => setTransactionModalOpen(true)}
+            />
             <ClickableLifeBalanceRadar factions={factions} />
-            <MentalStatsPanel stats={userProfile.mentalStats} />
+            <TodaysGoalsWidget onRefresh={loadData} />
           </div>
 
           {/* Faction Stats Widget - Full Width */}
@@ -312,54 +312,11 @@ export default function Dashboard() {
             <FactionStatsWidget factions={factions} />
           </div>
 
-          {/* Data Export Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/30 flex items-center justify-center">
-                    <Download className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-adaptive text-lg">Daten exportieren</h3>
-                    <p className="text-sm text-adaptive-muted">Exportiere alle deine Projekt L Daten</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => window.location.href = '/api/export?format=json'}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-medium flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  JSON Export
-                </button>
-                <button
-                  onClick={() => window.location.href = '/api/export?format=csv'}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition-colors font-medium flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  CSV Export
-                </button>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Quick Actions + Habits + Time Tracking + Streak Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-            <QuickActionsWidget
-              onOpenHabitModal={() => setHabitModalOpen(true)}
-              onOpenMoodModal={() => setMoodModalOpen(true)}
-              onOpenTransactionModal={() => setTransactionModalOpen(true)}
-            />
-            <HabitTrackerWidget />
+          {/* Habits + Time Tracking + Streak Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            <HabitTrackerWidget initialHabits={todaysHabits} onRefresh={loadData} />
             <TimeTrackingWidget />
-            <StreakHighlightWidget />
+            <StreakHighlightWidget initialHabits={allHabits} onRefresh={loadData} />
           </div>
 
 
@@ -402,13 +359,13 @@ export default function Dashboard() {
           </motion.div>
           {/* Achievements Row */}
           <div className="mb-8">
-            <AchievementBadgeWidget />
+            <AchievementBadgeWidget initialStats={achievementStats || undefined} onRefresh={loadData} />
           </div>
 
           {/* Weekly Summary + Recent Activity Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <WeeklySummary />
-            <RecentActivityFeed limit={6} />
+            <RecentActivityFeed limit={6} initialActivities={recentActivities} onRefresh={loadData} />
           </div>
 
           {/* Contacts Section */}

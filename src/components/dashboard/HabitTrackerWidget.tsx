@@ -7,9 +7,14 @@ import { Flame, ChevronRight, Check, X, AlertCircle, RefreshCw } from 'lucide-re
 import { getTodaysHabits, logHabitCompletion } from '@/lib/data/habits';
 import type { HabitWithLogs } from '@/lib/database.types';
 
-export default function HabitTrackerWidget() {
-  const [habits, setHabits] = useState<HabitWithLogs[]>([]);
-  const [loading, setLoading] = useState(true);
+interface HabitTrackerWidgetProps {
+  initialHabits?: HabitWithLogs[];
+  onRefresh?: () => void;
+}
+
+export default function HabitTrackerWidget({ initialHabits, onRefresh }: HabitTrackerWidgetProps) {
+  const [habits, setHabits] = useState<HabitWithLogs[]>(initialHabits || []);
+  const [loading, setLoading] = useState(!initialHabits);
   const [error, setError] = useState<string | null>(null);
 
   const loadHabits = async () => {
@@ -26,8 +31,11 @@ export default function HabitTrackerWidget() {
   };
 
   useEffect(() => {
-    loadHabits();
-  }, []);
+    // Only fetch if no initial data provided
+    if (!initialHabits) {
+      loadHabits();
+    }
+  }, [initialHabits]);
 
   const handleToggle = async (habitId: string, completed: boolean) => {
     try {

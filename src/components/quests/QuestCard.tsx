@@ -87,14 +87,14 @@ export function QuestCard({ quest, onComplete, onView }: QuestCardProps) {
               'text-orange-400'
             }`} />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-adaptive text-lg">{quest.title}</h3>
+              <h3 className="font-bold text-adaptive text-lg truncate">{quest.title}</h3>
               {isCompleted && (
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
               )}
               {isFailed && (
-                <XCircle className="w-5 h-5 text-red-400" />
+                <XCircle className="w-5 h-5 text-red-400 shrink-0" />
               )}
             </div>
             <div className="flex items-center gap-2 text-xs text-adaptive-muted">

@@ -53,7 +53,7 @@ export function SidebarTrigger() {
             />
           </div>
         </motion.button>
-        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
+        <span className="hidden sm:block absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
           Quest Master
         </span>
       </div>
@@ -77,7 +77,7 @@ export function SidebarTrigger() {
         >
           <Bot className="w-7 h-7 text-white" />
         </motion.button>
-        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
+        <span className="hidden sm:block absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap">
           Skill Coach
         </span>
       </div>

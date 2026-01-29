@@ -91,11 +91,13 @@ function groupActivitiesByDay(activities: ActivityLog[]): GroupedActivities[] {
 interface RecentActivityFeedProps {
   limit?: number;
   factionId?: FactionId;
+  initialActivities?: ActivityLog[];
+  onRefresh?: () => void;
 }
 
-export default function RecentActivityFeed({ limit = 8, factionId }: RecentActivityFeedProps) {
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function RecentActivityFeed({ limit = 8, factionId, initialActivities, onRefresh }: RecentActivityFeedProps) {
+  const [activities, setActivities] = useState<ActivityLog[]>(initialActivities || []);
+  const [loading, setLoading] = useState(!initialActivities);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FactionId | 'all'>('all');
   const [expandedDays, setExpandedDays] = useState<Set<string>>(
@@ -129,8 +131,11 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
   };
 
   useEffect(() => {
-    loadActivities();
-  }, [limit]);
+    // Only fetch if no initial data provided
+    if (!initialActivities) {
+      loadActivities();
+    }
+  }, [limit, initialActivities]);
 
   // Memoize filtered activities to prevent unnecessary recalculations
   const filteredActivities = useMemo(
@@ -218,23 +223,27 @@ export default function RecentActivityFeed({ limit = 8, factionId }: RecentActiv
 
       {/* Filter */}
       {!factionId && (
-        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-          <FilterButton
-            active={filter === 'all'}
-            onClick={() => setFilter('all')}
-          >
-            Alle
-          </FilterButton>
-          {FACTION_ORDER.map((f) => (
+        <div className="relative">
+          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-hide">
             <FilterButton
-              key={f}
-              active={filter === f}
-              onClick={() => setFilter(f)}
-              color={FACTION_COLORS[f]}
+              active={filter === 'all'}
+              onClick={() => setFilter('all')}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              Alle
             </FilterButton>
-          ))}
+            {FACTION_ORDER.map((f) => (
+              <FilterButton
+                key={f}
+                active={filter === f}
+                onClick={() => setFilter(f)}
+                color={FACTION_COLORS[f]}
+              >
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </FilterButton>
+            ))}
+          </div>
+          {/* Fade indicator for scroll */}
+          <div className="absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-[var(--background-secondary)] to-transparent pointer-events-none sm:hidden" />
         </div>
       )}
 

@@ -55,6 +55,54 @@ export default function HabitsPage() {
     }
   };
 
+  const handleResist = async (habitId: string) => {
+    try {
+      const response = await fetch('/api/habits/resist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habitId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to log resistance');
+      }
+
+      const result = await response.json();
+      // Show message if there were unlocked achievements
+      if (result.unlockedAchievements?.length > 0) {
+        alert(`${result.message}\n\nAchievements freigeschaltet:\n${result.unlockedAchievements.map((a: any) => `${a.icon} ${a.name}`).join('\n')}`);
+      }
+
+      await loadData();
+    } catch (err) {
+      console.error('Error logging resistance:', err);
+    }
+  };
+
+  const handleRelapse = async (habitId: string) => {
+    try {
+      const response = await fetch('/api/habits/relapse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habitId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to log relapse');
+      }
+
+      const result = await response.json();
+      // Show encouraging message
+      alert(result.message);
+
+      await loadData();
+    } catch (err) {
+      console.error('Error logging relapse:', err);
+    }
+  };
+
   const handleCreate = async (data: HabitFormData) => {
     try {
       await createHabit(data);
@@ -267,7 +315,7 @@ export default function HabitsPage() {
             {negativeHabits.length > 0 && (filter === 'all' || filter === 'negative') && (
               <div>
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-red-400">Vermeiden</span>
+                  <span className="text-emerald-400">🛡️ Abstinenz</span>
                   <span className="text-sm font-normal text-adaptive-dim">
                     ({negativeHabits.length} Habits)
                   </span>
@@ -283,6 +331,8 @@ export default function HabitsPage() {
                       <HabitCard
                         habit={habit}
                         onComplete={handleComplete}
+                        onResist={handleResist}
+                        onRelapse={handleRelapse}
                         onEdit={setEditingHabit}
                         onDelete={handleDelete}
                         onShowReminders={setReminderHabitId}

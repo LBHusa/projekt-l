@@ -1,20 +1,25 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { 
-  ArrowLeft, 
-  Swords, 
-  Trophy, 
-  Clock, 
-  Zap, 
-  CheckCircle2, 
+import {
+  ArrowLeft,
+  Swords,
+  Trophy,
+  Clock,
+  Zap,
+  CheckCircle2,
   XCircle,
   Target,
   Sparkles,
-  Calendar
+  Calendar,
+  Plus,
+  Minus,
+  Circle,
+  CheckCircle,
+  Loader2
 } from 'lucide-react'
 
 interface Quest {
@@ -36,6 +41,15 @@ interface Quest {
   target_faction_ids?: string[]
   related_skills?: { id: string; name: string; icon: string }[]
   related_factions?: { id: string; name_de: string; icon: string; color: string }[]
+}
+
+interface QuestAction {
+  id: string
+  quest_id: string
+  user_id: string
+  description: string
+  created_at: string
+  habit_log_id?: string
 }
 
 const DIFFICULTY_CONFIG = {
@@ -79,9 +93,13 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
   const resolvedParams = use(params)
   const router = useRouter()
   const [quest, setQuest] = useState<Quest | null>(null)
+  const [actions, setActions] = useState<QuestAction[]>([])
   const [loading, setLoading] = useState(true)
   const [isCompleting, setIsCompleting] = useState(false)
+  const [isUpdatingProgress, setIsUpdatingProgress] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showXpAnimation, setShowXpAnimation] = useState(false)
+  const [awardedXp, setAwardedXp] = useState(0)
 
   useEffect(() => {
     loadQuest()
@@ -91,15 +109,25 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await fetch(`/api/quests/${resolvedParams.id}`)
-      const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Quest nicht gefunden')
+      // Load quest and actions in parallel
+      const [questResponse, actionsResponse] = await Promise.all([
+        fetch(`/api/quests/${resolvedParams.id}`),
+        fetch(`/api/quests/${resolvedParams.id}/progress`)
+      ])
+
+      const questData = await questResponse.json()
+
+      if (!questResponse.ok) {
+        throw new Error(questData.error || 'Quest nicht gefunden')
       }
 
-      setQuest(data.quest)
+      setQuest(questData.quest)
+
+      if (actionsResponse.ok) {
+        const actionsData = await actionsResponse.json()
+        setActions(actionsData.actions || [])
+      }
     } catch (err) {
       console.error('Error loading quest:', err)
       setError(err instanceof Error ? err.message : 'Fehler beim Laden')
@@ -108,19 +136,62 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  const handleProgressUpdate = async (action: 'increment' | 'decrement') => {
+    if (!quest || isUpdatingProgress) return
+
+    try {
+      setIsUpdatingProgress(true)
+      const response = await fetch(`/api/quests/${quest.id}/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Fehler beim Aktualisieren')
+      }
+
+      // Show XP animation if quest was completed
+      if (data.completed && data.xp_awarded) {
+        setAwardedXp(data.xp_awarded)
+        setShowXpAnimation(true)
+        setTimeout(() => setShowXpAnimation(false), 2500)
+      }
+
+      // Reload quest to show updated status
+      await loadQuest()
+    } catch (err) {
+      console.error('Error updating progress:', err)
+      alert(err instanceof Error ? err.message : 'Fehler beim Aktualisieren')
+    } finally {
+      setIsUpdatingProgress(false)
+    }
+  }
+
   const handleComplete = async () => {
     if (!quest || isCompleting) return
 
     try {
       setIsCompleting(true)
-      const response = await fetch(`/api/quests/${quest.id}/complete`, {
+      const response = await fetch(`/api/quests/${quest.id}/progress`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'complete' }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
         throw new Error(data.error || 'Fehler beim Abschließen')
+      }
+
+      // Show XP animation
+      if (data.xp_awarded) {
+        setAwardedXp(data.xp_awarded)
+        setShowXpAnimation(true)
+        setTimeout(() => setShowXpAnimation(false), 2500)
       }
 
       // Reload quest to show updated status
@@ -174,6 +245,29 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text pb-20">
+      {/* XP Animation Overlay */}
+      <AnimatePresence>
+        {showXpAnimation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.5, y: 50 }}
+              animate={{ scale: 1.2, y: -100 }}
+              exit={{ scale: 0, y: -200, opacity: 0 }}
+              transition={{ duration: 2, ease: 'easeOut' }}
+              className="flex items-center gap-3 bg-yellow-500/20 backdrop-blur-md border border-yellow-500/50 rounded-2xl px-8 py-4"
+            >
+              <Zap className="w-10 h-10 text-yellow-400" />
+              <span className="text-4xl font-bold text-yellow-400">+{awardedXp} XP</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Link */}
         <Link href="/quests" className="inline-flex items-center gap-2 text-adaptive-muted hover:text-adaptive transition-colors mb-8">
@@ -256,6 +350,96 @@ export default function QuestDetailPage({ params }: { params: Promise<{ id: stri
             </div>
             <p className="text-right text-sm text-adaptive-muted mt-1">{progressPercent}% abgeschlossen</p>
           </div>
+
+          {/* Step Tracker - Visual Steps */}
+          {quest.status === 'active' && !isExpired && quest.required_actions > 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mb-6 p-4 bg-white/5 dark:bg-black/20 rounded-xl border border-white/10"
+            >
+              <h4 className="text-sm font-medium text-adaptive-muted mb-3 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Schritte
+              </h4>
+              <div className="space-y-2">
+                {Array.from({ length: quest.required_actions }, (_, i) => {
+                  const stepNum = i + 1
+                  const isCompleted = stepNum <= quest.completed_actions
+                  const action = actions[i]
+
+                  return (
+                    <motion.div
+                      key={stepNum}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 * i }}
+                      className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                        isCompleted
+                          ? 'bg-green-500/10 border border-green-500/20'
+                          : 'bg-white/5 border border-white/5'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      ) : (
+                        <Circle className="w-5 h-5 text-adaptive-muted flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-sm ${isCompleted ? 'text-green-400' : 'text-adaptive-muted'}`}>
+                          {action?.description || `Schritt ${stepNum}`}
+                        </span>
+                        {action?.created_at && (
+                          <span className="text-xs text-adaptive-dim ml-2">
+                            ({new Date(action.created_at).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })})
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Progress Controls */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
+                <button
+                  onClick={() => handleProgressUpdate('decrement')}
+                  disabled={isUpdatingProgress || quest.completed_actions === 0}
+                  className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Minus className="w-4 h-4" />
+                  <span className="text-sm">Zurück</span>
+                </button>
+
+                <span className="text-sm text-adaptive-muted">
+                  {quest.completed_actions} / {quest.required_actions}
+                </span>
+
+                <button
+                  onClick={() => handleProgressUpdate('increment')}
+                  disabled={isUpdatingProgress || quest.completed_actions >= quest.required_actions}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all font-medium ${
+                    quest.completed_actions >= quest.required_actions - 1
+                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500'
+                      : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isUpdatingProgress ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  <span className="text-sm">
+                    {quest.completed_actions >= quest.required_actions - 1
+                      ? 'Letzter Schritt'
+                      : 'Schritt abhaken'
+                    }
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          )}
 
           {/* Dates */}
           <div className="flex flex-wrap gap-4 mb-6 text-sm">

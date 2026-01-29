@@ -6,6 +6,7 @@ export { default as RecentActivityFeed } from './RecentActivityFeed';
 export { default as QuickActionsWidget } from './QuickActionsWidget';
 export { default as StreakHighlightWidget } from './StreakHighlightWidget';
 export { default as TimeTrackingWidget } from './TimeTrackingWidget';
+export { default as TodaysGoalsWidget } from './TodaysGoalsWidget';
 export { default as WeeklySummary } from './WeeklySummary';
 export { default as HabitCompletionModal } from './modals/HabitCompletionModal';
 export { default as MoodLogModal } from './modals/MoodLogModal';

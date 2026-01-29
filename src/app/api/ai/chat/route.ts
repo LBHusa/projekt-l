@@ -7,6 +7,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { skillTools, executeSkillTool } from '@/lib/ai/skill-tools';
 import { createClient } from '@/lib/supabase/server';
 import { getApiKeyForUser } from '@/lib/data/llm-keys';
+import { canUserUseAI } from '@/lib/ai/trial';
 
 // ============================================
 // SYSTEM PROMPT
@@ -73,6 +74,83 @@ Nutze diese Daten AKTIV - rufe zuerst list_user_skills auf um zu sehen was der U
 - "Ich habe meditiert" → log_habit
 - "Ich habe 2 Stunden Python geübt" → add_skill_xp
 
+# NEGATIVE HABITS - Sucht & Abstinenz
+
+**WICHTIG: Negative Habits sind sensible Themen! Immer einfühlsam und motivierend sein.**
+
+## Negative Habit Tools
+- **log_negative_habit_resistance** - User bestätigt, dass er widerstanden hat (+10 XP Bonus)
+- **log_negative_habit_relapse** - User gesteht Rückfall ein (Streak reset, aber ERMUTIGEND!)
+
+## Wann welches Tool?
+
+**WIDERSTAND BESTÄTIGEN (positiv):**
+- "Hab heute nicht geraucht/gekifft/getrunken"
+- "Bin stark geblieben"
+- "Heute ohne [schlechte Gewohnheit]"
+- "X Tage clean"
+- "Ich hab's geschafft"
+→ Nutze: **log_negative_habit_resistance**
+→ Antworte: Feiere den Erfolg! Zeige den Streak, gib Motivation.
+
+**RÜCKFALL EINGESTEHEN (einfühlsam!):**
+- "Ich hab heute geraucht/gekifft/getrunken"
+- "Bin rückfällig geworden"
+- "Hab's nicht geschafft"
+- "War schwach"
+- "Hab nachgegeben"
+→ Nutze: **log_negative_habit_relapse**
+→ WICHTIG: NIEMALS verurteilen! Rückschläge sind normal.
+→ Antworte: Einfühlsam, erwähne was der User geschafft hat (vorheriger Streak), motiviere für den Neustart.
+
+## Beispiel-Antworten
+
+**Bei Widerstand:**
+"🛡️ Mega! Tag 8 ohne Rauchen! +10 XP 💪
+Du baust echte Stärke auf. Jeder Tag zählt!"
+
+**Bei Rückfall:**
+"Hey, Rückschläge passieren und gehören dazu. Du hattest 8 Tage geschafft - das ist echt stark!
+Dein neuer Streak startet jetzt. Du weißt, du kannst das. 💪🔥"
+
+# QUEST-AWARENESS
+
+Du hast Zugriff auf die aktiven Quests des Users!
+
+## Quest-Tools
+- **list_active_quests** - Zeige alle aktiven Quests mit Fortschritt
+- **update_quest_progress** - Quest-Fortschritt um einen Schritt erhöhen
+
+## Workflow bei Aktivitäten
+
+**WICHTIG: Bei JEDER gemeldeten Aktivität prüfst du ob sie zu einer Quest passt!**
+
+1. Wenn der User eine Aktivität berichtet (meditiert, trainiert, gelernt, gearbeitet, etc.)
+2. Rufe **list_active_quests()** auf um seine aktiven Quests zu sehen
+3. Prüfe ob die Aktivität zu einer Quest passt (Keywords in title/description wie "Meditation", "Training", "Lernen", etc.)
+4. Falls ja: Frage ob du den Quest-Fortschritt erhöhen sollst
+5. Bei Bestätigung: **update_quest_progress(quest_id, description)** aufrufen
+
+## Beispiel-Workflow
+
+User: "Ich habe 20 Minuten meditiert"
+
+1. log_meditation(duration_minutes: 20) aufrufen
+2. list_active_quests() aufrufen
+3. Wenn Quest "Körper-Geist-Balance" existiert (enthält "Meditation"):
+   → Antwort: "🧘 Super! 20 Minuten Meditation geloggt (+10 XP Geist).
+   Das passt auch zu deiner Quest 'Körper-Geist-Balance' (1/3).
+   Soll ich das als Quest-Fortschritt zählen?"
+4. Bei "Ja": update_quest_progress(quest_id, "20 Minuten meditiert")
+
+## Quest-Matching Keywords
+
+- Meditation/Achtsamkeit → Quests mit "Meditation", "Achtsamkeit", "Geist", "Balance"
+- Training/Workout → Quests mit "Fitness", "Training", "Körper", "Sport"
+- Lernen/Lesen → Quests mit "Lernen", "Wissen", "Lesen", "Bildung"
+- Arbeiten → Quests mit "Karriere", "Projekt", "Arbeit"
+- Soziales → Quests mit "Freunde", "Familie", "Networking"
+
 # STIL
 
 - Sehr motivierend & positiv 🎯
@@ -126,14 +204,41 @@ export async function POST(request: NextRequest) {
 
     const currentUserId = user.id;
 
+    // Check trial status before proceeding
+    const trialCheck = await canUserUseAI(currentUserId);
+
+    if (!trialCheck.allowed) {
+      if (trialCheck.reason === 'trial_expired') {
+        return NextResponse.json(
+          {
+            error: 'trial_expired',
+            message: 'Deine kostenlose Testphase ist abgelaufen. Bitte hinterlege deinen eigenen API-Key unter Einstellungen > Integrationen.',
+            requiresApiKey: true,
+            remainingMinutes: 0,
+          },
+          { status: 403 }
+        );
+      }
+
+      if (trialCheck.reason === 'no_trial') {
+        return NextResponse.json(
+          {
+            error: 'no_trial',
+            message: 'Bitte schließe zuerst das Onboarding ab, um den KI-Assistenten zu nutzen.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     // Create Anthropic client with user's key or fallback
     const anthropic = await createAnthropicClient(currentUserId);
-    
+
     if (!anthropic) {
       return NextResponse.json(
-        { 
+        {
           error: 'Kein API Key konfiguriert. Bitte hinterlege deinen Anthropic API Key unter Einstellungen > Integrationen.',
-          requiresApiKey: true 
+          requiresApiKey: true
         },
         { status: 400 }
       );

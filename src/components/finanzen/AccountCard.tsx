@@ -43,9 +43,9 @@ export function AccountCard({ account, onClick }: AccountCardProps) {
           >
             <span className={config.color}>{config.icon}</span>
           </div>
-          <div>
-            <h3 className="font-medium">{account.name}</h3>
-            <p className="text-xs text-adaptive-dim">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium truncate">{account.name}</h3>
+            <p className="text-xs text-adaptive-dim truncate">
               {config.label}
               {account.institution && ` • ${account.institution}`}
             </p>

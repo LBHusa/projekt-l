@@ -63,9 +63,9 @@ export default function BudgetCard({ budget, onClick }: BudgetCardProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Wallet className="w-5 h-5 text-purple-400" />
-          <span className="font-medium">{budget.category}</span>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Wallet className="w-5 h-5 text-purple-400 shrink-0" />
+          <span className="font-medium truncate">{budget.category}</span>
         </div>
         <div className={`text-xs ${status.color}`}>
           {status.percentage.toFixed(0)}%

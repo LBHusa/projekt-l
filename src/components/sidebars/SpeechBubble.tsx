@@ -75,7 +75,7 @@ export function SpeechBubble() {
           exit={{ opacity: 0, scale: 0.8, y: 10 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
           onClick={handleClick}
-          className="absolute bottom-20 left-0 cursor-pointer"
+          className="absolute bottom-20 left-0 cursor-pointer hidden sm:block"
         >
           {/* Speech Bubble */}
           <div className="relative bg-white dark:bg-gray-800 rounded-2xl px-4 py-3 shadow-lg max-w-[200px]">

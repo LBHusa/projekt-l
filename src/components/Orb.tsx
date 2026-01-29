@@ -17,25 +17,28 @@ interface OrbProps {
   animated?: boolean;
 }
 
+// Responsive size classes - smaller on mobile, larger on desktop
 const sizeClasses = {
-  sm: 'w-20 h-20',
-  md: 'w-32 h-32',
-  lg: 'w-40 h-40',
-  xl: 'w-52 h-52',
+  sm: 'w-16 h-16 sm:w-20 sm:h-20',
+  md: 'w-24 h-24 sm:w-32 sm:h-32',
+  lg: 'w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40',
+  xl: 'w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52',
 };
 
+// Responsive text sizes for orb icons
 const textSizeClasses = {
-  sm: 'text-2xl',
-  md: 'text-4xl',
-  lg: 'text-5xl',
-  xl: 'text-6xl',
+  sm: 'text-xl sm:text-2xl',
+  md: 'text-2xl sm:text-4xl',
+  lg: 'text-3xl sm:text-4xl md:text-5xl',
+  xl: 'text-4xl sm:text-5xl md:text-6xl',
 };
 
+// Responsive label sizes
 const labelSizeClasses = {
   sm: 'text-xs',
-  md: 'text-sm',
-  lg: 'text-base',
-  xl: 'text-lg',
+  md: 'text-xs sm:text-sm',
+  lg: 'text-sm sm:text-base',
+  xl: 'text-base sm:text-lg',
 };
 
 const particleCounts = {

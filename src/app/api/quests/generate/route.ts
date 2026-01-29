@@ -10,6 +10,7 @@ import {
   generateQuests,
   saveQuests,
 } from '@/lib/ai/questGenerator'
+import { canUserUseAI } from '@/lib/ai/trial'
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,6 +43,35 @@ export async function POST(request: NextRequest) {
         { error: 'Count must be between 1 and 5' },
         { status: 400 }
       )
+    }
+
+    // Check trial status before proceeding
+    const trialCheck = await canUserUseAI(user.id)
+
+    if (!trialCheck.allowed) {
+      if (trialCheck.reason === 'trial_expired') {
+        return NextResponse.json(
+          {
+            error: 'trial_expired',
+            message:
+              'Deine kostenlose Testphase ist abgelaufen. Bitte hinterlege deinen eigenen API-Key unter Einstellungen > Integrationen.',
+            requiresApiKey: true,
+            remainingMinutes: 0,
+          },
+          { status: 403 }
+        )
+      }
+
+      if (trialCheck.reason === 'no_trial') {
+        return NextResponse.json(
+          {
+            error: 'no_trial',
+            message:
+              'Bitte schließe zuerst das Onboarding ab, um den KI-Assistenten zu nutzen.',
+          },
+          { status: 403 }
+        )
+      }
     }
 
     // Check if ANTHROPIC_API_KEY is configured

@@ -61,7 +61,8 @@ export default function JobTimeline({
             className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Job hinzufügen
+            <span className="hidden sm:inline">Job hinzufügen</span>
+            <span className="sm:hidden">Neu</span>
           </button>
         )}
       </div>

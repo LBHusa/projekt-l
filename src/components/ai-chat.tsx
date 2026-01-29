@@ -5,7 +5,9 @@
 // ============================================
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import type { Anthropic } from '@anthropic-ai/sdk';
+import { TrialExpiredModal } from '@/components/ai/TrialExpiredModal';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -16,6 +18,7 @@ export function AIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTrialExpired, setShowTrialExpired] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -58,11 +61,24 @@ export function AIChat() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
+      const data = await response.json();
+
+      // Handle trial expired error
+      if (response.status === 403 && data.error === 'trial_expired') {
+        setShowTrialExpired(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'Deine kostenlose Testphase ist abgelaufen. Bitte hinterlege deinen eigenen API-Key, um den KI-Assistenten weiter zu nutzen.',
+          },
+        ]);
+        return;
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to get response');
+      }
 
       // Extract text content from Claude response
       const assistantContent = extractTextContent(data.response);
@@ -96,6 +112,7 @@ export function AIChat() {
   };
 
   return (
+    <>
     <div className="flex flex-col h-[600px] border border-gray-700 rounded-lg bg-gray-800">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
@@ -142,7 +159,9 @@ export function AIChat() {
                   <span className="text-xs text-gray-400">AI-Assistent</span>
                 </div>
               )}
-              <div className="whitespace-pre-wrap">{message.content}</div>
+              <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </div>
             </div>
           </div>
         ))}
@@ -183,6 +202,13 @@ export function AIChat() {
         </div>
       </div>
     </div>
+
+    {/* Trial Expired Modal */}
+    <TrialExpiredModal
+      isOpen={showTrialExpired}
+      onClose={() => setShowTrialExpired(false)}
+    />
+    </>
   );
 }
 

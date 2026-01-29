@@ -34,31 +34,31 @@ export default function SkillBreadcrumb({
       {/* Domain Link */}
       <Link
         href={`/domain/${domain.id}`}
-        className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors shrink-0"
+        className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors shrink-0 max-w-[150px]"
       >
-        <span>{domain.icon}</span>
-        <span className="font-medium">{domain.name}</span>
+        <span className="shrink-0">{domain.icon}</span>
+        <span className="font-medium truncate">{domain.name}</span>
       </Link>
 
       {/* Ancestors */}
       {ancestors.map((ancestor) => (
-        <div key={ancestor.id} className="flex items-center gap-1 shrink-0">
-          <ChevronRight className="w-4 h-4 text-adaptive-dim" />
+        <div key={ancestor.id} className="flex items-center gap-1 shrink-0 max-w-[120px]">
+          <ChevronRight className="w-4 h-4 text-adaptive-dim shrink-0" />
           {onAncestorClick ? (
             <button
               onClick={() => onAncestorClick(ancestor)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors min-w-0"
             >
-              <span>{ancestor.icon}</span>
-              <span>{ancestor.name}</span>
+              <span className="shrink-0">{ancestor.icon}</span>
+              <span className="truncate">{ancestor.name}</span>
             </button>
           ) : (
             <Link
               href={`/skill/${ancestor.id}`}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-md text-adaptive-muted hover:text-white hover:bg-white/10 transition-colors min-w-0"
             >
-              <span>{ancestor.icon}</span>
-              <span>{ancestor.name}</span>
+              <span className="shrink-0">{ancestor.icon}</span>
+              <span className="truncate">{ancestor.name}</span>
             </Link>
           )}
         </div>
@@ -66,11 +66,11 @@ export default function SkillBreadcrumb({
 
       {/* Current Skill (not clickable) */}
       {currentSkillName && (
-        <div className="flex items-center gap-1 shrink-0">
-          <ChevronRight className="w-4 h-4 text-adaptive-dim" />
-          <span className="flex items-center gap-1.5 px-2 py-1 text-white font-medium">
-            {currentSkillIcon && <span>{currentSkillIcon}</span>}
-            <span>{currentSkillName}</span>
+        <div className="flex items-center gap-1 shrink-0 max-w-[150px]">
+          <ChevronRight className="w-4 h-4 text-adaptive-dim shrink-0" />
+          <span className="flex items-center gap-1.5 px-2 py-1 text-white font-medium min-w-0">
+            {currentSkillIcon && <span className="shrink-0">{currentSkillIcon}</span>}
+            <span className="truncate">{currentSkillName}</span>
           </span>
         </div>
       )}

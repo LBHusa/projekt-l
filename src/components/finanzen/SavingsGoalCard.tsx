@@ -33,8 +33,8 @@ export function SavingsGoalCard({ goal, onClick }: SavingsGoalCardProps) {
         </div>
       )}
 
-      <div className="flex items-start gap-3 mb-3">
-        <span className="text-2xl">{goal.icon}</span>
+      <div className="flex items-start gap-3 mb-3 min-w-0">
+        <span className="text-2xl shrink-0">{goal.icon}</span>
         <div className="flex-1 min-w-0">
           <h3 className="font-medium truncate">{goal.name}</h3>
           {goal.description && (

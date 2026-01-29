@@ -29,21 +29,26 @@ export default defineConfig({
     video: 'retain-on-failure',
     navigationTimeout: 45000, // 45s for navigation (increased for server slowness)
     actionTimeout: 20000, // 20s for actions (increased)
-    launchOptions: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    },
   },
 
   projects: [
     {
       name: 'setup',
       testMatch: /.*\.setup\.ts/,
+      use: {
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
+      },
     },
     {
       name: 'unauthenticated',
       testMatch: '**/api-security.spec.ts',
       use: {
         ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
         // No storageState = unauthenticated requests
       },
       // No dependencies on setup = runs without auth
@@ -53,9 +58,33 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'tests/e2e/.auth/user.json',
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
       },
       dependencies: ['setup'],
       testIgnore: '**/api-security.spec.ts', // Security tests run in unauthenticated project
+    },
+    {
+      name: 'mobile-chrome',
+      use: {
+        ...devices['Pixel 5'],
+        storageState: 'tests/e2e/.auth/user.json',
+        launchOptions: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        },
+      },
+      dependencies: ['setup'],
+      testIgnore: '**/api-security.spec.ts',
+    },
+    {
+      name: 'mobile-safari',
+      use: {
+        ...devices['iPhone 12'],
+        storageState: 'tests/e2e/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testIgnore: '**/api-security.spec.ts',
     },
   ],
 

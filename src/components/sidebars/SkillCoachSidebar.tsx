@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import type { Anthropic } from '@anthropic-ai/sdk';
 
 interface Message {
@@ -157,7 +158,9 @@ export function SkillCoachSidebar({ onClose }: SkillCoachSidebarProps) {
                   <span>Skill-Coach</span>
                 </div>
               )}
-              <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+              <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+                <ReactMarkdown>{message.content}</ReactMarkdown>
+              </div>
             </div>
           </motion.div>
         ))}

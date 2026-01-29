@@ -317,14 +317,14 @@ export async function getFavoriteContacts(): Promise<ContactWithStats[]> {
   return getContactsWithStats({ is_favorite: true, is_archived: false });
 }
 
-export async function getUpcomingBirthdays(days: number = 30): Promise<ContactWithStats[]> {
+export async function getUpcomingBirthdays(days: number = 30, userId?: string): Promise<ContactWithStats[]> {
   const supabase = createBrowserClient();
-  const userId = await getUserIdOrCurrent();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('contacts_upcoming_birthdays')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .lte('days_until_birthday', days);
 
   if (error) {
@@ -350,14 +350,14 @@ export async function getUpcomingBirthdays(days: number = 30): Promise<ContactWi
   }));
 }
 
-export async function getContactsNeedingAttention(limit: number = 10): Promise<ContactWithStats[]> {
+export async function getContactsNeedingAttention(limit: number = 10, userId?: string): Promise<ContactWithStats[]> {
   const supabase = createBrowserClient();
-  const userId = await getUserIdOrCurrent();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('contacts_needing_attention')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .limit(limit);
 
   if (error) {
@@ -380,19 +380,19 @@ export async function getContactsNeedingAttention(limit: number = 10): Promise<C
 // Statistiken
 // ============================================
 
-export async function getContactsStats(): Promise<{
+export async function getContactsStats(userId?: string): Promise<{
   total: number;
   byCategory: Record<RelationshipCategory, number>;
   favorites: number;
   needingAttention: number;
 }> {
   const supabase = createBrowserClient();
-  const userId = await getUserIdOrCurrent();
+  const resolvedUserId = await getUserIdOrCurrent(userId);
 
   const { data, error } = await supabase
     .from('contacts')
     .select('relationship_category, is_favorite')
-    .eq('user_id', userId)
+    .eq('user_id', resolvedUserId)
     .eq('is_archived', false);
 
   if (error) {
@@ -417,7 +417,7 @@ export async function getContactsStats(): Promise<{
   const { count: needingAttentionCount } = await supabase
     .from('contacts_needing_attention')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .eq('user_id', resolvedUserId);
 
   return {
     total: contacts.length,

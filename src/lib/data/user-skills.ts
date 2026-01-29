@@ -395,8 +395,9 @@ async function updateUserTotalXp(userId: string, xpToAdd: number): Promise<void>
 
 /**
  * Get the total count of all skills in the database
+ * userId param is accepted for API consistency but not used (skills are global)
  */
-export async function getTotalSkillCount(): Promise<number> {
+export async function getTotalSkillCount(userId?: string): Promise<number> {
   const supabase = createBrowserClient();
 
   const { count, error } = await supabase

@@ -37,7 +37,7 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
             <motion.button
               key={faction.id}
               onClick={() => handleFactionClick(faction.id)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border-l-3"
+              className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer border-l-3 gap-2 sm:gap-0"
               style={{ borderLeftColor: faction.color }}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -45,16 +45,14 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
               whileHover={{ scale: 1.01, x: 4 }}
               whileTap={{ scale: 0.99 }}
             >
-              {/* Left: Icon + Name */}
-              <div className="flex items-center gap-3 min-w-[200px]">
-                <span className="text-2xl">{faction.icon}</span>
-                <span className="text-adaptive font-medium">{faction.name_de}</span>
-              </div>
-
-              {/* Center: Level + XP */}
-              <div className="flex items-center gap-3 flex-1">
+              {/* Top row on mobile / Left on desktop: Icon + Name + Level */}
+              <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto sm:min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-2xl shrink-0">{faction.icon}</span>
+                  <span className="text-adaptive font-medium truncate">{faction.name_de}</span>
+                </div>
                 <span
-                  className="px-2 py-1 rounded-md text-sm font-semibold"
+                  className="px-2 py-1 rounded-md text-sm font-semibold shrink-0"
                   style={{
                     backgroundColor: `${faction.color}20`,
                     color: faction.color,
@@ -62,19 +60,20 @@ export default function FactionStatsWidget({ factions }: FactionStatsWidgetProps
                 >
                   Lvl {level}
                 </span>
-                <span className="text-adaptive-dim">•</span>
+              </div>
+
+              {/* Bottom row on mobile / Right on desktop: XP stats */}
+              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <span className="text-adaptive-muted text-sm">
                   {totalXp.toLocaleString()} XP
                 </span>
-              </div>
-
-              {/* Right: Weekly Progress */}
-              <div className={`flex items-center gap-2 ${weeklyXp > 0 ? 'text-green-400' : 'text-adaptive-dim'}`}>
-                <TrendingUp className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {weeklyXp > 0 ? `+${weeklyXp.toLocaleString()}` : '+0'} XP
-                </span>
-                <ChevronRight className="w-4 h-4 text-adaptive-dim" />
+                <div className={`flex items-center gap-2 ${weeklyXp > 0 ? 'text-green-400' : 'text-adaptive-dim'}`}>
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    {weeklyXp > 0 ? `+${weeklyXp.toLocaleString()}` : '+0'} XP
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-adaptive-dim" />
+                </div>
               </div>
             </motion.button>
           );

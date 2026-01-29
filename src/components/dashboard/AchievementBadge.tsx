@@ -4,18 +4,30 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Lock, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import type { AchievementWithProgress } from '@/lib/data/achievements';
+import type { AchievementWithProgress, AchievementStats } from '@/lib/data/achievements';
 import { getAchievementStats } from '@/lib/data/achievements';
 
-export default function AchievementBadgeWidget() {
+interface AchievementBadgeWidgetProps {
+  initialStats?: AchievementStats;
+  onRefresh?: () => void;
+}
+
+export default function AchievementBadgeWidget({ initialStats, onRefresh }: AchievementBadgeWidgetProps) {
   const [stats, setStats] = useState<{
     total: number;
     unlocked: number;
     recentUnlocks: AchievementWithProgress[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  } | null>(initialStats ? {
+    total: initialStats.total,
+    unlocked: initialStats.unlocked,
+    recentUnlocks: initialStats.recentUnlocks,
+  } : null);
+  const [loading, setLoading] = useState(!initialStats);
 
   useEffect(() => {
+    // Only fetch if no initial data provided
+    if (initialStats) return;
+
     async function loadStats() {
       try {
         const data = await getAchievementStats();
@@ -31,7 +43,7 @@ export default function AchievementBadgeWidget() {
       }
     }
     loadStats();
-  }, []);
+  }, [initialStats]);
 
   if (loading) {
     return (

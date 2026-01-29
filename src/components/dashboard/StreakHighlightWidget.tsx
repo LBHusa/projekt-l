@@ -8,13 +8,30 @@ import HabitStreak from '@/components/habits/HabitStreak';
 import { Flame, Trophy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function StreakHighlightWidget() {
-  const [habits, setHabits] = useState<HabitWithLogs[]>([]);
-  const [loading, setLoading] = useState(true);
+interface StreakHighlightWidgetProps {
+  initialHabits?: HabitWithLogs[];
+  onRefresh?: () => void;
+}
+
+export default function StreakHighlightWidget({ initialHabits, onRefresh }: StreakHighlightWidgetProps) {
+  const [habits, setHabits] = useState<HabitWithLogs[]>(() => {
+    if (initialHabits) {
+      // Pre-filter and sort initial habits
+      return initialHabits
+        .filter((h) => h.current_streak >= 3)
+        .sort((a, b) => b.current_streak - a.current_streak)
+        .slice(0, 6);
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(!initialHabits);
 
   useEffect(() => {
-    loadStreakHabits();
-  }, []);
+    // Only fetch if no initial data provided
+    if (!initialHabits) {
+      loadStreakHabits();
+    }
+  }, [initialHabits]);
 
   const loadStreakHabits = async () => {
     setLoading(true);

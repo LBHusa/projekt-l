@@ -365,3 +365,27 @@ export async function checkXPAchievements(
   await checkAndAwardAchievements(resolvedUserId, 'faction_xp', { faction_xp: factionXp });
   await checkAndAwardAchievements(resolvedUserId, 'total_xp', { total_xp: totalXp });
 }
+
+/**
+ * Check and award achievements for negative habits
+ * @param maxCleanStreak - Maximum "days clean" streak across all negative habits
+ * @param totalResistances - Total number of resistance confirmations
+ * @param userId - Optional user ID
+ */
+export async function checkNegativeHabitAchievements(
+  maxCleanStreak: number,
+  totalResistances: number,
+  userId?: string
+): Promise<void> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+
+  // Check streak-based achievements
+  await checkAndAwardAchievements(resolvedUserId, 'negative_habit_streak', {
+    negative_habit_streak: maxCleanStreak,
+  });
+
+  // Check resistance-based achievements
+  await checkAndAwardAchievements(resolvedUserId, 'negative_habit_avoided', {
+    negative_habit_avoided: totalResistances,
+  });
+}

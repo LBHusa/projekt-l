@@ -9,10 +9,11 @@ import type {
   HabitFaction,
   HabitFactionDisplay,
   HabitWithFactions,
+  HabitAchievement,
 } from '@/lib/database.types';
 import { logActivity } from './activity-log';
 import { updateFactionStats } from './factions';
-import { checkHabitAchievements } from './achievements';
+import { checkHabitAchievements, checkNegativeHabitAchievements } from './achievements';
 import { getUserIdOrCurrent } from '@/lib/auth-helper';
 
 // ============================================
@@ -709,4 +710,384 @@ export async function getActivityCategories(): Promise<any[]> {
   }
 
   return data || [];
+}
+
+// ============================================
+// NEGATIVE HABIT FUNCTIONS
+// ============================================
+
+/**
+ * Calculate the "days clean" streak for a negative habit
+ * Streak is calculated from streak_start_date to today
+ */
+export function calculateNegativeHabitStreak(habit: Habit): number {
+  if (habit.habit_type !== 'negative' || !habit.streak_start_date) {
+    return 0;
+  }
+  const start = new Date(habit.streak_start_date);
+  const today = new Date();
+  // Reset time components to compare just dates
+  start.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+/**
+ * Get all habit-specific achievements for a habit
+ */
+export async function getHabitAchievements(habitId: string): Promise<HabitAchievement[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_achievements')
+    .select('*')
+    .eq('habit_id', habitId)
+    .order('target_value', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching habit achievements:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Get all unlocked habit achievements for a user
+ */
+export async function getUnlockedHabitAchievements(
+  userId?: string
+): Promise<HabitAchievement[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_achievements')
+    .select('*')
+    .eq('user_id', resolvedUserId)
+    .eq('is_unlocked', true)
+    .order('unlocked_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching unlocked habit achievements:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Update habit achievement progress based on current streak
+ */
+export async function updateHabitAchievementProgress(
+  habitId: string,
+  currentStreak: number,
+  userId?: string
+): Promise<HabitAchievement[]> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const supabase = createBrowserClient();
+  const unlockedAchievements: HabitAchievement[] = [];
+
+  // Get all achievements for this habit
+  const achievements = await getHabitAchievements(habitId);
+
+  for (const achievement of achievements) {
+    // Skip already unlocked
+    if (achievement.is_unlocked) continue;
+
+    // Check if target reached
+    if (currentStreak >= achievement.target_value) {
+      // Unlock achievement
+      const { data, error } = await supabase
+        .from('habit_achievements')
+        .update({
+          current_progress: currentStreak,
+          is_unlocked: true,
+          unlocked_at: new Date().toISOString(),
+        })
+        .eq('id', achievement.id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        unlockedAchievements.push(data);
+
+        // Award XP
+        if (achievement.xp_reward > 0) {
+          await updateFactionStats('geist', achievement.xp_reward, userId);
+        }
+
+        // Log activity
+        await logActivity({
+          userId,
+          activityType: 'achievement_unlocked',
+          factionId: 'geist',
+          title: `${achievement.icon} ${achievement.name} freigeschaltet!`,
+          description: achievement.description || `${currentStreak} Tage geschafft`,
+          xpAmount: achievement.xp_reward,
+          relatedEntityType: 'habit_achievement',
+          relatedEntityId: achievement.id,
+        });
+      }
+    } else {
+      // Update progress
+      await supabase
+        .from('habit_achievements')
+        .update({ current_progress: currentStreak })
+        .eq('id', achievement.id);
+    }
+  }
+
+  return unlockedAchievements;
+}
+
+export interface LogRelapseResult {
+  habit: Habit;
+  previousStreak: number;
+  xpLost: number;
+  message: string;
+}
+
+/**
+ * Log a relapse for a negative habit
+ * - Resets streak_start_date to today
+ * - Increments total_completions (relapse counter)
+ * - Applies XP penalty
+ * - Logs activity
+ */
+export async function logHabitRelapse(
+  habitId: string,
+  notes?: string,
+  userId?: string
+): Promise<LogRelapseResult> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const supabase = createBrowserClient();
+
+  // Get current habit
+  const habit = await getHabit(habitId);
+  if (!habit) {
+    throw new Error('Habit not found');
+  }
+
+  if (habit.habit_type !== 'negative') {
+    throw new Error('This function is only for negative habits');
+  }
+
+  // Calculate previous streak before reset
+  const previousStreak = calculateNegativeHabitStreak(habit);
+  const today = new Date().toISOString().split('T')[0];
+
+  // XP penalty (base XP or default 10)
+  const xpPenalty = habit.xp_per_completion || 10;
+
+  // Reset streak and update habit
+  const { error: updateError } = await supabase
+    .from('habits')
+    .update({
+      streak_start_date: today,
+      current_streak: 0,
+      total_completions: habit.total_completions + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', habitId);
+
+  if (updateError) {
+    console.error('Error updating habit on relapse:', updateError);
+    throw updateError;
+  }
+
+  // Create log entry
+  const { error: logError } = await supabase.from('habit_logs').insert({
+    habit_id: habitId,
+    user_id: resolvedUserId,
+    completed: true, // For negative habits, "completed" means relapse
+    notes: notes || `Rückfall nach ${previousStreak} Tagen`,
+    logged_at: new Date().toISOString(),
+  });
+
+  if (logError) {
+    console.error('Error creating relapse log:', logError);
+  }
+
+  // Apply XP penalty
+  if (habit.faction_id) {
+    await updateFactionStats(habit.faction_id, -xpPenalty, userId);
+  }
+
+  // Log activity
+  const activityTitle = previousStreak > 0
+    ? `${habit.icon} ${habit.name} - Rückfall nach ${previousStreak} Tagen`
+    : `${habit.icon} ${habit.name} - Rückfall geloggt`;
+
+  await logActivity({
+    userId,
+    activityType: 'habit_completed', // Using existing type for compatibility
+    factionId: habit.faction_id || 'geist',
+    title: activityTitle,
+    description: notes || 'Neuer Start! Du schaffst das 💪',
+    xpAmount: -xpPenalty,
+    relatedEntityType: 'habit',
+    relatedEntityId: habitId,
+    metadata: {
+      is_relapse: true,
+      previous_streak: previousStreak,
+    },
+  });
+
+  // Check global negative habit achievements
+  await checkNegativeHabitAchievements(0, habit.resistance_count, userId);
+
+  return {
+    habit: { ...habit, streak_start_date: today, current_streak: 0 },
+    previousStreak,
+    xpLost: xpPenalty,
+    message: previousStreak > 0
+      ? `Du hattest ${previousStreak} Tage geschafft. Dein neuer Streak startet jetzt!`
+      : 'Dein Streak startet jetzt neu. Du schaffst das!',
+  };
+}
+
+export interface LogResistanceResult {
+  habit: Habit;
+  currentStreak: number;
+  xpGained: number;
+  isNewResistanceToday: boolean;
+  unlockedAchievements: HabitAchievement[];
+  message: string;
+}
+
+/**
+ * Log that user resisted temptation today (optional daily confirmation)
+ * - Awards bonus XP
+ * - Increments resistance_count
+ * - Updates habit achievements progress
+ * - Only counts once per day
+ */
+export async function logHabitResistance(
+  habitId: string,
+  notes?: string,
+  userId?: string
+): Promise<LogResistanceResult> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const supabase = createBrowserClient();
+
+  // Get current habit
+  const habit = await getHabit(habitId);
+  if (!habit) {
+    throw new Error('Habit not found');
+  }
+
+  if (habit.habit_type !== 'negative') {
+    throw new Error('This function is only for negative habits');
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const currentStreak = calculateNegativeHabitStreak(habit);
+
+  // Check if already confirmed today
+  const alreadyConfirmedToday = habit.last_resistance_at === today;
+
+  let xpGained = 0;
+  let isNewResistanceToday = false;
+  let newResistanceCount = habit.resistance_count;
+
+  if (!alreadyConfirmedToday) {
+    // First confirmation today - award bonus XP
+    xpGained = 10; // Bonus XP for active confirmation
+    isNewResistanceToday = true;
+    newResistanceCount += 1;
+
+    // Update habit
+    const { error: updateError } = await supabase
+      .from('habits')
+      .update({
+        resistance_count: newResistanceCount,
+        last_resistance_at: today,
+        current_streak: currentStreak, // Update current_streak with calculated value
+        longest_streak: Math.max(currentStreak, habit.longest_streak),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', habitId);
+
+    if (updateError) {
+      console.error('Error updating habit on resistance:', updateError);
+      throw updateError;
+    }
+
+    // Award XP
+    if (habit.faction_id) {
+      await updateFactionStats(habit.faction_id, xpGained, userId);
+    }
+
+    // Log activity
+    await logActivity({
+      userId,
+      activityType: 'habit_completed',
+      factionId: habit.faction_id || 'geist',
+      title: `${habit.icon} Heute stark geblieben! (Tag ${currentStreak})`,
+      description: notes || `${currentStreak} Tage ohne ${habit.name} 💪`,
+      xpAmount: xpGained,
+      relatedEntityType: 'habit',
+      relatedEntityId: habitId,
+      metadata: {
+        is_resistance: true,
+        current_streak: currentStreak,
+      },
+    });
+  }
+
+  // Update habit-specific achievement progress
+  const unlockedAchievements = await updateHabitAchievementProgress(
+    habitId,
+    currentStreak,
+    userId
+  );
+
+  // Check global achievements
+  await checkNegativeHabitAchievements(currentStreak, newResistanceCount, userId);
+
+  const updatedHabit: Habit = {
+    ...habit,
+    resistance_count: newResistanceCount,
+    last_resistance_at: today,
+    current_streak: currentStreak,
+    longest_streak: Math.max(currentStreak, habit.longest_streak),
+  };
+
+  return {
+    habit: updatedHabit,
+    currentStreak,
+    xpGained,
+    isNewResistanceToday,
+    unlockedAchievements,
+    message: isNewResistanceToday
+      ? `🛡️ Super! Tag ${currentStreak} ohne ${habit.name}! +${xpGained} XP`
+      : `Du hast heute bereits bestätigt. Aktueller Streak: ${currentStreak} Tage`,
+  };
+}
+
+/**
+ * Get max "days clean" streak across all negative habits for a user
+ */
+export async function getMaxNegativeHabitStreak(userId?: string): Promise<number> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const habits = await getHabits(userId);
+
+  const negativeHabits = habits.filter(h => h.habit_type === 'negative');
+  if (negativeHabits.length === 0) return 0;
+
+  const streaks = negativeHabits.map(h => calculateNegativeHabitStreak(h));
+  return Math.max(...streaks, 0);
+}
+
+/**
+ * Get total resistance count across all negative habits for a user
+ */
+export async function getTotalResistanceCount(userId?: string): Promise<number> {
+  const resolvedUserId = await getUserIdOrCurrent(userId);
+  const habits = await getHabits(userId);
+
+  const negativeHabits = habits.filter(h => h.habit_type === 'negative');
+  return negativeHabits.reduce((sum, h) => sum + (h.resistance_count || 0), 0);
 }

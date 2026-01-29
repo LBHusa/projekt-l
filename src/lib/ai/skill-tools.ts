@@ -207,7 +207,7 @@ export const skillTools: Anthropic.Tool[] = [
   // ============================================
   {
     name: 'log_habit',
-    description: 'Markiere ein Habit als erledigt. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Wasser getrunken", etc.',
+    description: 'Markiere ein positives Habit als erledigt. Nutze dies wenn der User sagt "ich habe meditiert", "ich habe Wasser getrunken", etc.',
     input_schema: {
       type: 'object',
       properties: {
@@ -218,6 +218,45 @@ export const skillTools: Anthropic.Tool[] = [
         notes: {
           type: 'string',
           description: 'Optional: Notizen zur Completion',
+        },
+      },
+      required: ['habit_name'],
+    },
+  },
+  // ============================================
+  // NEGATIVE HABIT TOOLS
+  // ============================================
+  {
+    name: 'log_negative_habit_resistance',
+    description: 'User bestätigt, dass er heute einer schlechten Gewohnheit widerstanden hat. Gibt Bonus-XP (+10). Nutze dies wenn der User sagt "hab heute nicht geraucht", "bin stark geblieben", "X Tage clean", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        habit_name: {
+          type: 'string',
+          description: 'Name des negativen Habits (z.B. "Rauchen", "Kiffen", "Alkohol", "Süßigkeiten")',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Notizen oder wie der User sich fühlt',
+        },
+      },
+      required: ['habit_name'],
+    },
+  },
+  {
+    name: 'log_negative_habit_relapse',
+    description: 'User gesteht einen Rückfall bei einem negativen Habit ein. Setzt Streak zurück. WICHTIG: Einfühlsam und motivierend antworten! Nutze dies wenn der User sagt "ich hab heute geraucht", "bin rückfällig geworden", "hab es nicht geschafft", etc.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        habit_name: {
+          type: 'string',
+          description: 'Name des negativen Habits',
+        },
+        notes: {
+          type: 'string',
+          description: 'Optional: Was war der Auslöser oder Kontext',
         },
       },
       required: ['habit_name'],
@@ -382,6 +421,36 @@ export const skillTools: Anthropic.Tool[] = [
       required: ['duration_minutes', 'hobby'],
     },
   },
+  // ============================================
+  // QUEST-AWARENESS TOOLS
+  // ============================================
+  {
+    name: 'list_active_quests',
+    description: 'Liste alle aktiven Quests des Users mit Fortschritt. Nützlich um zu sehen welche Quests der User gerade hat und ob eine Aktivität zu einer Quest passt.',
+    input_schema: {
+      type: 'object',
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: 'update_quest_progress',
+    description: 'Erhöhe den Fortschritt einer Quest um einen Schritt. Nutze dies wenn der User eine Aktivität macht die zu einer seiner aktiven Quests passt (z.B. meditiert und hat eine Meditations-Quest).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        quest_id: {
+          type: 'string',
+          description: 'UUID der Quest',
+        },
+        description: {
+          type: 'string',
+          description: 'Optional: Was wurde gemacht (z.B. "20 Minuten meditiert")',
+        },
+      },
+      required: ['quest_id'],
+    },
+  },
 ];
 
 // ============================================
@@ -429,6 +498,13 @@ export async function executeSkillTool(
       case 'log_habit':
         return await handleLogHabit(toolInput, userId);
 
+      // Negative Habit Tools
+      case 'log_negative_habit_resistance':
+        return await handleLogNegativeHabitResistance(toolInput, userId);
+
+      case 'log_negative_habit_relapse':
+        return await handleLogNegativeHabitRelapse(toolInput, userId);
+
       // Neue Tools für alle Lebensbereiche
       case 'log_meditation':
         return await handleLogMeditation(toolInput, userId);
@@ -447,6 +523,13 @@ export async function executeSkillTool(
 
       case 'log_hobby':
         return await handleLogHobby(toolInput, userId);
+
+      // Quest-Awareness Tools
+      case 'list_active_quests':
+        return await handleListActiveQuests(userId);
+
+      case 'update_quest_progress':
+        return await handleUpdateQuestProgress(toolInput, userId);
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -1560,5 +1643,466 @@ async function handleLogHobby(
     hobby,
     xp_gained: xpGained,
     message: `🎨 ${durationMinutes} Minuten ${hobby} geloggt! (+${xpGained} XP Hobbys)`,
+  });
+}
+
+// ============================================
+// TOOL HANDLERS - Quest-Awareness (NEU)
+// ============================================
+
+async function handleListActiveQuests(userId: string): Promise<string> {
+  const supabase = await createClient();
+
+  const { data: quests, error } = await supabase
+    .from('quests')
+    .select('id, title, description, type, difficulty, progress, completed_actions, required_actions, xp_reward, target_faction_ids, expires_at')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching active quests:', error);
+    throw new Error('Fehler beim Laden der Quests');
+  }
+
+  if (!quests || quests.length === 0) {
+    return JSON.stringify({
+      success: true,
+      count: 0,
+      quests: [],
+      message: 'Der User hat aktuell keine aktiven Quests.',
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    count: quests.length,
+    quests: quests.map((q) => ({
+      id: q.id,
+      title: q.title,
+      description: q.description,
+      type: q.type,
+      difficulty: q.difficulty,
+      progress: `${q.completed_actions || 0}/${q.required_actions || 1}`,
+      progress_percent: q.progress || 0,
+      xp_reward: q.xp_reward,
+      target_factions: q.target_faction_ids || [],
+      expires_at: q.expires_at,
+    })),
+    message: `Der User hat ${quests.length} aktive Quest(s).`,
+  });
+}
+
+async function handleUpdateQuestProgress(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const questId = input.quest_id as string;
+  const description = input.description as string | undefined;
+
+  if (!questId) {
+    return JSON.stringify({
+      success: false,
+      error: 'Quest-ID ist erforderlich',
+    });
+  }
+
+  // Get quest details
+  const { data: quest, error: questError } = await supabase
+    .from('quests')
+    .select('*')
+    .eq('id', questId)
+    .single();
+
+  if (questError || !quest) {
+    return JSON.stringify({
+      success: false,
+      error: 'Quest nicht gefunden',
+    });
+  }
+
+  // Verify ownership
+  if (quest.user_id !== userId) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine Berechtigung für diese Quest',
+    });
+  }
+
+  if (quest.status !== 'active') {
+    return JSON.stringify({
+      success: false,
+      error: 'Quest ist nicht aktiv',
+      quest_status: quest.status,
+    });
+  }
+
+  // Check if expired
+  if (quest.expires_at && new Date(quest.expires_at) < new Date()) {
+    return JSON.stringify({
+      success: false,
+      error: 'Quest ist abgelaufen',
+    });
+  }
+
+  // Increment progress
+  const newCompletedActions = Math.min(
+    (quest.completed_actions || 0) + 1,
+    quest.required_actions || 1
+  );
+  const newProgress = Math.round(
+    (newCompletedActions / (quest.required_actions || 1)) * 100
+  );
+  const questCompleted = newCompletedActions >= (quest.required_actions || 1);
+
+  // Log the action
+  await supabase.from('quest_actions').insert({
+    quest_id: questId,
+    user_id: userId,
+    description: description || `Schritt ${newCompletedActions} von ${quest.required_actions}`,
+  });
+
+  // Update quest
+  const updateData: Record<string, unknown> = {
+    completed_actions: newCompletedActions,
+    progress: newProgress,
+  };
+
+  let xpAwarded = 0;
+
+  if (questCompleted) {
+    updateData.status = 'completed';
+    updateData.completed_at = new Date().toISOString();
+    xpAwarded = quest.xp_reward || 50;
+
+    // Update user profile XP
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('total_xp')
+      .eq('user_id', userId)
+      .single();
+
+    if (profile) {
+      await supabase
+        .from('user_profiles')
+        .update({ total_xp: (profile.total_xp || 0) + xpAwarded })
+        .eq('user_id', userId);
+    }
+
+    // Update faction stats
+    const targetFactionIds = quest.target_faction_ids || [];
+    if (targetFactionIds.length > 0) {
+      const xpPerFaction = Math.round(xpAwarded / targetFactionIds.length);
+      for (const factionId of targetFactionIds) {
+        await updateFactionXP(supabase, userId, factionId, xpPerFaction);
+      }
+    }
+
+    // Log activity
+    await supabase.from('activity_log').insert({
+      user_id: userId,
+      activity_type: 'quest_completed',
+      faction_id: targetFactionIds[0] || 'karriere',
+      title: `Quest abgeschlossen: ${quest.title}`,
+      description: `+${xpAwarded} XP`,
+      xp_amount: xpAwarded,
+      related_entity_type: 'quest',
+      related_entity_id: questId,
+    });
+  }
+
+  // Update the quest
+  const { error: updateError } = await supabase
+    .from('quests')
+    .update(updateData)
+    .eq('id', questId);
+
+  if (updateError) {
+    console.error('Error updating quest:', updateError);
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Aktualisieren der Quest',
+    });
+  }
+
+  if (questCompleted) {
+    return JSON.stringify({
+      success: true,
+      quest_id: questId,
+      quest_title: quest.title,
+      completed: true,
+      xp_awarded: xpAwarded,
+      message: `🎉 Quest "${quest.title}" abgeschlossen! +${xpAwarded} XP verdient!`,
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    quest_id: questId,
+    quest_title: quest.title,
+    completed: false,
+    progress: `${newCompletedActions}/${quest.required_actions}`,
+    progress_percent: newProgress,
+    message: `✅ Quest-Fortschritt aktualisiert: "${quest.title}" - ${newCompletedActions}/${quest.required_actions} (${newProgress}%)`,
+  });
+}
+
+// ============================================
+// NEGATIVE HABIT HANDLERS
+// ============================================
+
+/**
+ * Calculate days since streak_start_date
+ */
+function calculateDaysClean(streakStartDate: string | null): number {
+  if (!streakStartDate) return 0;
+  const start = new Date(streakStartDate);
+  const today = new Date();
+  start.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
+async function handleLogNegativeHabitResistance(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const habitName = input.habit_name as string;
+  const notes = input.notes as string | undefined;
+
+  // Get all negative habits
+  const { data: habits, error: habitsError } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('habit_type', 'negative')
+    .eq('is_active', true);
+
+  if (habitsError || !habits || habits.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine negativen Habits gefunden. Erstelle zuerst ein negatives Habit (z.B. "Rauchen", "Alkohol") unter Habits.',
+    });
+  }
+
+  // Fuzzy match habit by name
+  const normalizedSearch = habitName.toLowerCase().trim();
+  const matchedHabit = habits.find((h) =>
+    h.name.toLowerCase().includes(normalizedSearch) ||
+    normalizedSearch.includes(h.name.toLowerCase())
+  );
+
+  if (!matchedHabit) {
+    return JSON.stringify({
+      success: false,
+      error: `Negatives Habit "${habitName}" nicht gefunden`,
+      available_habits: habits.map((h) => h.name),
+      hint: 'Verfügbare negative Habits: ' + habits.map(h => h.name).join(', '),
+    });
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const currentStreak = calculateDaysClean(matchedHabit.streak_start_date);
+
+  // Check if already confirmed today
+  const alreadyConfirmedToday = matchedHabit.last_resistance_at === today;
+
+  if (alreadyConfirmedToday) {
+    return JSON.stringify({
+      success: true,
+      already_confirmed: true,
+      habit_name: matchedHabit.name,
+      habit_icon: matchedHabit.icon,
+      current_streak: currentStreak,
+      message: `Du hast heute bereits bestätigt. Aktueller Streak: ${currentStreak} Tage ohne ${matchedHabit.name} 💪`,
+    });
+  }
+
+  // Award bonus XP for active confirmation
+  const xpGained = 10;
+  const newResistanceCount = (matchedHabit.resistance_count || 0) + 1;
+
+  // Update habit
+  const { error: updateError } = await supabase
+    .from('habits')
+    .update({
+      resistance_count: newResistanceCount,
+      last_resistance_at: today,
+      current_streak: currentStreak,
+      longest_streak: Math.max(currentStreak, matchedHabit.longest_streak || 0),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', matchedHabit.id);
+
+  if (updateError) {
+    console.error('Error updating habit on resistance:', updateError);
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Aktualisieren des Habits',
+    });
+  }
+
+  // Award faction XP
+  if (matchedHabit.faction_id) {
+    await updateFactionXP(supabase, userId, matchedHabit.faction_id, xpGained);
+  }
+
+  // Log activity
+  await supabase.from('activity_log').insert({
+    user_id: userId,
+    activity_type: 'habit_completed',
+    faction_id: matchedHabit.faction_id || 'geist',
+    title: `${matchedHabit.icon} Heute stark geblieben! (Tag ${currentStreak})`,
+    description: notes || `${currentStreak} Tage ohne ${matchedHabit.name}`,
+    xp_amount: xpGained,
+    related_entity_type: 'habit',
+    related_entity_id: matchedHabit.id,
+  });
+
+  // Check for unlocked habit achievements
+  const { data: unlockedAchs } = await supabase
+    .from('habit_achievements')
+    .select('name, icon, xp_reward')
+    .eq('habit_id', matchedHabit.id)
+    .eq('is_unlocked', false)
+    .lte('target_value', currentStreak);
+
+  let achievementMessage = '';
+  if (unlockedAchs && unlockedAchs.length > 0) {
+    // Unlock achievements
+    await supabase
+      .from('habit_achievements')
+      .update({
+        current_progress: currentStreak,
+        is_unlocked: true,
+        unlocked_at: new Date().toISOString(),
+      })
+      .eq('habit_id', matchedHabit.id)
+      .eq('is_unlocked', false)
+      .lte('target_value', currentStreak);
+
+    achievementMessage = '\n\n🏆 Achievements freigeschaltet:\n' +
+      unlockedAchs.map(a => `${a.icon} ${a.name} (+${a.xp_reward} XP)`).join('\n');
+  }
+
+  return JSON.stringify({
+    success: true,
+    habit_name: matchedHabit.name,
+    habit_icon: matchedHabit.icon,
+    current_streak: currentStreak,
+    xp_gained: xpGained,
+    resistance_count: newResistanceCount,
+    unlocked_achievements: unlockedAchs || [],
+    message: `🛡️ Super! Tag ${currentStreak} ohne ${matchedHabit.name}! +${xpGained} XP 💪${achievementMessage}`,
+  });
+}
+
+async function handleLogNegativeHabitRelapse(
+  input: Record<string, unknown>,
+  userId: string
+): Promise<string> {
+  const supabase = await createClient();
+  const habitName = input.habit_name as string;
+  const notes = input.notes as string | undefined;
+
+  // Get all negative habits
+  const { data: habits, error: habitsError } = await supabase
+    .from('habits')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('habit_type', 'negative')
+    .eq('is_active', true);
+
+  if (habitsError || !habits || habits.length === 0) {
+    return JSON.stringify({
+      success: false,
+      error: 'Keine negativen Habits gefunden.',
+    });
+  }
+
+  // Fuzzy match habit by name
+  const normalizedSearch = habitName.toLowerCase().trim();
+  const matchedHabit = habits.find((h) =>
+    h.name.toLowerCase().includes(normalizedSearch) ||
+    normalizedSearch.includes(h.name.toLowerCase())
+  );
+
+  if (!matchedHabit) {
+    return JSON.stringify({
+      success: false,
+      error: `Negatives Habit "${habitName}" nicht gefunden`,
+      available_habits: habits.map((h) => h.name),
+    });
+  }
+
+  // Calculate previous streak
+  const previousStreak = calculateDaysClean(matchedHabit.streak_start_date);
+  const today = new Date().toISOString().split('T')[0];
+  const xpPenalty = matchedHabit.xp_per_completion || 10;
+
+  // Reset streak
+  const { error: updateError } = await supabase
+    .from('habits')
+    .update({
+      streak_start_date: today,
+      current_streak: 0,
+      total_completions: matchedHabit.total_completions + 1,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', matchedHabit.id);
+
+  if (updateError) {
+    console.error('Error updating habit on relapse:', updateError);
+    return JSON.stringify({
+      success: false,
+      error: 'Fehler beim Aktualisieren des Habits',
+    });
+  }
+
+  // Create log entry
+  await supabase.from('habit_logs').insert({
+    habit_id: matchedHabit.id,
+    user_id: userId,
+    completed: true,
+    notes: notes || `Rückfall nach ${previousStreak} Tagen`,
+    logged_at: new Date().toISOString(),
+  });
+
+  // Apply XP penalty
+  if (matchedHabit.faction_id) {
+    await updateFactionXP(supabase, userId, matchedHabit.faction_id, -xpPenalty);
+  }
+
+  // Log activity
+  const activityTitle = previousStreak > 0
+    ? `${matchedHabit.icon} ${matchedHabit.name} - Rückfall nach ${previousStreak} Tagen`
+    : `${matchedHabit.icon} ${matchedHabit.name} - Rückfall geloggt`;
+
+  await supabase.from('activity_log').insert({
+    user_id: userId,
+    activity_type: 'habit_completed',
+    faction_id: matchedHabit.faction_id || 'geist',
+    title: activityTitle,
+    description: notes || 'Neuer Start!',
+    xp_amount: -xpPenalty,
+    related_entity_type: 'habit',
+    related_entity_id: matchedHabit.id,
+  });
+
+  // Empathetic response
+  const encouragement = previousStreak > 0
+    ? `Du hattest ${previousStreak} Tage geschafft - das ist eine echte Leistung! Rückschläge gehören dazu.`
+    : 'Rückschläge gehören dazu.';
+
+  return JSON.stringify({
+    success: true,
+    habit_name: matchedHabit.name,
+    habit_icon: matchedHabit.icon,
+    previous_streak: previousStreak,
+    xp_lost: xpPenalty,
+    message: `${encouragement} Dein neuer Streak startet jetzt. Du schaffst das! 💪🔥`,
+    encouragement: 'Jeder Tag ist eine neue Chance. Was zählt ist, dass du weitermachst.',
   });
 }

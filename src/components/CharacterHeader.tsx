@@ -74,8 +74,8 @@ export default function CharacterHeader({
         </div>
 
         {/* Name + Title */}
-        <div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent truncate">
             {displayName}
           </h1>
           <p className="text-sm text-adaptive-muted">
