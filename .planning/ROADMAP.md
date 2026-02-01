@@ -1,146 +1,125 @@
-# Roadmap: Projekt L - System Audit & Stabilisierung
+# Roadmap: Projekt L - Vision Implementation "Digitaler Spiegel"
 
 ## Overview
 
-This roadmap delivers a security-hardened, fully functional gamification system through systematic testing and bug fixes. The journey follows a defense-in-depth security approach: establishing RLS policies and input validation as the foundation, securing API routes and authentication flows, building comprehensive E2E testing infrastructure with Playwright, validating critical user workflows and data flows, and finally hardening with database-level testing and automated security audits. Each phase builds on the previous, ensuring no user data exposure while making the Quest → XP → Skill → Faction progression system work correctly across all flows.
+This roadmap implements the core vision: A gamified life-tracking system that transforms from a "passive tracker" to a "living digital mirror" through real consequences (HP/Death), proactive AI companionship (Memory + Telegram), and visual rewards (Gold + Equipment). The journey spans 11 weeks across 4 phases, building on the security-hardened foundation from the previous milestone.
+
+## Milestones
+
+### Milestone 1: System Audit & Security (COMPLETE)
+- **Status:** COMPLETE (2026-01-23)
+- **Phases:** 6/6 complete
+- **Deliverables:** RLS policies, E2E tests (126+), security audit scripts, CI/CD
+
+### Milestone 2: Vision Implementation (CURRENT)
+- **Status:** NOT STARTED
+- **Timeline:** 11 Wochen
+- **Goal:** HP-System, AI Memory, Telegram Chat, Equipment Shop
 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3, 4, 5, 6): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- Integer phases (1, 2, 3, 4): Planned milestone work
+- Decimal phases (1.1, 2.1): Urgent insertions if needed
 
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [x] **Phase 1: Security Foundation** - RLS policies, input validation, remove hardcoded IDs
-- [x] **Phase 2: API Security Audit** - Auth checks, error sanitization, service role cleanup
-- [x] **Phase 3: E2E Testing Infrastructure** - Playwright setup, auth helpers, test fixtures
-- [ ] **Phase 4: Critical User Workflows** - Test Dashboard, Quests, Habits, Skills, Factions
-- [ ] **Phase 5: XP System Validation** - End-to-end data flow testing, Level Up triggers
-- [ ] **Phase 6: Database Testing & Security Hardening** - pgTAP tests, audit scripts, CI/CD
+- [ ] **Phase 1: Fairness & Proaktivität** - Streak Insurance, Proaktive Notifications, Health-Habit Link
+- [ ] **Phase 2: Konsequenzen (HP/Death)** - HP System, Damage/Heal Triggers, Death/Respawn, Prestige
+- [ ] **Phase 3: Lebendiger Buddy** - AI Memory, Telegram AI Chat, Gold System, Proaktive Quests
+- [ ] **Phase 4: Visuelle Belohnungen** - 2D Equipment System, Shop, Weekly AI Reports
 
 ## Phase Details
 
-### Phase 1: Security Foundation
-**Goal**: Database-level security is in place and all user-specific pages load correct data
-**Depends on**: Nothing (first phase)
-**Requirements**: SEC-01, SEC-02, SEC-03, SEC-05, SEC-06, SEC-07
+### Phase 1: Fairness & Proaktivität (Woche 1-2)
+**Goal**: Die App wird "fair" und "lebendig" - Streak Insurance verhindert Frustration, proaktive Erinnerungen aktivieren User.
+**Depends on**: Milestone 1 (Security) - COMPLETE
+**Requirements**: FAIR-01, FAIR-02, FAIR-03, FAIR-04
 **Success Criteria** (what must be TRUE):
-  1. User accessing soziales page sees only their own birthday data and social interactions (no hardcoded User IDs)
-  2. User accessing karriere page sees only their own career data (no hardcoded User IDs)
-  3. User cannot query another user's data via Supabase client (RLS policies enforced on all tables: quests, habits, skills, factions, user_stats, notifications, ai_conversations, journal_entries)
-  4. Quest creation with malicious title/description does not execute scripts (XSS prevented via Zod + sanitization)
-  5. Habit tracking with malicious input does not execute scripts (XSS prevented via Zod + sanitization)
-  6. Profile editing with malicious input does not execute scripts (XSS prevented via Zod + sanitization)
-**Plans:** 6 plans
+  1. Streak Insurance verhindert 80% der Streak-Breaks (Token können eingelöst werden)
+  2. 1+ proaktive Notification pro aktivem User/Tag (bei vernachlässigten Factions)
+  3. Health Imports auto-completen passende Habits (Apple Watch → Habit)
+  4. Quest-Expiration Notifications werden 24h vorher gesendet
+**Plans:** 4 plans in 2 waves
 
 Plans:
-- [x] 01-01-PLAN.md — Install validation dependencies and create Zod schemas (Wave 1)
-- [x] 01-02-PLAN.md — Verify RLS on all 49 tables and create performance indexes (Wave 1)
-- [x] 01-03-PLAN.md — Remove hardcoded user UUIDs from API routes (Wave 2)
-- [x] 01-04-PLAN.md — Remove hardcoded domain UUIDs from homepage and types (Wave 2)
-- [x] 01-05-PLAN.md — Integrate validation into Quest/Habit/Profile APIs (Wave 3)
-- [x] 01-06-PLAN.md — Verify soziales/karriere pages and E2E XSS tests (Wave 4)
+- [ ] 01-01-PLAN.md — Streak Insurance Token System (DB + API + UI) [Wave 1]
+- [ ] 01-02-PLAN.md — Proaktive Lebensbereich-Erinnerungen (Cron + Notifications) [Wave 2]
+- [ ] 01-03-PLAN.md — Health Import → Habit Auto-Complete Link [Wave 1]
+- [ ] 01-04-PLAN.md — Quest-Expiration Notifications [Wave 2]
 
-### Phase 2: API Security Audit
-**Goal**: All API routes verify authentication and errors never leak sensitive data
+### Phase 2: Konsequenzen - HP/Death System (Woche 3-5)
+**Goal**: Echte Stakes durch HP-System - User erlebt Konsequenzen für Vernachlässigung und Belohnungen für Konsistenz.
 **Depends on**: Phase 1
-**Requirements**: SEC-04, SEC-08, SEC-09, SEC-10
+**Requirements**: HP-01, HP-02, HP-03, HP-04, HP-05, HP-06
 **Success Criteria** (what must be TRUE):
-  1. Unauthenticated user attempting to access protected pages is redirected to login (middleware + route handler auth verified)
-  2. API routes return 401 Unauthorized when called without valid session (getUser() pattern enforced, not just middleware)
-  3. Health Import webhook rejects requests without valid API key
-  4. Error messages displayed to users contain generic messages only (no stack traces, user IDs, or tokens visible)
-**Plans:** 2 plans
+  1. HP-System live und stabil (user_health + health_events Tabellen)
+  2. Damage Triggers funktionieren (Quest fail: -10, Streak break: -5, Inaktivität: -5/Tag)
+  3. Heal Triggers funktionieren (Quest complete: +10-30, Habit: +5, Mood: +2)
+  4. Death & Respawn Flow funktioniert (3 Lives, XP-Verlust bei Tod)
+  5. Prestige System aktiv bei 0 Lives (Soft Reset mit Boni)
+  6. Health Bar UI zeigt HP animiert, Danger Zone Warnings bei < 20 HP
+**Plans:** TBD (6 Deliverables)
 
 Plans:
-- [x] 02-01-PLAN.md — Sanitize error responses in all API routes (Wave 1)
-- [x] 02-02-PLAN.md — Create E2E tests for Phase 2 security requirements (Wave 2)
+- [ ] 02-01-PLAN.md — Health Database Schema (user_health, health_events)
+- [ ] 02-02-PLAN.md — Damage Triggers Implementation
+- [ ] 02-03-PLAN.md — Heal Triggers Implementation
+- [ ] 02-04-PLAN.md — Death & Respawn Flow
+- [ ] 02-05-PLAN.md — Prestige System
+- [ ] 02-06-PLAN.md — Health Bar UI & Danger Zone Warnings
 
-### Phase 3: E2E Testing Infrastructure
-**Goal**: Playwright testing environment is ready to validate security and features
+### Phase 3: Lebendiger Buddy (Woche 6-8)
+**Goal**: Der Buddy wird real - er erinnert sich an Gespräche, ist via Telegram erreichbar, und der User verdient Gold.
 **Depends on**: Phase 2
-**Requirements**: TEST-01 (partial - infrastructure setup)
+**Requirements**: MEM-01, MEM-02, TEL-01, GOLD-01, QUEST-01
 **Success Criteria** (what must be TRUE):
-  1. Playwright can authenticate as test user and persist session across tests (auth.setup.ts with storageState working) ✅
-  2. Test database has fixtures for users, habits, quests, skills loaded before each test run (SKIPPED - tests use existing data)
-  3. Helper functions exist for common test operations (login, create quest, track habit, verify XP update) (SKIPPED - add as needed in Phase 4)
-  4. Tests can be run in parallel without data conflicts (transaction isolation or unique test user per worker) ✅ (workers: 1 as safe default)
-**Plans**: 0 plans (infrastructure implemented during Phase 1-2)
-
-**Implementation Note:** Core Playwright infrastructure was built incrementally during Phase 1-2:
-- `playwright.config.ts` with webServer, projects, storageState
-- `tests/e2e/auth.setup.ts` with login + session persistence
-- `tests/e2e/.auth/` directory for storage state
-- 25 E2E tests already passing (11 security + 14 API)
+  1. AI Conversation Memory funktioniert (letzte 50 Messages + Summary als Context)
+  2. Wöchentlicher Summary-Generator läuft (Cron)
+  3. Telegram AI Chat funktioniert Ende-zu-Ende (freier Text → Claude → Antwort)
+  4. Gold wird bei Quest/Habit Completion vergeben
+  5. Proaktive Quest-Generierung basierend auf Faction-Balance
+**Plans:** TBD (4 Deliverables)
 
 Plans:
-- N/A (implemented during Phase 1-2)
+- [ ] 03-01-PLAN.md — AI Conversation Memory (conversation_history + user_summaries)
+- [ ] 03-02-PLAN.md — Telegram AI Chat (Two-Way)
+- [ ] 03-03-PLAN.md — Gold-System (user_currency + Rewards)
+- [ ] 03-04-PLAN.md — Proaktive Quest-Generierung
 
-### Phase 4: Critical User Workflows
-**Goal**: All core features work correctly in real browser environment
+### Phase 4: Visuelle Belohnungen (Woche 9-11)
+**Goal**: Visuelle Progression durch 2D Equipment, Shop und AI-powered Weekly Reports.
 **Depends on**: Phase 3
-**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06, TEST-07, TEST-08, TEST-09, TEST-10
+**Requirements**: EQUIP-01, EQUIP-02, REPORT-01
 **Success Criteria** (what must be TRUE):
-  1. User can navigate from Dashboard to all sections (Quests, Habits, Skills, Factions, Profile, Settings) and each page loads correctly
-  2. User can create Quest, mark as complete, and verify Quest appears in completed list
-  3. User can track positive/negative Habit and see streak counter increment correctly
-  4. User can open Skills page, view all skills, click skill card to see details and XP progress bars display correctly
-  5. User can view Factions page showing all 6 factions (Korper, Geist, Seele, Finanzen, Soziales, Karriere) with accurate XP and Level values
-  6. User can edit Profile (change name, bio), save changes, and verify data persists after page reload
-  7. User can open Settings, toggle theme between light/dark modes, and preference persists across sessions
-  8. User accessing soziales page sees correct birthdays and social interaction data (no data from wrong user)
-  9. User accessing karriere page sees correct career tracking data (no data from wrong user)
-  10. User can create journal entry in Geist section and see entry appear in history list
-**Plans:** 3 plans
+  1. 2D Equipment System funktioniert (Layered Avatar mit Head/Body/Accessory)
+  2. Equipment Shop funktioniert (Gold → Equipment kaufen)
+  3. Weekly AI Report wird automatisch generiert (Sonntag, AI Insights)
+  4. User Feedback: "Die App fühlt sich lebendig an"
+**Plans:** TBD (3 Deliverables)
 
 Plans:
-- [ ] 04-01-PLAN.md — Navigation and page load tests (TEST-01, TEST-04, TEST-05) (Wave 1)
-- [ ] 04-02-PLAN.md — CRUD operation tests (TEST-02, TEST-03, TEST-06, TEST-10) (Wave 2)
-- [ ] 04-03-PLAN.md — Data persistence and user isolation tests (TEST-07, TEST-08, TEST-09) (Wave 3)
-
-### Phase 5: XP System Validation
-**Goal**: Complex XP data flows work correctly end-to-end with proper triggers and notifications
-**Depends on**: Phase 4
-**Requirements**: XP-01, XP-02, XP-03, XP-04, XP-05, XP-06, FLOW-01, FLOW-02, FLOW-03, FLOW-04
-**Success Criteria** (what must be TRUE):
-  1. User completes Quest and observes: XP awarded → Skill XP increases → Faction XP updates → user_stats table reflects new totals (Quest → XP → Skill → Faction flow verified)
-  2. User tracks Habit and observes: Habit XP awarded → Faction XP updates based on habit domain → user_stats table reflects change (Habit → XP → Faction flow verified)
-  3. User crosses Level Up threshold and observes: Level Up animation triggers → Notification displays → New level reflected in user_stats and Dashboard
-  4. All XP-generating actions (Quest complete, Habit track, Skill unlock) appear in Activity Log with correct timestamps and XP amounts
-  5. Skill XP persists correctly after logout and login (no XP loss across sessions)
-  6. Faction XP correctly aggregates weighted XP from all Skills in that faction (weighted calculation verified)
-**Plans**: TBD
-
-Plans:
-- [ ] TBD during phase planning
-
-### Phase 6: Database Testing & Security Hardening
-**Goal**: RLS policies validated at database level and security checks automated in CI/CD
-**Depends on**: Phase 5
-**Requirements**: BUILD-01, BUILD-02 (plus validation of all security/testing work)
-**Success Criteria** (what must be TRUE):
-  1. pgTAP tests verify RLS policies prevent cross-user data access on all tables (test runs as User A, attempts to query User B's data, verifies empty result)
-  2. Database triggers for XP calculations execute correctly (pgTAP tests verify Quest completion triggers recalculate Faction XP accurately)
-  3. Security audit script runs in CI/CD and fails build if: RLS disabled on any table, hardcoded User IDs detected, API routes missing auth checks
-  4. npm run build completes without TypeScript errors
-  5. Production build runs in browser without console errors (verified via Playwright test that checks console logs)
-  6. Multi-user context test validates 3+ test users can interact simultaneously without data leakage (User A completes Quest while User B tracks Habit, each sees only their own data)
-**Plans**: TBD
-
-Plans:
-- [ ] TBD during phase planning
+- [ ] 04-01-PLAN.md — Layered 2D Equipment System
+- [ ] 04-02-PLAN.md — Equipment Shop
+- [ ] 04-03-PLAN.md — Weekly AI Reflection Reports
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
+### Milestone 1: System Audit (COMPLETE)
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Security Foundation | 6/6 | COMPLETE | 2026-01-23 |
 | 2. API Security Audit | 2/2 | COMPLETE | 2026-01-23 |
 | 3. E2E Testing Infrastructure | N/A | COMPLETE | 2026-01-23 |
-| 4. Critical User Workflows | 0/3 | Planning complete | - |
-| 5. XP System Validation | 0/TBD | Not started | - |
-| 6. Database Testing & Security Hardening | 0/TBD | Not started | - |
+| 4. Critical User Workflows | 3/3 | COMPLETE | 2026-01-23 |
+| 5. XP System Validation | 5/5 | COMPLETE | 2026-01-23 |
+| 6. Database Testing & Security | 4/4 | COMPLETE | 2026-01-23 |
+
+### Milestone 2: Vision Implementation (CURRENT)
+| Phase | Plans Complete | Status | Target |
+|-------|----------------|--------|--------|
+| 1. Fairness & Proaktivität | 0/4 | PLANNED | Woche 1-2 |
+| 2. Konsequenzen (HP/Death) | 0/6 | BLOCKED | Woche 3-5 |
+| 3. Lebendiger Buddy | 0/4 | BLOCKED | Woche 6-8 |
+| 4. Visuelle Belohnungen | 0/3 | BLOCKED | Woche 9-11 |
