@@ -592,3 +592,234 @@ export async function validateApiKey(apiKey: string): Promise<string | null> {
 
   return null;
 }
+
+// ============================================
+// HABIT AUTO-COMPLETION FROM HEALTH IMPORTS
+// ============================================
+
+import type {
+  HabitHealthMapping,
+  HabitAutoCompleteResult,
+} from '@/lib/types/health-import';
+import { WORKOUT_TYPE_ALIASES } from '@/lib/types/health-import';
+
+/**
+ * Normalize workout type to standard name
+ */
+export function normalizeWorkoutType(workoutType: string): string {
+  const normalized = workoutType.toLowerCase().replace(/[- ]/g, '_');
+  return WORKOUT_TYPE_ALIASES[normalized] || normalized;
+}
+
+/**
+ * Get active health mappings for a user
+ */
+export async function getHealthMappings(userId: string): Promise<HabitHealthMapping[]> {
+  const supabase = createBrowserClient();
+
+  const { data, error } = await supabase
+    .from('habit_health_mappings')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('enabled', true);
+
+  if (error) {
+    console.error('Error fetching health mappings:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Match and auto-complete habits based on imported workout
+ * Prevents duplicate completions on the same day
+ */
+export async function matchAndCompleteHabits(
+  userId: string,
+  workout: HealthWorkout
+): Promise<HabitAutoCompleteResult[]> {
+  const supabase = createBrowserClient();
+  const results: HabitAutoCompleteResult[] = [];
+
+  const normalizedType = normalizeWorkoutType(workout.workoutType);
+  console.log(`[Health Import] Checking habit mappings for workout type: ${normalizedType}`);
+
+  // Find matching mappings with habit info
+  const { data: mappings, error: mappingError } = await supabase
+    .from('habit_health_mappings')
+    .select(`
+      *,
+      habits!inner (
+        id,
+        name,
+        icon,
+        xp_per_completion,
+        is_active,
+        faction_id
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('enabled', true)
+    .eq('health_workout_type', normalizedType)
+    .lte('min_duration_minutes', workout.duration);
+
+  if (mappingError) {
+    console.error('[Health Import] Error fetching mappings:', mappingError);
+    return results;
+  }
+
+  if (!mappings || mappings.length === 0) {
+    console.log('[Health Import] No matching mappings found');
+    return results;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const mapping of mappings) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const habit = mapping.habits as any;
+
+    if (!habit || !habit.is_active) {
+      console.log('[Health Import] Habit not active, skipping');
+      continue;
+    }
+
+    // Check if habit already completed today
+    const { data: existingLog } = await supabase
+      .from('habit_logs')
+      .select('id')
+      .eq('habit_id', habit.id)
+      .eq('user_id', userId)
+      .gte('logged_at', today)
+      .lt('logged_at', `${today}T23:59:59.999Z`)
+      .eq('completed', true)
+      .limit(1);
+
+    if (existingLog && existingLog.length > 0) {
+      console.log(`[Health Import] Habit ${habit.name} already completed today, skipping`);
+      continue;
+    }
+
+    // Auto-complete the habit
+    try {
+      const { error: logError } = await supabase
+        .from('habit_logs')
+        .insert({
+          habit_id: habit.id,
+          user_id: userId,
+          logged_at: new Date().toISOString(),
+          completed: true,
+          notes: `Auto-completed via Health Import (${workout.workoutType}, ${workout.duration} min)`,
+          duration_minutes: workout.duration,
+          source: 'health_import',
+        });
+
+      if (logError) {
+        console.error(`[Health Import] Failed to create habit log:`, logError);
+        continue;
+      }
+
+      // Update habit streak
+      const { error: updateError } = await supabase
+        .from('habits')
+        .update({
+          current_streak: (habit.current_streak || 0) + 1,
+          total_completions: (habit.total_completions || 0) + 1,
+          last_completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', habit.id);
+
+      if (updateError) {
+        console.error(`[Health Import] Failed to update habit streak:`, updateError);
+      }
+
+      const xpGained = habit.xp_per_completion || 10;
+
+      // Award XP to faction
+      if (habit.faction_id) {
+        await updateFactionStats(habit.faction_id, xpGained, userId);
+      }
+
+      results.push({
+        habitId: habit.id,
+        habitName: habit.name,
+        xpGained,
+        workoutType: workout.workoutType,
+      });
+
+      console.log(`[Health Import] Auto-completed habit: ${habit.name} (+${xpGained} XP)`);
+
+      // Log activity
+      await logActivity({
+        userId,
+        activityType: 'habit_completed' as any,
+        factionId: habit.faction_id || 'koerper',
+        title: `${habit.icon || '✅'} ${habit.name} auto-completed`,
+        description: `Via Health Import: ${workout.workoutType} (${workout.duration} min)`,
+        xpAmount: xpGained,
+        relatedEntityType: 'habit',
+        relatedEntityId: habit.id,
+        metadata: {
+          source: 'health_import',
+          workoutType: workout.workoutType,
+          duration: workout.duration,
+        },
+      });
+    } catch (err) {
+      console.error(`[Health Import] Error auto-completing habit ${habit.name}:`, err);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Create a habit-health mapping
+ */
+export async function createHealthMapping(
+  userId: string,
+  habitId: string,
+  workoutType: string,
+  minDuration: number = 0
+): Promise<HabitHealthMapping> {
+  const supabase = createBrowserClient();
+
+  const normalizedType = normalizeWorkoutType(workoutType);
+
+  const { data, error } = await supabase
+    .from('habit_health_mappings')
+    .insert({
+      user_id: userId,
+      habit_id: habitId,
+      health_workout_type: normalizedType,
+      min_duration_minutes: minDuration,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating health mapping:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+/**
+ * Delete a habit-health mapping
+ */
+export async function deleteHealthMapping(mappingId: string): Promise<void> {
+  const supabase = createBrowserClient();
+
+  const { error } = await supabase
+    .from('habit_health_mappings')
+    .delete()
+    .eq('id', mappingId);
+
+  if (error) {
+    console.error('Error deleting health mapping:', error);
+    throw error;
+  }
+}
