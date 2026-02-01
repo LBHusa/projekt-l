@@ -7,8 +7,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   importHealthData,
   validateApiKey,
+  matchAndCompleteHabits,
   type HealthImportData,
 } from '@/lib/data/health-import';
+import type { HabitAutoCompleteResult } from '@/lib/types/health-import';
 
 // Rate limiting tracking (simple in-memory implementation)
 // For production, consider using Redis or Upstash
@@ -186,18 +188,44 @@ export async function POST(request: NextRequest) {
     const result = await importHealthData(userId, data);
 
     // ============================================
-    // 5. RESPONSE
+    // 5. HABIT AUTO-COMPLETION
+    // Match imported workouts to habits and auto-complete them
     // ============================================
-    return NextResponse.json(result, {
+    const habitResults: HabitAutoCompleteResult[] = [];
+
+    if (data.workouts && data.workouts.length > 0) {
+      for (const workout of data.workouts) {
+        try {
+          const autoCompleted = await matchAndCompleteHabits(userId, workout);
+          habitResults.push(...autoCompleted);
+        } catch (err) {
+          console.error('[Health Webhook] Error matching habits for workout:', err);
+        }
+      }
+    }
+
+    // Calculate total XP including habit completions
+    const habitXP = habitResults.reduce((sum, h) => sum + h.xpGained, 0);
+    const totalXP = result.totalXP + habitXP;
+
+    // ============================================
+    // 6. RESPONSE
+    // ============================================
+    return NextResponse.json({
+      ...result,
+      totalXP,
+      habitsAutoCompleted: habitResults,
+    }, {
       status: result.success ? 200 : 500,
       headers: {
-        'X-Total-XP': result.totalXP.toString(),
+        'X-Total-XP': totalXP.toString(),
         'X-Imported-Count': (
           result.imported.workouts +
           result.imported.bodyMetrics +
           result.imported.steps +
           result.imported.sleep
         ).toString(),
+        'X-Habits-Completed': habitResults.length.toString(),
       },
     });
   } catch (error) {
