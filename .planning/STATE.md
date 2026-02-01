@@ -4,18 +4,18 @@
 
 See: .planning/PROJECT.md (updated 2026-02-01)
 
-**Core value:** Den User durch echte Stakes, proaktive Begleitung und spürbare Belohnungen motivieren, sein Leben bewusst auf der Meta-Ebene zu gestalten.
-**Current focus:** Vision Implementation - Phase 1 (Fairness & Proaktivitaet)
+**Core value:** Den User durch echte Stakes, proaktive Begleitung und spuerbare Belohnungen motivieren, sein Leben bewusst auf der Meta-Ebene zu gestalten.
+**Current focus:** Vision Implementation - Phase 1 COMPLETE, ready for Phase 2
 
 ## Current Position
 
 Milestone: 2 of 2 (Vision Implementation)
-Phase: 1 of 4 (Fairness & Proaktivitaet)
-Plan: 2 of 4 (01-01 and 01-03 complete)
-Status: In progress
-Last activity: 2026-02-01 - Completed 01-01-PLAN.md (Streak Insurance Token System)
+Phase: 1 of 4 (Fairness & Proaktivitaet) - COMPLETE
+Plan: 4 of 4 (all plans complete)
+Status: Phase 1 complete
+Last activity: 2026-02-01 - Completed 01-04-PLAN.md (Quest Expiration Notifications)
 
-Progress: [█████░░░░░] 50% (Milestone 2 - 2/4 plans complete in Phase 1)
+Progress: [██████████] 100% (Phase 1 complete - 4/4 plans)
 
 ## Milestone Overview
 
@@ -26,7 +26,7 @@ Progress: [█████░░░░░] 50% (Milestone 2 - 2/4 plans complete
 - **Key Deliverable:** Security-hardened foundation
 
 ### Milestone 2: Vision Implementation (CURRENT)
-- **Status:** In progress
+- **Status:** Phase 1 complete, Phase 2 ready
 - **Timeline:** 11 Wochen (4 Phasen)
 - **Target:** HP-System, AI Memory, Telegram Chat, Equipment
 
@@ -35,15 +35,15 @@ Progress: [█████░░░░░] 50% (Milestone 2 - 2/4 plans complete
 | ID | Task | Status | Assignee |
 |----|------|--------|----------|
 | P1-01 | Streak Insurance Token System | `done` | GSD Executor |
-| P1-02 | Proaktive Lebensbereich-Erinnerungen | `pending` | - |
+| P1-02 | Proaktive Lebensbereich-Erinnerungen | `done` | GSD Executor |
 | P1-03 | Health Import -> Habit Auto-Complete | `done` | GSD Executor |
-| P1-04 | Quest-Expiration Notifications | `pending` | - |
+| P1-04 | Quest-Expiration Notifications | `done` | GSD Executor |
 
 ### Success Criteria Phase 1
 - [x] Streak Insurance Token System implemented (UI + API ready)
-- [ ] 1+ proaktive Notification pro aktivem User/Tag
+- [x] 1+ proaktive Notification pro aktivem User/Tag (proactive scheduler)
 - [x] Health Imports auto-completen passende Habits
-- [ ] Quest-Expiration Notifications 24h vorher
+- [x] Quest-Expiration Notifications 24h vorher
 
 ## Accumulated Decisions
 
@@ -55,6 +55,8 @@ Progress: [█████░░░░░] 50% (Milestone 2 - 2/4 plans complete
 | 2026-02-01 | 01-03 | Workout type normalization via WORKOUT_TYPE_ALIASES map | Standardize various input formats |
 | 2026-02-01 | 01-03 | Same-day duplicate prevention via logged_at comparison | Prevent double XP on repeated imports |
 | 2026-02-01 | 01-03 | Minimum duration filter for mappings | Allow fine-grained control over triggers |
+| 2026-02-01 | 01-04 | Hourly scheduler execution for quest expiry | 24h window is long enough; hourly check reduces load |
+| 2026-02-01 | 01-04 | Mark quest as notified immediately after sending | Prevents duplicate notifications |
 
 ## Blockers
 
@@ -64,6 +66,8 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-01 | Plan 01-04 Complete | Quest Expiration Notifications (3 tasks, 4 min) |
+| 2026-02-01 | Plan 01-02 Complete | Proaktive Lebensbereich-Erinnerungen (executed in parallel) |
 | 2026-02-01 | Plan 01-01 Complete | Streak Insurance Token System (5 tasks, 8 min) |
 | 2026-02-01 | Plan 01-03 Complete | Health Import -> Habit Auto-Complete (6 tasks, 8 min) |
 | 2026-02-01 | GSD Planning | PROJECT.md, ROADMAP.md, STATE.md, Phase Plans erstellt |
@@ -73,23 +77,24 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-01 19:16 UTC
-- **Focus:** Streak Insurance Token System
-- **Completed:** 01-01-PLAN.md (5/5 tasks)
-- **Outcome:** Token schema, API, and UI for protecting habit streaks
+- **Date:** 2026-02-01 19:24 UTC
+- **Focus:** Quest Expiration Notifications
+- **Completed:** 01-04-PLAN.md (3/3 tasks)
+- **Outcome:** Hourly cron scheduler warns users 24h before quest expiry
 
 ### Resume Information
-- **Stopped at:** Completed 01-01-PLAN.md
+- **Stopped at:** Completed Phase 1 (01-04-PLAN.md was final plan)
 - **Resume file:** None (no active checkpoint)
-- **Next:** 01-02-PLAN.md (Proaktive Lebensbereich-Erinnerungen) or 01-04-PLAN.md (Quest-Expiration Notifications)
+- **Next:** Phase 2 - HP-System & Consequences
 
 ## Key Metrics
 
 ### Codebase Status
-- **Existing Features:** 33 Pages, 120+ Components, 54 APIs (+1)
+- **Existing Features:** 33 Pages, 120+ Components, 54+ APIs
 - **Test Coverage:** 126+ E2E Tests, 271 Unit Tests
 - **Build Status:** Passing
 - **Security Audit:** 3/3 Checks passing
+- **Cron Schedulers:** 3 active (reminder, proactive, quest-expiry)
 
 ### Vision Progress
 | Feature | Status | Phase |
@@ -101,8 +106,8 @@ None currently.
 | Apple Health Import | 100% | - |
 | **Health -> Habit Auto-Complete** | 100% | Phase 1 |
 | **Streak Insurance** | 100% | Phase 1 |
-| **Proaktive Notifications** | 0% | Phase 1 |
-| **Quest Expiration Notifications** | 0% | Phase 1 |
+| **Proaktive Notifications** | 100% | Phase 1 |
+| **Quest Expiration Notifications** | 100% | Phase 1 |
 | **HP/Death System** | 0% | Phase 2 |
 | **AI Memory** | 0% | Phase 3 |
 | **Telegram AI Chat** | 0% | Phase 3 |
@@ -111,14 +116,14 @@ None currently.
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~45% (2 of 4 Phase 1 plans complete)
+**Overall Vision Progress:** ~55% (Phase 1 complete, 4/4 plans)
 
 ## Notes
 
-- **Prioritaet Phase 1:** Streak Insurance zuerst (hoechster User-Impact bei geringstem Aufwand)
-- **Notification-System:** Besteht bereits (Web Push + Telegram one-way)
-- **Cron-Jobs:** Muessen geprueft werden - gibt es Infrastruktur?
-- **Health Import:** Webhook existiert (/api/integrations/health-import/webhook) - now with habit auto-complete
+- **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
+- **Cron Infrastructure:** Now has 3 schedulers running (reminder, proactive, quest-expiry)
+- **Notification-System:** Fully operational (Web Push + Telegram one-way)
+- **Health Import:** Complete with auto-complete feature
 
 ## Technical Context
 
@@ -130,16 +135,14 @@ None currently.
 - Telegram Bot API (one-way notifications)
 - Playwright E2E Testing
 
-### New in Plan 01-01
-- streak_insurance_tokens table (migration pending)
+### New in Phase 1
+- streak_insurance_tokens table
+- habit_health_mappings table
+- proactive_notification_log table
+- quests.expiry_notified_at column
+- 3 cron schedulers in instrumentation.ts
 - StreakInsuranceCard and UseTokenModal UI components
-- Token CRUD data layer functions
-- /api/streak-insurance/* endpoints
-
-### New in Plan 01-03
-- habit_health_mappings table (migration pending)
 - HabitHealthMappingConfig UI component
-- matchAndCompleteHabits function
 
 ### To Research for Phase 3
 - AI Memory: Summary-based vs Vector-DB approach
@@ -147,4 +150,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-01 - Completed Plan 01-01*
+*Last updated: 2026-02-01 - Phase 1 Complete (01-04-PLAN.md)*
