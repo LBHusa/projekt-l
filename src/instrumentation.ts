@@ -8,6 +8,7 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { initReminderScheduler } = await import('./lib/cron/reminder-scheduler');
     const { initQuestExpiryScheduler } = await import('./lib/cron/quest-expiry-scheduler');
+    const { initProactiveScheduler } = await import('./lib/cron/proactive-scheduler');
 
     console.log('[Instrumentation] Server starting...');
 
@@ -18,6 +19,9 @@ export async function register() {
     console.log('[Instrumentation] Initializing quest expiry scheduler...');
     initQuestExpiryScheduler();
 
-    console.log('[Instrumentation] Server ready (2 schedulers active)');
+    console.log('[Instrumentation] Initializing proactive reminder scheduler...');
+    initProactiveScheduler();
+
+    console.log('[Instrumentation] Server ready (3 schedulers active)');
   }
 }
