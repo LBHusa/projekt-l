@@ -19,6 +19,7 @@ import {
   MoodLogModal,
   QuickTransactionModal,
 } from '@/components/dashboard';
+import { StreakInsuranceCard } from '@/components/streaks';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Users, Heart, AlertCircle, Settings, Flame, Bot, Swords, Plus } from 'lucide-react';
@@ -319,6 +320,10 @@ export default function Dashboard() {
             <StreakHighlightWidget initialHabits={allHabits} onRefresh={loadData} />
           </div>
 
+          {/* Streak Insurance */}
+          <div className="mb-8">
+            <StreakInsuranceCard className="max-w-sm" />
+          </div>
 
           {/* AI & Quests Section */}
           <motion.div
