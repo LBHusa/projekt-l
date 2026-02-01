@@ -277,7 +277,9 @@ async function checkProactiveReminders(): Promise<void> {
 
     for (const user of users) {
       try {
-        const timezone = user.user_profiles?.timezone || 'Europe/Berlin';
+        // user_profiles is returned as array from join, take first element
+        const userProfile = Array.isArray(user.user_profiles) ? user.user_profiles[0] : user.user_profiles;
+        const timezone = userProfile?.timezone || 'Europe/Berlin';
 
         // Check quiet hours
         if (isQuietHours(
