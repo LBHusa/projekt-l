@@ -1558,3 +1558,15 @@ export interface HabitAchievementWithHabit extends HabitAchievement {
     color: string;
   };
 }
+
+// =============================================
+// Streak Insurance Types
+// =============================================
+
+export type {
+  StreakInsuranceToken,
+  UseTokenResult,
+  TokenStats,
+  TokenType,
+  TokenReason
+} from '@/lib/types/streak-insurance';
