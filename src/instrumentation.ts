@@ -7,12 +7,17 @@ export async function register() {
   // Only run on Node.js server, not in Edge runtime
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { initReminderScheduler } = await import('./lib/cron/reminder-scheduler');
+    const { initQuestExpiryScheduler } = await import('./lib/cron/quest-expiry-scheduler');
 
     console.log('[Instrumentation] Server starting...');
-    console.log('[Instrumentation] Initializing reminder scheduler...');
 
+    // Initialize cron schedulers
+    console.log('[Instrumentation] Initializing reminder scheduler...');
     initReminderScheduler();
 
-    console.log('[Instrumentation] Server ready ✅');
+    console.log('[Instrumentation] Initializing quest expiry scheduler...');
+    initQuestExpiryScheduler();
+
+    console.log('[Instrumentation] Server ready (2 schedulers active)');
   }
 }
