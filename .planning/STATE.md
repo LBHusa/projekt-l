@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Den User durch echte Stakes, proaktive Begleitung und spuerbare Belohnungen motivieren, sein Leben bewusst auf der Meta-Ebene zu gestalten.
-**Current focus:** Vision Implementation - Phase 1 COMPLETE, ready for Phase 2
+**Current focus:** Vision Implementation - Phase 2 IN PROGRESS
 
 ## Current Position
 
 Milestone: 2 of 2 (Vision Implementation)
-Phase: 1 of 4 (Fairness & Proaktivitaet) - COMPLETE
-Plan: 4 of 4 (all plans complete)
-Status: Phase 1 complete
-Last activity: 2026-02-01 - Completed 01-04-PLAN.md (Quest Expiration Notifications)
+Phase: 2 of 4 (Konsequenzen & HP/Death System) - IN PROGRESS
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-02-02 - Completed 02-01-PLAN.md (HP System Schema)
 
-Progress: [██████████] 100% (Phase 1 complete - 4/4 plans)
+Progress: [████░░░░░░] 25% (Phase 2 started - 1/4 plans)
 
 ## Milestone Overview
 
@@ -26,24 +26,26 @@ Progress: [██████████] 100% (Phase 1 complete - 4/4 plans)
 - **Key Deliverable:** Security-hardened foundation
 
 ### Milestone 2: Vision Implementation (CURRENT)
-- **Status:** Phase 1 complete, Phase 2 ready
+- **Status:** Phase 2 in progress
 - **Timeline:** 11 Wochen (4 Phasen)
 - **Target:** HP-System, AI Memory, Telegram Chat, Equipment
 
-## Phase 1 Tasks
+## Phase 2 Tasks
 
 | ID | Task | Status | Assignee |
 |----|------|--------|----------|
-| P1-01 | Streak Insurance Token System | `done` | GSD Executor |
-| P1-02 | Proaktive Lebensbereich-Erinnerungen | `done` | GSD Executor |
-| P1-03 | Health Import -> Habit Auto-Complete | `done` | GSD Executor |
-| P1-04 | Quest-Expiration Notifications | `done` | GSD Executor |
+| P2-01 | HP System Schema | `done` | GSD Executor |
+| P2-02 | Damage Triggers | `todo` | - |
+| P2-03 | Heal Triggers | `todo` | - |
+| P2-04 | HP UI Components | `todo` | - |
 
-### Success Criteria Phase 1
-- [x] Streak Insurance Token System implemented (UI + API ready)
-- [x] 1+ proaktive Notification pro aktivem User/Tag (proactive scheduler)
-- [x] Health Imports auto-completen passende Habits
-- [x] Quest-Expiration Notifications 24h vorher
+### Success Criteria Phase 2
+- [x] user_health + health_events tables created
+- [ ] Streak-Break deals damage to user HP
+- [ ] Inactivity deals damage to user HP
+- [ ] Quest/Habit completion heals user HP
+- [ ] HP bar visible in dashboard
+- [ ] Death triggers respawn at full HP, loses 1 life
 
 ## Accumulated Decisions
 
@@ -57,6 +59,10 @@ Progress: [██████████] 100% (Phase 1 complete - 4/4 plans)
 | 2026-02-01 | 01-03 | Minimum duration filter for mappings | Allow fine-grained control over triggers |
 | 2026-02-01 | 01-04 | Hourly scheduler execution for quest expiry | 24h window is long enough; hourly check reduces load |
 | 2026-02-01 | 01-04 | Mark quest as notified immediately after sending | Prevents duplicate notifications |
+| 2026-02-02 | 02-01 | HP bounded 0-100 with CHECK constraints | Database enforces valid HP range |
+| 2026-02-02 | 02-01 | Death respawns at full HP automatically | Immediate recovery, no manual reset needed |
+| 2026-02-02 | 02-01 | awaiting_prestige blocks HP changes | Prevents damage/healing during game over state |
+| 2026-02-02 | 02-01 | SECURITY DEFINER on RPC functions | Bypass RLS for system operations |
 
 ## Blockers
 
@@ -66,6 +72,7 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-02 | Plan 02-01 Complete | HP System Schema (2 tasks, 4 min) |
 | 2026-02-01 | Plan 01-04 Complete | Quest Expiration Notifications (3 tasks, 4 min) |
 | 2026-02-01 | Plan 01-02 Complete | Proaktive Lebensbereich-Erinnerungen (executed in parallel) |
 | 2026-02-01 | Plan 01-01 Complete | Streak Insurance Token System (5 tasks, 8 min) |
@@ -77,15 +84,15 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-01 19:24 UTC
-- **Focus:** Quest Expiration Notifications
-- **Completed:** 01-04-PLAN.md (3/3 tasks)
-- **Outcome:** Hourly cron scheduler warns users 24h before quest expiry
+- **Date:** 2026-02-02 07:28 UTC
+- **Focus:** HP System Schema
+- **Completed:** 02-01-PLAN.md (2/2 tasks)
+- **Outcome:** user_health + health_events tables, apply_hp_change RPC
 
 ### Resume Information
-- **Stopped at:** Completed Phase 1 (01-04-PLAN.md was final plan)
+- **Stopped at:** Completed 02-01-PLAN.md
 - **Resume file:** None (no active checkpoint)
-- **Next:** Phase 2 - HP-System & Consequences
+- **Next:** 02-02-PLAN.md - Damage Triggers
 
 ## Key Metrics
 
@@ -108,7 +115,7 @@ None currently.
 | **Streak Insurance** | 100% | Phase 1 |
 | **Proaktive Notifications** | 100% | Phase 1 |
 | **Quest Expiration Notifications** | 100% | Phase 1 |
-| **HP/Death System** | 0% | Phase 2 |
+| **HP/Death System** | 25% | Phase 2 |
 | **AI Memory** | 0% | Phase 3 |
 | **Telegram AI Chat** | 0% | Phase 3 |
 | **Gold System** | 0% | Phase 3 |
@@ -116,11 +123,12 @@ None currently.
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~55% (Phase 1 complete, 4/4 plans)
+**Overall Vision Progress:** ~60% (Phase 2 started - 1/4 plans complete)
 
 ## Notes
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
+- **Phase 2 STARTED:** HP schema foundation complete, triggers next
 - **Cron Infrastructure:** Now has 3 schedulers running (reminder, proactive, quest-expiry)
 - **Notification-System:** Fully operational (Web Push + Telegram one-way)
 - **Health Import:** Complete with auto-complete feature
@@ -144,10 +152,17 @@ None currently.
 - StreakInsuranceCard and UseTokenModal UI components
 - HabitHealthMappingConfig UI component
 
+### New in Phase 2 (so far)
+- user_health table (HP, lives, prestige)
+- health_events table (append-only event log)
+- apply_hp_change RPC function
+- perform_prestige RPC function
+- UserHealth and HealthEvent TypeScript types
+
 ### To Research for Phase 3
 - AI Memory: Summary-based vs Vector-DB approach
 - Telegram: Webhook fuer 2-Way Chat bereits vorhanden?
 
 ---
 
-*Last updated: 2026-02-01 - Phase 1 Complete (01-04-PLAN.md)*
+*Last updated: 2026-02-02 - Phase 2 Plan 1 Complete (02-01-PLAN.md)*
