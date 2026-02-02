@@ -20,6 +20,7 @@ import {
   QuickTransactionModal,
 } from '@/components/dashboard';
 import { StreakInsuranceCard } from '@/components/streaks';
+import HealthBar from '@/components/health/HealthBar';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Users, Heart, AlertCircle, Settings, Flame, Bot, Swords, Plus } from 'lucide-react';
@@ -297,6 +298,13 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
+          {/* Health Bar - Prominent HP Display */}
+          <div className="mb-8">
+            <div className="max-w-md mx-auto">
+              <HealthBar showDetails showLives />
+            </div>
+          </div>
+
           {/* Quick Actions + Life Balance + Today's Goals */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
             <QuickActionsWidget
