@@ -10,6 +10,7 @@ export async function register() {
     const { initQuestExpiryScheduler } = await import('./lib/cron/quest-expiry-scheduler');
     const { initProactiveScheduler } = await import('./lib/cron/proactive-scheduler');
     const { initHealthInactivityScheduler } = await import('./lib/cron/health-inactivity-scheduler');
+    const { initProactiveQuestScheduler } = await import('./lib/cron/proactive-quest-scheduler');
 
     console.log('[Instrumentation] Server starting...');
 
@@ -26,6 +27,9 @@ export async function register() {
     console.log('[Instrumentation] Initializing health inactivity scheduler...');
     initHealthInactivityScheduler();
 
-    console.log('[Instrumentation] Server ready (4 schedulers active)');
+    console.log('[Instrumentation] Initializing proactive quest scheduler...');
+    initProactiveQuestScheduler();
+
+    console.log('[Instrumentation] Server ready (5 schedulers active)');
   }
 }

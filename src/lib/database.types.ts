@@ -1837,3 +1837,58 @@ export interface StreakMilestoneAward {
   gold_awarded: number;
   awarded_at: string;
 }
+
+// =============================================
+// Proactive Quest Generation Types
+// Phase 3: Lebendiger Buddy
+// =============================================
+
+export type QuestSuggestionStatus = 'pending' | 'accepted' | 'dismissed' | 'expired';
+export type QuestSuggestionTrigger = 'inactivity' | 'morning' | 'balance';
+
+export interface QuestSuggestion {
+  id: string;
+  user_id: string;
+  quest_type: 'daily' | 'weekly' | 'story';
+  difficulty: 'easy' | 'medium' | 'hard' | 'epic';
+  title: string;
+  description: string;
+  motivation: string | null;
+  target_faction_ids: string[];
+  xp_reward: number;
+  required_actions: number;
+  trigger_reason: QuestSuggestionTrigger;
+  trigger_faction_id: string | null;
+  status: QuestSuggestionStatus;
+  accepted_at: string | null;
+  dismissed_at: string | null;
+  expires_at: string | null;
+  created_quest_id: string | null;
+  notification_sent: boolean;
+  notification_sent_at: string | null;
+  created_at: string;
+}
+
+export interface UserQuestPreferencesExtended {
+  id: string;
+  user_id: string;
+  preferred_difficulty: 'easy' | 'medium' | 'hard' | 'epic';
+  daily_quest_count: number;
+  weekly_quest_count: number;
+  enable_story_quests: boolean;
+  focus_faction_ids: string[];
+  focus_skill_ids: string[];
+  prefer_balanced_quests: boolean;
+  challenge_level: number;
+  completed_quests_count: number;
+  failed_quests_count: number;
+  average_completion_rate: number;
+  // Phase 3 additions
+  proactive_enabled: boolean;
+  morning_quests_enabled: boolean;
+  morning_quest_time: string;
+  quest_free_days: string[];
+  inactivity_threshold_days: number;
+  created_at: string;
+  updated_at: string;
+}
