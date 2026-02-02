@@ -8,16 +8,17 @@ INSERT INTO skill_domains (id, name, icon, color, description, display_order, fa
   -- Original 5 Domains mit Faction-Mapping (angepasst an neue Factions)
   ('11111111-1111-1111-1111-111111111111', 'Coding', '💻', '#6366f1', 'Programmierung und Software-Entwicklung', 1, 'karriere'),
   ('22222222-2222-2222-2222-222222222222', 'Labor', '🔬', '#22c55e', 'Wissenschaftliche Laborarbeit und Molekularbiologie', 2, 'karriere'),
-  ('33333333-3333-3333-3333-333333333333', 'Design', '🎨', '#f59e0b', 'UI/UX Design und visuelle Gestaltung', 3, 'hobbys'),
+  ('33333333-3333-3333-3333-333333333333', 'Design', '🎨', '#f59e0b', 'UI/UX Design und visuelle Gestaltung', 3, 'hobby'),
   ('44444444-4444-4444-4444-444444444444', 'Fitness', '💪', '#ef4444', 'Körperliche Fitness und Sport', 4, 'koerper'),
   ('55555555-5555-5555-5555-555555555555', 'Finanzen', '💰', '#8b5cf6', 'Finanzmanagement und Investitionen', 5, 'finanzen'),
   -- Neue Lebensbereiche (angepasst an neue Factions)
   ('66666666-6666-6666-6666-666666666666', 'Karriere', '💼', '#3b82f6', 'Berufliche Entwicklung und Karriere', 6, 'karriere'),
   ('77777777-7777-7777-7777-777777777777', 'Familie', '👨‍👩‍👧‍👦', '#ec4899', 'Familie und Beziehungen', 7, 'soziales'),
-  ('88888888-8888-8888-8888-888888888888', 'Hobbys', '🎮', '#8b5cf6', 'Freizeitaktivitäten und Hobbys', 8, 'hobbys'),
-  ('99999999-9999-9999-9999-999999999999', 'Lernen', '📚', '#f59e0b', 'Bildung und lebenslanges Lernen', 9, 'weisheit'),
+  ('88888888-8888-8888-8888-888888888888', 'Hobbys', '🎮', '#8b5cf6', 'Freizeitaktivitäten und Hobbys', 8, 'hobby'),
+  ('99999999-9999-9999-9999-999999999999', 'Lernen', '📚', '#f59e0b', 'Bildung und lebenslanges Lernen', 9, 'wissen'),
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Soziales', '🤝', '#06b6d4', 'Freundschaften und soziales Netzwerk', 10, 'soziales'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Seele', '🧘', '#a855f7', 'Mentale Gesundheit und Spiritualität', 11, 'geist');
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Seele', '🧘', '#a855f7', 'Mentale Gesundheit und Spiritualität', 11, 'geist')
+ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
 -- 2. SKILLS - Coding Domain

@@ -22,8 +22,8 @@ ON CONFLICT (id) DO NOTHING;
 UPDATE user_faction_stats SET faction_id = 'hobby' WHERE faction_id = 'hobbys';
 UPDATE experiences SET faction_id = 'hobby' WHERE faction_id = 'hobbys';
 UPDATE skill_domains SET faction_key = 'hobby' WHERE faction_key = 'hobbys';
-UPDATE habits SET faction = 'hobby' WHERE faction = 'hobbys';
-UPDATE activities SET faction_id = 'hobby' WHERE faction_id = 'hobbys';
+UPDATE habits SET faction_id = 'hobby' WHERE faction_id = 'hobbys';
+-- UPDATE activities SET faction_id = 'hobby' WHERE faction_id = 'hobbys'; -- Table doesn't exist
 
 -- Delete old faction
 DELETE FROM factions WHERE id = 'hobbys';
@@ -39,8 +39,8 @@ ON CONFLICT (id) DO NOTHING;
 UPDATE user_faction_stats SET faction_id = 'wissen' WHERE faction_id = 'weisheit';
 UPDATE experiences SET faction_id = 'wissen' WHERE faction_id = 'weisheit';
 UPDATE skill_domains SET faction_key = 'wissen' WHERE faction_key = 'weisheit';
-UPDATE habits SET faction = 'wissen' WHERE faction = 'weisheit';
-UPDATE activities SET faction_id = 'wissen' WHERE faction_id = 'weisheit';
+UPDATE habits SET faction_id = 'wissen' WHERE faction_id = 'weisheit';
+-- UPDATE activities SET faction_id = 'wissen' WHERE faction_id = 'weisheit'; -- Table doesn't exist
 
 -- Delete old faction
 DELETE FROM factions WHERE id = 'weisheit';

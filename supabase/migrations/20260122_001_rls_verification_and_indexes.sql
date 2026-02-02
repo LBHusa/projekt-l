@@ -83,154 +83,154 @@ END $$;
 -- ============================================
 
 -- Accounts
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_accounts_user_id ON accounts USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts USING btree (user_id);
 
 -- Activity Log
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_activity_log_user_id ON activity_log USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_log_user_id ON activity_log USING btree (user_id);
 
 -- AI Faction Suggestions Feedback
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_faction_suggestions_feedback_user_id ON ai_faction_suggestions_feedback USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_ai_faction_suggestions_feedback_user_id ON ai_faction_suggestions_feedback USING btree (user_id);
 
 -- Body Metrics
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_body_metrics_user_id ON body_metrics USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_body_metrics_user_id ON body_metrics USING btree (user_id);
 
 -- Books
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_books_user_id ON books USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_books_user_id ON books USING btree (user_id);
 
 -- Budgets
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_budgets_user_id ON budgets USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_budgets_user_id ON budgets USING btree (user_id);
 
 -- Career Goals
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_career_goals_user_id ON career_goals USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_career_goals_user_id ON career_goals USING btree (user_id);
 
 -- Career Sources
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_career_sources_user_id ON career_sources USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_career_sources_user_id ON career_sources USING btree (user_id);
 
 -- Contact Interactions
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_contact_interactions_user_id ON contact_interactions USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_contact_interactions_user_id ON contact_interactions USING btree (user_id);
 
 -- Contacts
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_contacts_user_id ON contacts USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts USING btree (user_id);
 
 -- Courses
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_courses_user_id ON courses USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_courses_user_id ON courses USING btree (user_id);
 
 -- Experiences
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_experiences_user_id ON experiences USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_experiences_user_id ON experiences USING btree (user_id);
 
 -- Finance Achievements
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_finance_achievements_user_id ON finance_achievements USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_finance_achievements_user_id ON finance_achievements USING btree (user_id);
 
 -- Finance Streaks
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_finance_streaks_user_id ON finance_streaks USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_finance_streaks_user_id ON finance_streaks USING btree (user_id);
 
 -- Google Calendar Integrations
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_google_calendar_integrations_user_id ON google_calendar_integrations USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_google_calendar_integrations_user_id ON google_calendar_integrations USING btree (user_id);
 
 -- Habit Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_habit_logs_user_id ON habit_logs USING btree (user_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_habit_logs_user_date ON habit_logs USING btree (user_id, logged_at);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_user_id ON habit_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_habit_logs_user_date ON habit_logs USING btree (user_id, logged_at);
 
 -- Habit Reminders
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_habit_reminders_user_id ON habit_reminders USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_habit_reminders_user_id ON habit_reminders USING btree (user_id);
 
 -- Habits
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_habits_user_id ON habits USING btree (user_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_habits_user_active ON habits USING btree (user_id, is_active);
+CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits USING btree (user_id, is_active);
 
 -- Health Import Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_health_import_logs_user_id ON health_import_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_health_import_logs_user_id ON health_import_logs USING btree (user_id);
 
 -- Hobby Projects
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hobby_projects_user_id ON hobby_projects USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_hobby_projects_user_id ON hobby_projects USING btree (user_id);
 
 -- Hobby Time Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hobby_time_logs_user_id ON hobby_time_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_hobby_time_logs_user_id ON hobby_time_logs USING btree (user_id);
 
 -- Investments
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_investments_user_id ON investments USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_investments_user_id ON investments USING btree (user_id);
 
 -- Job History
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_job_history_user_id ON job_history USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_job_history_user_id ON job_history USING btree (user_id);
 
 -- Journal Entries
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_journal_entries_user_id ON journal_entries USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_id ON journal_entries USING btree (user_id);
 
 -- Mental Stats Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_mental_stats_logs_user_id ON mental_stats_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_mental_stats_logs_user_id ON mental_stats_logs USING btree (user_id);
 
 -- Mood Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_mood_logs_user_id ON mood_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_mood_logs_user_id ON mood_logs USING btree (user_id);
 
 -- Net Worth History
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_net_worth_history_user_id ON net_worth_history USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_net_worth_history_user_id ON net_worth_history USING btree (user_id);
 
 -- Notification Log
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notification_log_user_id ON notification_log USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_log_user_id ON notification_log USING btree (user_id);
 
 -- Notification Settings
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notification_settings_user_id ON notification_settings USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_settings_user_id ON notification_settings USING btree (user_id);
 
 -- Notion Integrations
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notion_integrations_user_id ON notion_integrations USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_notion_integrations_user_id ON notion_integrations USING btree (user_id);
 
 -- Quest Actions
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quest_actions_user_id ON quest_actions USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_quest_actions_user_id ON quest_actions USING btree (user_id);
 
 -- Quests
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quests_user_id ON quests USING btree (user_id);
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quests_user_status ON quests USING btree (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_quests_user_id ON quests USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_quests_user_status ON quests USING btree (user_id, status);
 
 -- Recurring Flows
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_recurring_flows_user_id ON recurring_flows USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_recurring_flows_user_id ON recurring_flows USING btree (user_id);
 
 -- Reminder Delivery Log
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_reminder_delivery_log_user_id ON reminder_delivery_log USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_reminder_delivery_log_user_id ON reminder_delivery_log USING btree (user_id);
 
 -- Salary Entries
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_salary_entries_user_id ON salary_entries USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_salary_entries_user_id ON salary_entries USING btree (user_id);
 
 -- Savings Goals
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_savings_goals_user_id ON savings_goals USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_savings_goals_user_id ON savings_goals USING btree (user_id);
 
 -- Sleep Logs
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sleep_logs_user_id ON sleep_logs USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_sleep_logs_user_id ON sleep_logs USING btree (user_id);
 
 -- Social Events
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_social_events_user_id ON social_events USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_social_events_user_id ON social_events USING btree (user_id);
 
 -- Training Plans
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_training_plans_user_id ON training_plans USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_training_plans_user_id ON training_plans USING btree (user_id);
 
 -- Transaction Categories
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_transaction_categories_user_id ON transaction_categories USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_categories_user_id ON transaction_categories USING btree (user_id);
 
 -- Transactions
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_transactions_user_id ON transactions USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions USING btree (user_id);
 
 -- User Achievements
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_achievements_user_id ON user_achievements USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements USING btree (user_id);
 
 -- User API Keys
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_api_keys_user_id ON user_api_keys USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_api_keys_user_id ON user_api_keys USING btree (user_id);
 
 -- User Faction Stats
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_faction_stats_user_id ON user_faction_stats USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_faction_stats_user_id ON user_faction_stats USING btree (user_id);
 
 -- User Profiles
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_profiles_user_id ON user_profiles USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles USING btree (user_id);
 
 -- User Quest Preferences
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_quest_preferences_user_id ON user_quest_preferences USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_quest_preferences_user_id ON user_quest_preferences USING btree (user_id);
 
 -- User Skills
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_user_skills_user_id ON user_skills USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_skills_user_id ON user_skills USING btree (user_id);
 
 -- Workout Sessions
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_workout_sessions_user_id ON workout_sessions USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_workout_sessions_user_id ON workout_sessions USING btree (user_id);
 
 -- Workouts
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_workouts_user_id ON workouts USING btree (user_id);
+CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts USING btree (user_id);
 
 -- ============================================
 -- SEC-03 VERIFICATION QUERIES

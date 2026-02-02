@@ -5,10 +5,7 @@
 -- Purpose: Ensure each user can only access their own data
 -- ============================================
 
--- Helper function to get current user ID
-CREATE OR REPLACE FUNCTION auth.user_id() RETURNS uuid AS $$
-  SELECT auth.uid()
-$$ LANGUAGE sql SECURITY DEFINER;
+-- Note: auth.uid() is already provided by Supabase, no need for wrapper function
 
 -- ============================================
 -- ENABLE RLS ON ALL USER-DATA TABLES
