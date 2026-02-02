@@ -1570,3 +1570,106 @@ export type {
   TokenType,
   TokenReason
 } from '@/lib/types/streak-insurance';
+
+// =============================================
+// HP/Death System Types
+// Phase 2: Konsequenzen
+// =============================================
+
+export type HealthEventType =
+  | 'quest_complete'
+  | 'habit_done'
+  | 'streak_break'
+  | 'inactivity'
+  | 'death'
+  | 'prestige'
+  | 'damage_manual'
+  | 'heal_manual';
+
+export type HealthSourceTable = 'quests' | 'habits' | 'habit_logs' | null;
+
+export interface UserHealth {
+  id: string;
+  user_id: string;
+  current_hp: number;
+  max_hp: number;
+  lives: number;
+  max_lives: number;
+  awaiting_prestige: boolean;
+  prestige_level: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserHealthInsert {
+  id?: string;
+  user_id: string;
+  current_hp?: number;
+  max_hp?: number;
+  lives?: number;
+  max_lives?: number;
+  awaiting_prestige?: boolean;
+  prestige_level?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserHealthUpdate {
+  id?: string;
+  user_id?: string;
+  current_hp?: number;
+  max_hp?: number;
+  lives?: number;
+  max_lives?: number;
+  awaiting_prestige?: boolean;
+  prestige_level?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface HealthEvent {
+  id: string;
+  user_id: string;
+  event_type: HealthEventType;
+  hp_change: number;
+  source_table: HealthSourceTable;
+  source_id: string | null;
+  metadata: Json | null;
+  created_at: string;
+}
+
+export interface HealthEventInsert {
+  id?: string;
+  user_id: string;
+  event_type: HealthEventType;
+  hp_change: number;
+  source_table?: HealthSourceTable;
+  source_id?: string | null;
+  metadata?: Json | null;
+  created_at?: string;
+}
+
+export interface HealthEventUpdate {
+  id?: string;
+  user_id?: string;
+  event_type?: HealthEventType;
+  hp_change?: number;
+  source_table?: HealthSourceTable;
+  source_id?: string | null;
+  metadata?: Json | null;
+  created_at?: string;
+}
+
+// RPC return types
+export interface ApplyHpChangeResult {
+  new_hp: number;
+  new_lives: number;
+  death_occurred: boolean;
+  awaiting_prestige: boolean;
+}
+
+export interface PerformPrestigeResult {
+  new_prestige_level: number;
+  new_hp: number;
+  new_lives: number;
+}
