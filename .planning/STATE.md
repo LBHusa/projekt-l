@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Milestone: 2 of 2 (Vision Implementation)
 Phase: 3 of 4 (Lebendiger Buddy) - COMPLETE
-Plan: 6 of 6 complete (P3-01a, P3-01b, P3-01c, P3-02, P3-03, P3-04)
-Status: Phase 3 complete
-Last activity: 2026-02-02 - Completed 03-PLAN.md (Lebendiger Buddy)
+Plan: 7 of 7 complete (P3-01a, P3-01b, P3-01c, P3-02, P3-03, P3-04, P3-05)
+Status: Phase 3 complete (all gaps closed)
+Last activity: 2026-02-02 - Completed 03-05-PLAN.md (Gap Closure)
 
-Progress: [████████████████████] 100% (Phase 3 complete - 16/17 plans)
+Progress: [████████████████████] 100% (Phase 3 complete - 17/17 plans)
 
 ## Milestone Overview
 
@@ -40,6 +40,7 @@ Progress: [████████████████████] 100% (P
 | P3-02 | Telegram AI Chat (Two-Way) | `done` | GSD Executor |
 | P3-03 | Gold-System | `done` | GSD Executor |
 | P3-04 | Proaktive Quest-Generierung | `done` | GSD Executor |
+| P3-05 | Gap Closure (Qdrant init + Weekly Summary) | `done` | GSD Executor |
 
 ### Success Criteria Phase 3
 - [x] AI Conversation Memory mit Hybrid-RAG funktioniert (Qdrant + Supabase)
@@ -87,6 +88,8 @@ Progress: [████████████████████] 100% (P
 | 2026-02-02 | 03 | Streak milestones not every completion | Prevents gold inflation |
 | 2026-02-02 | 03 | Neutral-wise quest notification tone | Per CONTEXT.md specifications |
 | 2026-02-02 | 03 | Quest suggestions vs direct creation | User agency - they choose to accept |
+| 2026-02-02 | 03-05 | Non-blocking Qdrant init with error logging | Server should start even if Qdrant unavailable |
+| 2026-02-02 | 03-05 | Skip weekly summary scheduler in development | Avoid unnecessary AI API calls during development |
 
 ## Blockers
 
@@ -96,7 +99,8 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
-| 2026-02-02 | Phase 3 Complete | Lebendiger Buddy (6/6 tasks, 21 min) |
+| 2026-02-02 | P3-05 Complete | Gap Closure - Qdrant init + Weekly Summary Scheduler |
+| 2026-02-02 | Phase 3 Complete | Lebendiger Buddy (7/7 tasks, 24 min) |
 | 2026-02-02 | P3-04 Complete | Proaktive Quest-Generierung |
 | 2026-02-02 | P3-03 Complete | Gold System |
 | 2026-02-02 | P3-02 Complete | Telegram AI Chat |
@@ -111,13 +115,13 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-02 13:11 UTC
-- **Focus:** Phase 3 Complete
-- **Completed:** 03-PLAN.md (6/6 tasks)
-- **Outcome:** AI Memory, Telegram Chat, Gold System, Proactive Quests
+- **Date:** 2026-02-02 15:38 UTC
+- **Focus:** Phase 3 Gap Closure
+- **Completed:** 03-05-PLAN.md (2 tasks)
+- **Outcome:** Qdrant collection init on startup, Weekly summary scheduler
 
 ### Resume Information
-- **Stopped at:** Phase 3 complete
+- **Stopped at:** Phase 3 complete (all gaps closed)
 - **Resume file:** None (no active checkpoint)
 - **Next:** Phase 4 - 2D Equipment & Shop
 
@@ -128,7 +132,7 @@ None currently.
 - **Test Coverage:** 126+ E2E Tests, 271 Unit Tests
 - **Build Status:** Passing
 - **Security Audit:** 3/3 Checks passing
-- **Cron Schedulers:** 5 active (reminder, proactive, quest-expiry, health-inactivity, proactive-quest)
+- **Cron Schedulers:** 6 active (reminder, proactive, quest-expiry, health-inactivity, proactive-quest, weekly-summary)
 
 ### Vision Progress
 | Feature | Status | Phase |
@@ -157,9 +161,10 @@ None currently.
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
 - **Phase 2 COMPLETE:** Full HP/Death system with damage/heal triggers, prestige, and UI
-- **Phase 3 COMPLETE:** AI Memory, Telegram Chat, Gold System, Proactive Quests
-- **Cron Infrastructure:** Now has 5 schedulers running
-- **Qdrant Integration:** projekt_l_memory collection created (3072 dimensions)
+- **Phase 3 COMPLETE:** AI Memory, Telegram Chat, Gold System, Proactive Quests, Gaps Closed
+- **Cron Infrastructure:** Now has 6 schedulers running
+- **Qdrant Integration:** projekt_l_memory collection auto-created on startup (3072 dimensions)
+- **Weekly Summary:** Scheduler runs Sundays 03:00 AM
 - **Gold Economy:** Ready for Phase 4 shop implementation
 
 ## Technical Context
@@ -186,6 +191,7 @@ None currently.
 - GoldDisplay component
 - 7 new API endpoints
 - 5th cron scheduler (proactive-quest)
+- 6th cron scheduler (weekly-summary)
 - @qdrant/js-client-rest dependency
 - openai dependency
 
@@ -196,4 +202,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 - Phase 3 Complete (6/6 tasks)*
+*Last updated: 2026-02-02 - Phase 3 Complete (7/7 tasks, all gaps closed)*
