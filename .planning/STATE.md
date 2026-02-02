@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Milestone: 2 of 2 (Vision Implementation)
 Phase: 2 of 4 (Konsequenzen & HP/Death System) - IN PROGRESS
-Plan: 4 of 6 complete
+Plan: 5 of 6 complete
 Status: In progress
-Last activity: 2026-02-02 - Completed 02-05-PLAN.md (HP UI Components)
+Last activity: 2026-02-02 - Completed 02-04-PLAN.md (HP Heal Triggers)
 
-Progress: [██████████░] 67% (Phase 2 - 4/6 plans complete)
+Progress: [████████████░] 83% (Phase 2 - 5/6 plans complete)
 
 ## Milestone Overview
 
@@ -37,7 +37,7 @@ Progress: [██████████░] 67% (Phase 2 - 4/6 plans complete)
 | P2-01 | HP System Schema | `done` | GSD Executor |
 | P2-02 | Health Data Layer & Death Flow | `done` | GSD Executor |
 | P2-03 | Damage Triggers | `done` | GSD Executor |
-| P2-04 | Heal Triggers | `todo` | - |
+| P2-04 | Heal Triggers | `done` | GSD Executor |
 | P2-05 | HP UI Components | `done` | GSD Executor |
 | P2-06 | Death/Prestige Flow | `todo` | - |
 
@@ -47,7 +47,7 @@ Progress: [██████████░] 67% (Phase 2 - 4/6 plans complete)
 - [x] Death triggers XP loss (10% per faction)
 - [x] Streak-Break deals damage to user HP
 - [x] Inactivity deals damage to user HP
-- [ ] Quest/Habit completion heals user HP
+- [x] Quest/Habit completion heals user HP
 - [x] HP bar visible in dashboard
 - [ ] Death modal and prestige flow
 
@@ -75,6 +75,9 @@ Progress: [██████████░] 67% (Phase 2 - 4/6 plans complete)
 | 2026-02-02 | 02-03 | Max 25 HP inactivity damage (5 days) | Prevent death spiral |
 | 2026-02-02 | 02-05 | HealthBar at top of dashboard main content | Maximum visibility for HP status |
 | 2026-02-02 | 02-05 | max-w-md centered layout | Readable across screen sizes |
+| 2026-02-02 | 02-04 | Quest HP varies by difficulty (10/15/25/40) | Harder quests = bigger reward |
+| 2026-02-02 | 02-04 | Only positive habits grant HP | Negative habit avoidance is its own reward |
+| 2026-02-02 | 02-04 | Mood logging grants +2 HP | Small reward to encourage daily check-in |
 
 ## Blockers
 
@@ -84,6 +87,7 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-02 | Plan 02-04 Complete | HP Heal Triggers (3 tasks, 20 min) |
 | 2026-02-02 | Plan 02-05 Complete | HP UI Components (2 tasks, 4 min) |
 | 2026-02-02 | Plan 02-03 Complete | HP Damage Triggers (3 tasks, 2 min) |
 | 2026-02-02 | Plan 02-02 Complete | Health Data Layer & Death Flow (2 tasks, 4 min) |
@@ -99,15 +103,15 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-02 07:44 UTC
-- **Focus:** HP UI Components
-- **Completed:** 02-05-PLAN.md (2/2 tasks)
-- **Outcome:** HealthBar component with Framer Motion, dashboard integration
+- **Date:** 2026-02-02 08:00 UTC
+- **Focus:** HP Heal Triggers
+- **Completed:** 02-04-PLAN.md (3/3 tasks)
+- **Outcome:** Quest/habit/mood heal triggers with difficulty-based HP rewards
 
 ### Resume Information
-- **Stopped at:** Completed 02-05-PLAN.md
+- **Stopped at:** Completed 02-04-PLAN.md
 - **Resume file:** None (no active checkpoint)
-- **Next:** 02-04-PLAN.md - Heal Triggers OR 02-06-PLAN.md - Death/Prestige Flow
+- **Next:** 02-06-PLAN.md - Death/Prestige Flow
 
 ## Key Metrics
 
@@ -130,7 +134,7 @@ None currently.
 | **Streak Insurance** | 100% | Phase 1 |
 | **Proaktive Notifications** | 100% | Phase 1 |
 | **Quest Expiration Notifications** | 100% | Phase 1 |
-| **HP/Death System** | 67% | Phase 2 |
+| **HP/Death System** | 83% | Phase 2 |
 | **AI Memory** | 0% | Phase 3 |
 | **Telegram AI Chat** | 0% | Phase 3 |
 | **Gold System** | 0% | Phase 3 |
@@ -138,12 +142,12 @@ None currently.
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~68% (Phase 2 - 4/6 plans complete)
+**Overall Vision Progress:** ~70% (Phase 2 - 5/6 plans complete)
 
 ## Notes
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
-- **Phase 2 IN PROGRESS:** Schema + data layer + damage triggers + UI complete, heal triggers + death flow remaining
+- **Phase 2 IN PROGRESS:** Schema + data layer + damage + heal triggers + UI complete, death/prestige flow remaining
 - **Cron Infrastructure:** Now has 4 schedulers running (reminder, proactive, quest-expiry, health-inactivity)
 - **Notification-System:** Fully operational (Web Push + Telegram one-way)
 - **Health Import:** Complete with auto-complete feature
@@ -182,6 +186,12 @@ None currently.
 - Streak break HP damage in habits/relapse API
 - HealthBar component (Framer Motion animated)
 - Dashboard HealthBar integration
+- handle_quest_completion_hp trigger function (+10/15/25/40 by difficulty)
+- handle_habit_completion_hp trigger function (+5 for positive habits)
+- handle_mood_log_hp trigger function (+2 for any mood log)
+- quest_completion_hp_trigger on quests table
+- habit_completion_hp_trigger on habit_logs table
+- mood_log_hp_trigger on mood_logs table
 
 ### To Research for Phase 3
 - AI Memory: Summary-based vs Vector-DB approach
@@ -189,4 +199,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 - Phase 2 Plan 5 Complete (02-05-PLAN.md)*
+*Last updated: 2026-02-02 - Phase 2 Plan 4 Complete (02-04-PLAN.md)*
