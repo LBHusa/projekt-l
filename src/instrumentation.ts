@@ -11,8 +11,20 @@ export async function register() {
     const { initProactiveScheduler } = await import('./lib/cron/proactive-scheduler');
     const { initHealthInactivityScheduler } = await import('./lib/cron/health-inactivity-scheduler');
     const { initProactiveQuestScheduler } = await import('./lib/cron/proactive-quest-scheduler');
+    const { initWeeklySummaryScheduler } = await import('./lib/cron/weekly-summary-scheduler');
+    const { ensureCollection } = await import('./lib/ai/memory-rag');
 
     console.log('[Instrumentation] Server starting...');
+
+    // Ensure Qdrant memory collection exists
+    console.log('[Instrumentation] Ensuring Qdrant memory collection...');
+    try {
+      await ensureCollection();
+      console.log('[Instrumentation] Qdrant memory collection ready');
+    } catch (error) {
+      console.error('[Instrumentation] Warning: Qdrant collection init failed:', error);
+      // Don't block startup - memory features will work when Qdrant is available
+    }
 
     // Initialize cron schedulers
     console.log('[Instrumentation] Initializing reminder scheduler...');
@@ -30,6 +42,9 @@ export async function register() {
     console.log('[Instrumentation] Initializing proactive quest scheduler...');
     initProactiveQuestScheduler();
 
-    console.log('[Instrumentation] Server ready (5 schedulers active)');
+    console.log('[Instrumentation] Initializing weekly summary scheduler...');
+    initWeeklySummaryScheduler();
+
+    console.log('[Instrumentation] Server ready (6 schedulers active)');
   }
 }
