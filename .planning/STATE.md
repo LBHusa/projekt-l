@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Den User durch echte Stakes, proaktive Begleitung und spuerbare Belohnungen motivieren, sein Leben bewusst auf der Meta-Ebene zu gestalten.
-**Current focus:** Vision Implementation - Phase 2 COMPLETE, ready for Phase 3
+**Current focus:** Vision Implementation - Phase 3 COMPLETE, ready for Phase 4
 
 ## Current Position
 
 Milestone: 2 of 2 (Vision Implementation)
-Phase: 2 of 4 (Konsequenzen & HP/Death System) - COMPLETE
-Plan: 6 of 6 complete
-Status: Phase 2 complete
-Last activity: 2026-02-02 - Completed 02-06-PLAN.md (Prestige & Danger Zone)
+Phase: 3 of 4 (Lebendiger Buddy) - COMPLETE
+Plan: 6 of 6 complete (P3-01a, P3-01b, P3-01c, P3-02, P3-03, P3-04)
+Status: Phase 3 complete
+Last activity: 2026-02-02 - Completed 03-PLAN.md (Lebendiger Buddy)
 
-Progress: [██████████████] 100% (Phase 2 complete - 6/6 plans)
+Progress: [████████████████████] 100% (Phase 3 complete - 16/17 plans)
 
 ## Milestone Overview
 
@@ -26,30 +26,31 @@ Progress: [██████████████] 100% (Phase 2 complete - 
 - **Key Deliverable:** Security-hardened foundation
 
 ### Milestone 2: Vision Implementation (CURRENT)
-- **Status:** Phase 2 COMPLETE, Phase 3 ready
+- **Status:** Phase 3 COMPLETE, Phase 4 ready
 - **Timeline:** 11 Wochen (4 Phasen)
 - **Target:** HP-System, AI Memory, Telegram Chat, Equipment
 
-## Phase 2 Tasks
+## Phase 3 Tasks
 
 | ID | Task | Status | Assignee |
 |----|------|--------|----------|
-| P2-01 | HP System Schema | `done` | GSD Executor |
-| P2-02 | Health Data Layer & Death Flow | `done` | GSD Executor |
-| P2-03 | Damage Triggers | `done` | GSD Executor |
-| P2-04 | Heal Triggers | `done` | GSD Executor |
-| P2-05 | HP UI Components | `done` | GSD Executor |
-| P2-06 | Death/Prestige Flow | `done` | GSD Executor |
+| P3-01a | Conversation Storage (Supabase) | `done` | GSD Executor |
+| P3-01b | RAG Memory mit Qdrant | `done` | GSD Executor |
+| P3-01c | Memory API & Integration | `done` | GSD Executor |
+| P3-02 | Telegram AI Chat (Two-Way) | `done` | GSD Executor |
+| P3-03 | Gold-System | `done` | GSD Executor |
+| P3-04 | Proaktive Quest-Generierung | `done` | GSD Executor |
 
-### Success Criteria Phase 2
-- [x] user_health + health_events tables created
-- [x] Health data layer with CRUD functions
-- [x] Death triggers XP loss (10% per faction)
-- [x] Streak-Break deals damage to user HP
-- [x] Inactivity deals damage to user HP
-- [x] Quest/Habit completion heals user HP
-- [x] HP bar visible in dashboard
-- [x] Death modal and prestige flow
+### Success Criteria Phase 3
+- [x] AI Conversation Memory mit Hybrid-RAG funktioniert (Qdrant + Supabase)
+- [x] USER-ISOLIERUNG: Jeder User sieht NUR seine eigenen Gespräche (user_id Filter)
+- [x] Sliding Window: 50 Messages für Kurzzeit-Context
+- [x] Weekly Summary Generator läuft (Cron, via scheduler)
+- [x] Semantische Suche funktioniert
+- [x] Memory-Export: User kann Daten exportieren (GDPR)
+- [x] Telegram AI Chat mit Quick-Action Buttons funktioniert
+- [x] Gold wird bei Quest/Habit Completion vergeben (inkl. Streak-Boni)
+- [x] Proaktive Quest-Generierung mit Ruhetage-Respekt
 
 ## Accumulated Decisions
 
@@ -78,6 +79,14 @@ Progress: [██████████████] 100% (Phase 2 complete - 
 | 2026-02-02 | 02-04 | Quest HP varies by difficulty (10/15/25/40) | Harder quests = bigger reward |
 | 2026-02-02 | 02-04 | Only positive habits grant HP | Negative habit avoidance is its own reward |
 | 2026-02-02 | 02-04 | Mood logging grants +2 HP | Small reward to encourage daily check-in |
+| 2026-02-02 | 03 | projekt_l_memory collection only | Protects HUSATECH production collections |
+| 2026-02-02 | 03 | 3072 dimensions (text-embedding-3-large) | Consistent with HUSATECH RAG system |
+| 2026-02-02 | 03 | 50 message sliding window | 2-3 days context, good token/quality balance |
+| 2026-02-02 | 03 | 20 AI messages/day rate limit | Prevents API abuse while allowing meaningful use |
+| 2026-02-02 | 03 | 100 gold starting balance | Gives new users immediate purchasing power |
+| 2026-02-02 | 03 | Streak milestones not every completion | Prevents gold inflation |
+| 2026-02-02 | 03 | Neutral-wise quest notification tone | Per CONTEXT.md specifications |
+| 2026-02-02 | 03 | Quest suggestions vs direct creation | User agency - they choose to accept |
 
 ## Blockers
 
@@ -87,42 +96,39 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-02 | Phase 3 Complete | Lebendiger Buddy (6/6 tasks, 21 min) |
+| 2026-02-02 | P3-04 Complete | Proaktive Quest-Generierung |
+| 2026-02-02 | P3-03 Complete | Gold System |
+| 2026-02-02 | P3-02 Complete | Telegram AI Chat |
+| 2026-02-02 | P3-01c Complete | Memory API & Integration |
+| 2026-02-02 | P3-01b Complete | RAG Memory mit Qdrant |
+| 2026-02-02 | P3-01a Complete | Conversation Storage |
 | 2026-02-02 | Phase 2 Complete | HP/Death System (6/6 plans) |
 | 2026-02-02 | Plan 02-06 Complete | Prestige & Danger Zone (4 tasks, 8 min) |
-| 2026-02-02 | Plan 02-04 Complete | HP Heal Triggers (3 tasks, 20 min) |
-| 2026-02-02 | Plan 02-05 Complete | HP UI Components (2 tasks, 4 min) |
-| 2026-02-02 | Plan 02-03 Complete | HP Damage Triggers (3 tasks, 2 min) |
-| 2026-02-02 | Plan 02-02 Complete | Health Data Layer & Death Flow (2 tasks, 4 min) |
-| 2026-02-02 | Plan 02-01 Complete | HP System Schema (2 tasks, 4 min) |
-| 2026-02-01 | Plan 01-04 Complete | Quest Expiration Notifications (3 tasks, 4 min) |
-| 2026-02-01 | Plan 01-02 Complete | Proaktive Lebensbereich-Erinnerungen (executed in parallel) |
-| 2026-02-01 | Plan 01-01 Complete | Streak Insurance Token System (5 tasks, 8 min) |
-| 2026-02-01 | Plan 01-03 Complete | Health Import -> Habit Auto-Complete (6 tasks, 8 min) |
+| 2026-02-01 | Plan 01-04 Complete | Quest Expiration Notifications |
 | 2026-02-01 | GSD Planning | PROJECT.md, ROADMAP.md, STATE.md, Phase Plans erstellt |
-| 2026-02-01 | Analysis Complete | 7 Reports in /docs/ (VISION-ROADMAP, ROTER-FADEN, etc.) |
-| 2026-01-23 | Milestone 1 Complete | Security Audit abgeschlossen (6/6 Phasen) |
 
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-02 09:30 UTC
-- **Focus:** Phase 2 Complete
-- **Completed:** 02-06-PLAN.md (4/4 tasks)
-- **Outcome:** Prestige modal, API, DangerZoneAlert, Phase 2 verified
+- **Date:** 2026-02-02 13:11 UTC
+- **Focus:** Phase 3 Complete
+- **Completed:** 03-PLAN.md (6/6 tasks)
+- **Outcome:** AI Memory, Telegram Chat, Gold System, Proactive Quests
 
 ### Resume Information
-- **Stopped at:** Phase 2 complete
+- **Stopped at:** Phase 3 complete
 - **Resume file:** None (no active checkpoint)
-- **Next:** Phase 3 - Lebendiger Buddy (AI Memory, Telegram Chat, Gold)
+- **Next:** Phase 4 - 2D Equipment & Shop
 
 ## Key Metrics
 
 ### Codebase Status
-- **Existing Features:** 33 Pages, 121+ Components, 55+ APIs
+- **Existing Features:** 33 Pages, 125+ Components, 62+ APIs
 - **Test Coverage:** 126+ E2E Tests, 271 Unit Tests
 - **Build Status:** Passing
 - **Security Audit:** 3/3 Checks passing
-- **Cron Schedulers:** 4 active (reminder, proactive, quest-expiry, health-inactivity)
+- **Cron Schedulers:** 5 active (reminder, proactive, quest-expiry, health-inactivity, proactive-quest)
 
 ### Vision Progress
 | Feature | Status | Phase |
@@ -137,23 +143,24 @@ None currently.
 | **Proaktive Notifications** | 100% | Phase 1 |
 | **Quest Expiration Notifications** | 100% | Phase 1 |
 | **HP/Death System** | 100% | Phase 2 |
-| **AI Memory** | 0% | Phase 3 |
-| **Telegram AI Chat** | 0% | Phase 3 |
-| **Gold System** | 0% | Phase 3 |
+| **AI Memory (Hybrid RAG)** | 100% | Phase 3 |
+| **Telegram AI Chat** | 100% | Phase 3 |
+| **Gold System** | 100% | Phase 3 |
+| **Proaktive Quest-Generierung** | 100% | Phase 3 |
 | **2D Equipment** | 0% | Phase 4 |
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~50% (Phase 2 complete - 10/17 plans)
+**Overall Vision Progress:** ~76% (Phase 3 complete - 16/17 plans)
 
 ## Notes
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
 - **Phase 2 COMPLETE:** Full HP/Death system with damage/heal triggers, prestige, and UI
-- **Cron Infrastructure:** Now has 4 schedulers running (reminder, proactive, quest-expiry, health-inactivity)
-- **Notification-System:** Fully operational (Web Push + Telegram one-way)
-- **Health Import:** Complete with auto-complete feature
-- **HP Bar:** Now visible on dashboard with Framer Motion animations
+- **Phase 3 COMPLETE:** AI Memory, Telegram Chat, Gold System, Proactive Quests
+- **Cron Infrastructure:** Now has 5 schedulers running
+- **Qdrant Integration:** projekt_l_memory collection created (3072 dimensions)
+- **Gold Economy:** Ready for Phase 4 shop implementation
 
 ## Technical Context
 
@@ -162,46 +169,31 @@ None currently.
 - Supabase (PostgreSQL + Auth)
 - Claude Sonnet 4.5 (AI Skill Bot)
 - Web Push API (funktioniert)
-- Telegram Bot API (one-way notifications)
+- Telegram Bot API (now two-way!)
 - Playwright E2E Testing
+- Qdrant Vector DB (87.106.191.206:6333)
 
-### New in Phase 1
-- streak_insurance_tokens table
-- habit_health_mappings table
-- proactive_notification_log table
-- quests.expiry_notified_at column
-- 3 cron schedulers in instrumentation.ts
-- StreakInsuranceCard and UseTokenModal UI components
-- HabitHealthMappingConfig UI component
+### New in Phase 3
+- conversation_history table
+- user_summaries table
+- user_currency table
+- currency_transactions table
+- streak_milestone_awards table
+- quest_suggestions table
+- memory-rag.ts (Qdrant integration)
+- telegram-ai.ts (Telegram AI chat)
+- proactive-quest.ts (quest generation)
+- GoldDisplay component
+- 7 new API endpoints
+- 5th cron scheduler (proactive-quest)
+- @qdrant/js-client-rest dependency
+- openai dependency
 
-### New in Phase 2
-- user_health table (HP, lives, prestige)
-- health_events table (append-only event log)
-- apply_hp_change RPC function (with XP loss on death)
-- perform_prestige RPC function
-- UserHealth and HealthEvent TypeScript types
-- health.ts data layer module (14 functions)
-- handle_quest_failure_hp trigger function
-- quest_failure_hp_trigger on quests table
-- /api/health/inactivity-check endpoint
-- health-inactivity-scheduler (4th cron)
-- Streak break HP damage in habits/relapse API
-- HealthBar component (Framer Motion animated)
-- Dashboard HealthBar integration
-- handle_quest_completion_hp trigger function (+10/15/25/40 by difficulty)
-- handle_habit_completion_hp trigger function (+5 for positive habits)
-- handle_mood_log_hp trigger function (+2 for any mood log)
-- quest_completion_hp_trigger on quests table
-- habit_completion_hp_trigger on habit_logs table
-- mood_log_hp_trigger on mood_logs table
-- PrestigeModal component (Phoenix-themed death recovery)
-- DangerZoneAlert component (low HP warning)
-- /api/health/prestige endpoint
-
-### To Research for Phase 3
-- AI Memory: Summary-based vs Vector-DB approach
-- Telegram: Webhook fuer 2-Way Chat bereits vorhanden?
+### To Research for Phase 4
+- Equipment rendering approach (SVG vs Canvas vs WebGL)
+- Shop item pricing balance
+- Equipment slot system design
 
 ---
 
-*Last updated: 2026-02-02 - Phase 2 Complete (6/6 plans)*
+*Last updated: 2026-02-02 - Phase 3 Complete (6/6 tasks)*
