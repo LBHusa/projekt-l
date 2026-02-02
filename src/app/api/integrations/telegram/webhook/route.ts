@@ -3,12 +3,14 @@
  * POST /api/integrations/telegram/webhook
  *
  * Receives updates from Telegram when users interact with the bot
+ * Phase 3: Extended with AI Chat support
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { sendMessage, type TelegramUpdate } from '@/lib/telegram';
+import { sendMessage, answerCallbackQuery, type TelegramUpdate } from '@/lib/telegram';
 import { consumeConnectionCode } from '@/lib/telegram-codes';
+import { handleTelegramAIChat, handleTelegramCallback } from '@/lib/telegram-ai';
 
 // Use service role for webhook (no user context)
 const supabase = createClient(
@@ -29,7 +31,38 @@ export async function POST(request: NextRequest) {
 
     const update: TelegramUpdate = await request.json();
 
-    // Only process messages
+    // Handle callback queries (button presses)
+    if (update.callback_query) {
+      const callbackQuery = update.callback_query;
+      const callbackChatId = callbackQuery.message?.chat.id;
+      const callbackData = callbackQuery.data;
+
+      // Acknowledge the callback
+      await answerCallbackQuery(callbackQuery.id);
+
+      if (callbackChatId && callbackData) {
+        // Find user for this chat
+        const { data: settings } = await supabase
+          .from('notification_settings')
+          .select('user_id')
+          .eq('telegram_chat_id', callbackChatId.toString())
+          .single();
+
+        if (settings?.user_id) {
+          const response = await handleTelegramCallback(
+            settings.user_id,
+            callbackChatId,
+            callbackData
+          );
+          if (response) {
+            await sendMessage(callbackChatId, response, { parseMode: 'HTML' });
+          }
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    // Only process text messages
     if (!update.message?.text) {
       return NextResponse.json({ ok: true });
     }
@@ -107,14 +140,20 @@ export async function POST(request: NextRequest) {
       await sendMessage(
         chatId,
         `<b>Projekt L Bot - Hilfe</b>\n\n` +
-        `Dieser Bot sendet dir Benachrichtigungen von Projekt L:\n` +
+        `Ich bin dein KI-Begleiter! Schreibe mir einfach, was du getan hast:\n` +
+        `- "Ich war joggen"\n` +
+        `- "30 Min meditiert"\n` +
+        `- "50€ für Essen ausgegeben"\n\n` +
+        `Ich logge das automatisch und gebe dir XP!\n\n` +
+        `<b>Benachrichtigungen:</b>\n` +
         `- Quest-Erinnerungen\n` +
         `- Streak-Warnungen\n` +
-        `- Achievement-Benachrichtigungen\n\n` +
+        `- Achievement-Meldungen\n\n` +
         `<b>Befehle:</b>\n` +
-        `/start - Bot starten & verbinden\n` +
-        `/status - Verbindungsstatus prüfen\n` +
-        `/help - Diese Hilfe anzeigen`,
+        `/start - Bot verbinden\n` +
+        `/status - Verbindungsstatus\n` +
+        `/help - Diese Hilfe\n\n` +
+        `<i>Tageslimit: 20 AI-Nachrichten</i>`,
         { parseMode: 'HTML' }
       );
       return NextResponse.json({ ok: true });
@@ -148,12 +187,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Unknown command - show help hint
-    await sendMessage(
-      chatId,
-      `Ich verstehe diesen Befehl nicht. Schreibe /help für eine Übersicht.`,
-      { parseMode: 'HTML' }
-    );
+    // Free text message - forward to AI Chat
+    // First, check if this chat is connected to a user
+    const { data: settings } = await supabase
+      .from('notification_settings')
+      .select('user_id, telegram_enabled')
+      .eq('telegram_chat_id', chatId.toString())
+      .single();
+
+    if (!settings?.user_id || !settings.telegram_enabled) {
+      await sendMessage(
+        chatId,
+        `Um mit mir zu chatten, verbinde zuerst deinen Account:\n` +
+        `projekt-l.husatech.com/settings/notifications\n\n` +
+        `/help für mehr Infos.`,
+        { parseMode: 'HTML' }
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // Forward to AI Chat
+    await handleTelegramAIChat(settings.user_id, chatId, text);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

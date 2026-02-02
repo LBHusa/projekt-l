@@ -32,9 +32,18 @@ interface TelegramMessage {
   text?: string;
 }
 
+export interface TelegramCallbackQuery {
+  id: string;
+  from: TelegramUser;
+  message?: TelegramMessage;
+  chat_instance: string;
+  data?: string;
+}
+
 export interface TelegramUpdate {
   update_id: number;
   message?: TelegramMessage;
+  callback_query?: TelegramCallbackQuery;
 }
 
 function getBotToken(): string {
@@ -52,13 +61,29 @@ function getApiUrl(method: string): string {
 /**
  * Send a message to a Telegram chat
  */
+/**
+ * Inline keyboard button type
+ */
+export interface InlineKeyboardButton {
+  text: string;
+  callback_data?: string;
+  url?: string;
+}
+
+/**
+ * Inline keyboard markup type
+ */
+export interface InlineKeyboardMarkup {
+  inline_keyboard: InlineKeyboardButton[][];
+}
+
 export async function sendMessage(
   chatId: string | number,
   text: string,
   options?: {
     parseMode?: 'HTML' | 'Markdown' | 'MarkdownV2';
     disableNotification?: boolean;
-    replyMarkup?: object;
+    replyMarkup?: InlineKeyboardMarkup | object;
   }
 ): Promise<TelegramMessage | null> {
   try {
@@ -183,6 +208,41 @@ export async function getWebhookInfo(): Promise<object | null> {
   } catch (error) {
     console.error('Telegram getWebhookInfo failed:', error);
     return null;
+  }
+}
+
+/**
+ * Answer callback query (acknowledge button press)
+ */
+export async function answerCallbackQuery(
+  callbackQueryId: string,
+  options?: {
+    text?: string;
+    showAlert?: boolean;
+  }
+): Promise<boolean> {
+  try {
+    const response = await fetch(getApiUrl('answerCallbackQuery'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        callback_query_id: callbackQueryId,
+        text: options?.text,
+        show_alert: options?.showAlert,
+      }),
+    });
+
+    const data: TelegramResponse<boolean> = await response.json();
+
+    if (!data.ok) {
+      console.error('Telegram answerCallbackQuery error:', data.description);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Telegram answerCallbackQuery failed:', error);
+    return false;
   }
 }
 
