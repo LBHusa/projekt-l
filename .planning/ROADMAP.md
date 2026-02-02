@@ -12,7 +12,7 @@ This roadmap implements the core vision: A gamified life-tracking system that tr
 - **Deliverables:** RLS policies, E2E tests (126+), security audit scripts, CI/CD
 
 ### Milestone 2: Vision Implementation (CURRENT)
-- **Status:** NOT STARTED
+- **Status:** Phase 1 COMPLETE, Phase 2 PLANNED
 - **Timeline:** 11 Wochen
 - **Goal:** HP-System, AI Memory, Telegram Chat, Equipment Shop
 
@@ -22,14 +22,14 @@ This roadmap implements the core vision: A gamified life-tracking system that tr
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (1.1, 2.1): Urgent insertions if needed
 
-- [ ] **Phase 1: Fairness & Proaktivität** - Streak Insurance, Proaktive Notifications, Health-Habit Link
+- [x] **Phase 1: Fairness & Proaktivität** - Streak Insurance, Proaktive Notifications, Health-Habit Link
 - [ ] **Phase 2: Konsequenzen (HP/Death)** - HP System, Damage/Heal Triggers, Death/Respawn, Prestige
 - [ ] **Phase 3: Lebendiger Buddy** - AI Memory, Telegram AI Chat, Gold System, Proaktive Quests
 - [ ] **Phase 4: Visuelle Belohnungen** - 2D Equipment System, Shop, Weekly AI Reports
 
 ## Phase Details
 
-### Phase 1: Fairness & Proaktivität (Woche 1-2)
+### Phase 1: Fairness & Proaktivität (Woche 1-2) - COMPLETE
 **Goal**: Die App wird "fair" und "lebendig" - Streak Insurance verhindert Frustration, proaktive Erinnerungen aktivieren User.
 **Depends on**: Milestone 1 (Security) - COMPLETE
 **Requirements**: FAIR-01, FAIR-02, FAIR-03, FAIR-04
@@ -41,31 +41,31 @@ This roadmap implements the core vision: A gamified life-tracking system that tr
 **Plans:** 4 plans in 2 waves
 
 Plans:
-- [ ] 01-01-PLAN.md — Streak Insurance Token System (DB + API + UI) [Wave 1]
-- [ ] 01-02-PLAN.md — Proaktive Lebensbereich-Erinnerungen (Cron + Notifications) [Wave 2]
-- [ ] 01-03-PLAN.md — Health Import → Habit Auto-Complete Link [Wave 1]
-- [ ] 01-04-PLAN.md — Quest-Expiration Notifications [Wave 2]
+- [x] 01-01-PLAN.md — Streak Insurance Token System (DB + API + UI) [Wave 1]
+- [x] 01-02-PLAN.md — Proaktive Lebensbereich-Erinnerungen (Cron + Notifications) [Wave 2]
+- [x] 01-03-PLAN.md — Health Import → Habit Auto-Complete Link [Wave 1]
+- [x] 01-04-PLAN.md — Quest-Expiration Notifications [Wave 2]
 
 ### Phase 2: Konsequenzen - HP/Death System (Woche 3-5)
 **Goal**: Echte Stakes durch HP-System - User erlebt Konsequenzen für Vernachlässigung und Belohnungen für Konsistenz.
-**Depends on**: Phase 1
+**Depends on**: Phase 1 (COMPLETE)
 **Requirements**: HP-01, HP-02, HP-03, HP-04, HP-05, HP-06
 **Success Criteria** (what must be TRUE):
   1. HP-System live und stabil (user_health + health_events Tabellen)
   2. Damage Triggers funktionieren (Quest fail: -10, Streak break: -5, Inaktivität: -5/Tag)
-  3. Heal Triggers funktionieren (Quest complete: +10-30, Habit: +5, Mood: +2)
+  3. Heal Triggers funktionieren (Quest complete: +10-40, Habit: +5, Mood: +2)
   4. Death & Respawn Flow funktioniert (3 Lives, XP-Verlust bei Tod)
   5. Prestige System aktiv bei 0 Lives (Soft Reset mit Boni)
   6. Health Bar UI zeigt HP animiert, Danger Zone Warnings bei < 20 HP
-**Plans:** TBD (6 Deliverables)
+**Plans:** 6 plans in 4 waves
 
 Plans:
-- [ ] 02-01-PLAN.md — Health Database Schema (user_health, health_events)
-- [ ] 02-02-PLAN.md — Damage Triggers Implementation
-- [ ] 02-03-PLAN.md — Heal Triggers Implementation
-- [ ] 02-04-PLAN.md — Death & Respawn Flow
-- [ ] 02-05-PLAN.md — Prestige System
-- [ ] 02-06-PLAN.md — Health Bar UI & Danger Zone Warnings
+- [ ] 02-01-PLAN.md — Health Database Schema (user_health + health_events tables, RLS, apply_hp_change RPC) [Wave 1]
+- [ ] 02-02-PLAN.md — Data Layer & Death Flow (health.ts functions, XP loss on death) [Wave 2]
+- [ ] 02-03-PLAN.md — Damage Triggers (Quest fail, Streak break, Inactivity cron) [Wave 3]
+- [ ] 02-04-PLAN.md — Heal Triggers (Quest complete, Habit done, Mood log) [Wave 3]
+- [ ] 02-05-PLAN.md — Health Bar UI (HealthBar component + dashboard integration) [Wave 3]
+- [ ] 02-06-PLAN.md — Prestige & Danger Zone (Prestige modal + API, DangerZoneAlert, verification) [Wave 4]
 
 ### Phase 3: Lebendiger Buddy (Woche 6-8)
 **Goal**: Der Buddy wird real - er erinnert sich an Gespräche, ist via Telegram erreichbar, und der User verdient Gold.
@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 ### Milestone 2: Vision Implementation (CURRENT)
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
-| 1. Fairness & Proaktivität | 0/4 | PLANNED | Woche 1-2 |
-| 2. Konsequenzen (HP/Death) | 0/6 | BLOCKED | Woche 3-5 |
+| 1. Fairness & Proaktivität | 4/4 | COMPLETE | Woche 1-2 |
+| 2. Konsequenzen (HP/Death) | 0/6 | PLANNED | Woche 3-5 |
 | 3. Lebendiger Buddy | 0/4 | BLOCKED | Woche 6-8 |
 | 4. Visuelle Belohnungen | 0/3 | BLOCKED | Woche 9-11 |
