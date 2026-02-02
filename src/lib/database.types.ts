@@ -1892,3 +1892,78 @@ export interface UserQuestPreferencesExtended {
   created_at: string;
   updated_at: string;
 }
+
+// =============================================
+// Equipment System Types
+// Phase 4: Visuelle Belohnungen
+// =============================================
+
+export type EquipmentItemType = 'head' | 'body' | 'accessory';
+export type EquipmentRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+export interface EquipmentItem {
+  id: string;
+  name: string;
+  description: string | null;
+  item_type: EquipmentItemType;
+  sprite_url: string;
+  price_gold: number;
+  rarity: EquipmentRarity;
+  required_level: number;
+  required_prestige: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface UserEquipment {
+  id: string;
+  user_id: string;
+  item_id: string;
+  is_equipped: boolean;
+  acquired_at: string;
+}
+
+export interface UserEquipmentWithItem extends UserEquipment {
+  equipment_items: EquipmentItem;
+}
+
+export interface EquippedItems {
+  head: UserEquipmentWithItem | null;
+  body: UserEquipmentWithItem | null;
+  accessory: UserEquipmentWithItem | null;
+}
+
+// =============================================
+// Weekly Reports Types
+// Phase 4: Visuelle Belohnungen
+// =============================================
+
+export interface WeeklyReport {
+  id: string;
+  user_id: string;
+  week_start: string;
+  week_end: string;
+  top_wins: string[];
+  attention_area: string;
+  recognized_pattern: string;
+  recommendation: string;
+  stats_snapshot: WeeklyStatsSnapshot | null;
+  generated_at: string;
+  read_at: string | null;
+}
+
+export interface WeeklyStatsSnapshot {
+  quests_completed: number;
+  quests_failed: number;
+  habits_tracked: number;
+  total_xp: number;
+  faction_activity: Record<string, number>;
+  streaks_maintained: number;
+  streaks_broken: number;
+  hp_start: number;
+  hp_end: number;
+  gold_earned: number;
+  gold_spent: number;
+  mood_entries: number;
+  journal_entries: number;
+}

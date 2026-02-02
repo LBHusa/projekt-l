@@ -12,6 +12,7 @@ export async function register() {
     const { initHealthInactivityScheduler } = await import('./lib/cron/health-inactivity-scheduler');
     const { initProactiveQuestScheduler } = await import('./lib/cron/proactive-quest-scheduler');
     const { initWeeklySummaryScheduler } = await import('./lib/cron/weekly-summary-scheduler');
+    const { initWeeklyReportScheduler } = await import('./lib/cron/weekly-report-scheduler');
     const { ensureCollection } = await import('./lib/ai/memory-rag');
 
     console.log('[Instrumentation] Server starting...');
@@ -45,6 +46,9 @@ export async function register() {
     console.log('[Instrumentation] Initializing weekly summary scheduler...');
     initWeeklySummaryScheduler();
 
-    console.log('[Instrumentation] Server ready (6 schedulers active)');
+    console.log('[Instrumentation] Initializing weekly report scheduler...');
+    initWeeklyReportScheduler();
+
+    console.log('[Instrumentation] Server ready (7 schedulers active)');
   }
 }
