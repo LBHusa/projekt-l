@@ -133,6 +133,44 @@ export async function POST(request: NextRequest) {
       console.error('Error logging activity:', err);
     }
 
+    // ============================================
+    // Apply HP damage for streak break
+    // Only if user had an actual streak (previousStreak > 0)
+    // ============================================
+    if (previousStreak > 0) {
+      const hpDamage = 5; // Fixed 5 HP damage for streak break
+
+      try {
+        // Apply HP damage via apply_hp_change RPC
+        // This function handles:
+        // 1. Logging the health_event
+        // 2. Updating user_health.current_hp
+        // 3. Death detection and respawn
+        // 4. XP loss on death (10% per faction)
+        const { error: hpError } = await adminClient.rpc('apply_hp_change', {
+          p_user_id: userId,
+          p_hp_change: -hpDamage,
+          p_event_type: 'streak_break',
+          p_source_table: 'habits',
+          p_source_id: habitId,
+          p_metadata: {
+            previous_streak: previousStreak,
+            habit_name: habit.name,
+            faction_id: habit.faction_id
+          }
+        });
+
+        if (hpError) {
+          console.error('[RELAPSE] Failed to apply HP damage on streak break:', hpError);
+        } else {
+          console.log(`[RELAPSE] Applied -${hpDamage} HP for streak break (${previousStreak} days lost)`);
+        }
+      } catch (err) {
+        console.error('[RELAPSE] Error applying HP damage:', err);
+        // Don't block the relapse operation if HP damage fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       log,
