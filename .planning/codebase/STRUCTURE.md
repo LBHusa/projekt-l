@@ -1,251 +1,326 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-01-22
+**Analysis Date:** 2026-02-02
 
 ## Directory Layout
 
 ```
 projekt-l/
-├── public/                      # Static assets served directly
-├── supabase/
-│   ├── migrations/              # SQL migration files (schema)
-│   └── seed.sql                 # Initial seed data
 ├── src/
-│   ├── __tests__/               # Unit and integration tests
-│   ├── app/                     # Next.js App Router pages and API routes
-│   ├── components/              # Reusable React components
-│   ├── contexts/                # React Context providers and hooks
-│   ├── hooks/                   # Custom React hooks
-│   ├── lib/                     # Utility functions, data access, types
-│   └── middleware.ts            # Request middleware (authentication)
-├── .env                         # Environment variables (secrets)
-├── .env.example                 # Example environment variables
-├── next.config.ts               # Next.js configuration
-├── tsconfig.json                # TypeScript configuration
-├── package.json                 # Dependencies
-└── tailwind.config.ts           # Tailwind CSS configuration
+│   ├── app/                           # Next.js App Router pages & API
+│   │   ├── page.tsx                   # Dashboard (main entry)
+│   │   ├── layout.tsx                 # Root layout with providers
+│   │   ├── api/                       # API routes (business logic)
+│   │   │   ├── ai/                    # AI chat & memory
+│   │   │   ├── health/                # HP/prestige system
+│   │   │   ├── habits/                # Habit tracking & completion
+│   │   │   ├── quests/                # Quest generation & tracking
+│   │   │   ├── skills/                # Skill management
+│   │   │   ├── integrations/          # Telegram, Google Calendar, Health Import
+│   │   │   ├── finanzen/              # Finance (accounts, transactions)
+│   │   │   ├── contacts/              # Contact management
+│   │   │   ├── factions/              # Life domain management
+│   │   │   ├── profile/               # Avatar, user settings
+│   │   │   ├── notifications/         # Push notifications
+│   │   │   └── ...                    # Other domains (geist, koerper, etc.)
+│   │   ├── koerper/                   # Body/Health domain page
+│   │   ├── weisheit/                  # Knowledge domain page
+│   │   ├── soziales/                  # Social domain page
+│   │   ├── quests/                    # Quest system UI
+│   │   ├── habits/                    # Habit tracker UI
+│   │   ├── skill/[id]/                # Skill detail page
+│   │   ├── contacts/                  # Contact list & management
+│   │   ├── finanzen/                  # Finance dashboard
+│   │   ├── ai-chat-demo/              # AI chat UI
+│   │   ├── auth/                      # Login/signup pages
+│   │   ├── onboarding/                # User onboarding flow
+│   │   └── settings/                  # User preferences
+│   │
+│   ├── components/                    # React components (reusable)
+│   │   ├── dashboard/                 # Dashboard widgets
+│   │   │   ├── modals/                # QuickTransactionModal, HabitCompletionModal, etc.
+│   │   │   └── ...                    # Specific widgets
+│   │   ├── health/                    # Health bar, prestige, danger zone alerts
+│   │   ├── currency/                  # Gold display, balance UI
+│   │   ├── quests/                    # Quest cards, generation UI
+│   │   ├── habits/                    # Habit widgets, trackers
+│   │   ├── skills/                    # Skill tree, graph views
+│   │   ├── ai/                        # AI chat interface components
+│   │   ├── contacts/                  # Contact cards, birthdays, attention lists
+│   │   ├── factions/                  # Life balance radar, faction stats
+│   │   ├── character/                 # Character header, avatar
+│   │   ├── ui/                        # Generic UI (buttons, modals, inputs)
+│   │   ├── providers/                 # Context providers
+│   │   ├── sidebars/                  # Navigation sidebar
+│   │   ├── onboarding/                # Onboarding step components
+│   │   └── shared/                    # Utilities (Loading, Modal, etc.)
+│   │
+│   ├── lib/
+│   │   ├── data/                      # Data access layer (CRUD)
+│   │   │   ├── health.ts              # HP, lives, prestige, health events
+│   │   │   ├── currency.ts            # Gold, gems, transactions
+│   │   │   ├── skills.ts              # User skills (CRUD)
+│   │   │   ├── habits.ts              # Habit logs, streaks, completion
+│   │   │   ├── quests.ts              # Quest CRUD & tracking
+│   │   │   ├── domains.ts             # Skill domains & factions
+│   │   │   ├── contacts.ts            # Contacts, birthdays, relationships
+│   │   │   ├── factions.ts            # Faction stats & balancing
+│   │   │   ├── finanzen.ts            # Accounts, transactions, budgets
+│   │   │   ├── geist.ts               # Mood logs, mental health
+│   │   │   ├── koerper.ts             # Body metrics, workouts
+│   │   │   ├── activity-log.ts        # Recent activity feed
+│   │   │   ├── achievements.ts        # Badge/achievement stats
+│   │   │   ├── conversation-memory.ts # Chat message history
+│   │   │   └── ...                    # Other domains
+│   │   │
+│   │   ├── ai/                        # AI integration & tools
+│   │   │   ├── memory-rag.ts          # Qdrant semantic search
+│   │   │   ├── skill-tools.ts         # Claude tools for skill management
+│   │   │   ├── questGenerator.ts      # Quest generation prompts
+│   │   │   ├── proactive-quest.ts     # Smart quest suggestions
+│   │   │   ├── faction-suggester.ts   # Faction balancing recommendations
+│   │   │   └── trial.ts               # Free trial/credit system
+│   │   │
+│   │   ├── cron/                      # Background job schedulers
+│   │   │   ├── proactive-quest-scheduler.ts
+│   │   │   ├── weekly-summary-scheduler.ts
+│   │   │   ├── health-inactivity-scheduler.ts
+│   │   │   ├── quest-expiry-scheduler.ts
+│   │   │   ├── reminder-scheduler.ts
+│   │   │   └── proactive-scheduler.ts
+│   │   │
+│   │   ├── supabase/                  # Database client setup
+│   │   │   ├── client.ts              # Browser client (Supabase SSR)
+│   │   │   ├── server.ts              # Server client (server components)
+│   │   │   ├── admin.ts               # Service role client (webhooks)
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── types/                     # Custom TypeScript types
+│   │   │   ├── contacts.ts            # Contact type definitions
+│   │   │   ├── notifications.ts       # Notification types
+│   │   │   ├── health-import.ts       # Apple Health import types
+│   │   │   └── streak-insurance.ts    # Streak insurance types
+│   │   │
+│   │   ├── database.types.ts          # Auto-generated Supabase schema types
+│   │   ├── auth-helper.ts             # Auth utilities
+│   │   ├── telegram.ts                # Telegram bot client & API
+│   │   ├── telegram-ai.ts             # Telegram + AI integration
+│   │   ├── telegram-codes.ts          # QR/token linking system
+│   │   └── ...                        # Other utilities
+│   │
+│   ├── hooks/                         # React hooks
+│   │   ├── use-auth.ts                # Current user & session
+│   │   └── ...
+│   │
+│   ├── contexts/                      # React context providers
+│   │   └── SidebarContext.tsx         # Navigation sidebar state
+│   │
+│   └── middleware.ts                  # Next.js middleware (auth, redirects)
+│
+├── supabase/
+│   └── migrations/                    # SQL schema migrations
+│       └── 20241226_001_initial_schema.sql
+│
+├── .planning/                         # GSD planning artifacts
+│   └── codebase/                      # This directory
+│       ├── ARCHITECTURE.md
+│       └── STRUCTURE.md
+│
+├── package.json                       # Dependencies & scripts
+├── tsconfig.json                      # TypeScript config
+├── next.config.ts                     # Next.js config (redirects)
+├── playwright.config.ts               # E2E test config
+├── vitest.config.ts                   # Unit test config
+└── .env.example                       # Environment variables template
 ```
 
 ## Directory Purposes
 
-**public/**
-- Purpose: Serve static assets directly to clients
-- Contains: Icons, logos, avatars, images, manifest.json
-- Key files: `manifest.json` (PWA manifest)
+**`src/app/`**
+- Purpose: Next.js App Router - defines routes and API endpoints
+- Contains: Page components (.tsx), layout files, API route handlers
+- Key files: `page.tsx` (dashboard), `layout.tsx` (root), `api/**` (endpoints)
 
-**supabase/**
-- Purpose: Database schema and initialization
-- Contains: SQL migrations, seed data
-- Key files:
-  - `migrations/20241226_001_initial_schema.sql` (main schema)
-  - `migrations/20260117200000_faction_names_fix.sql` (latest updates)
-
-**src/app/**
-- Purpose: Next.js App Router pages and API endpoints
-- Contains: Page components, API route handlers, layouts
-- Key patterns:
-  - `[page]/page.tsx` - UI pages
-  - `[page]/layout.tsx` - Layout wrappers
-  - `api/[feature]/[action]/route.ts` - API endpoints
-  - `auth/` - Authentication pages
-
-**src/components/**
-- Purpose: Reusable React components
+**`src/components/`**
+- Purpose: Reusable React components organized by feature domain
 - Contains: UI components, forms, widgets, modals
-- Organization: Grouped by domain/feature
-- Key files:
-  - `Orb.tsx` - Main interactive sphere component
-  - `dashboard/` - Dashboard widgets and modals
-  - `finanzen/` - Finance-related components
-  - `habits/` - Habit tracking components
-  - `contacts/` - Contact management components
+- Namespaces: `dashboard/`, `health/`, `habits/`, `quests/`, `skills/`, `ai/`, etc.
+- Pattern: Each domain has a directory with related components
 
-**src/lib/**
-- Purpose: Business logic, data access, utilities
-- Contains: Database layer, types, external integrations
-- Subdirectories:
-  - `data/` - Data access layer (queries and mutations)
-  - `supabase/` - Supabase client configuration
-  - `types/` - Custom TypeScript types
-  - `ui/` - UI constants and utilities
-  - `ai/` - AI integration (quest generation, chat)
-  - `cron/` - Scheduled tasks
-  - `export/` - Data export functionality
-  - `import/` - Data import functionality
+**`src/lib/data/`**
+- Purpose: Data access layer - encapsulates all database queries
+- Contains: CRUD functions, each file represents a data domain
+- Convention: Exported functions use camelCase (e.g., `getUserHealth()`, `createSkill()`)
+- Pattern: Functions take userId param, use browser client or server client depending on context
 
-**src/hooks/**
-- Purpose: Custom React hooks for common patterns
-- Contains: useAuth, authentication handlers, custom hooks
-- Key files:
-  - `useAuth.ts` - Authentication state management
+**`src/lib/ai/`**
+- Purpose: AI integration - Claude tools, Qdrant RAG, quest generation
+- Contains: Tool definitions, prompts, memory management, schedulers
+- Key: `memory-rag.ts` handles semantic search, `skill-tools.ts` exposes abilities to Claude
 
-**src/contexts/**
-- Purpose: React Context providers for global state
-- Contains: Theme provider, sidebar state, other contexts
-- Key patterns: Providers wrapping application
+**`src/lib/cron/`**
+- Purpose: Automated background tasks
+- Contains: Scheduler initialization functions using node-cron
+- Examples: Daily proactive quest suggestions, weekly summaries, health inactivity checks
+- Startup: Called from API routes or server startup
 
-**src/__tests__/**
-- Purpose: Unit and integration tests
-- Contains: Test files for business logic, types, parsers
-- Key files: `*.test.ts` files testing specific modules
+**`src/lib/supabase/`**
+- Purpose: Database client factory functions
+- Contains: `client.ts` (browser), `server.ts` (server), `admin.ts` (service role)
+- Usage: Import and call `createClient()` to get appropriate Supabase instance
+
+**`src/lib/types/`**
+- Purpose: Custom TypeScript interfaces not in auto-generated schema
+- Contains: Complex types (contacts with stats, notifications, health import)
+- Note: Most types auto-generated in `database.types.ts` from Supabase
+
+**`src/hooks/`**
+- Purpose: Reusable React hooks
+- Contains: `use-auth.ts` for current user, others as needed
+- Pattern: Custom hooks encapsulate stateful logic
+
+**`src/contexts/`**
+- Purpose: React Context providers for app-wide state
+- Contains: `SidebarContext.tsx` for navigation state
+- Usage: Wrap app in provider, use hook to access
+
+**`supabase/migrations/`**
+- Purpose: SQL schema definitions (source of truth for database)
+- Contains: Migration files that define tables, functions, RLS policies
+- Note: Auto-generated types in `database.types.ts` come from here
 
 ## Key File Locations
 
 **Entry Points:**
-- `src/app/layout.tsx` - Root layout with providers
-- `src/app/page.tsx` - Dashboard (main page)
-- `middleware.ts` - Authentication middleware
+- `src/app/page.tsx`: Main dashboard (first page user sees)
+- `src/app/layout.tsx`: Root layout with all providers
+- `src/app/api/ai/chat/route.ts`: AI chat endpoint (POST)
+- `src/app/api/integrations/telegram/webhook/route.ts`: Telegram webhook
 
 **Configuration:**
-- `.env` - Secret environment variables (not committed)
-- `.env.example` - Template for required environment variables
-- `next.config.ts` - Next.js settings (redirects configured here)
-- `tsconfig.json` - TypeScript configuration
+- `tsconfig.json`: TypeScript config with `@/*` alias
+- `next.config.ts`: Next.js redirects (old URLs → new URLs)
+- `.env.example`: Required environment variables
+- `package.json`: Dependencies and scripts
 
 **Core Logic:**
-- `src/lib/data/` - All data operations
-- `src/lib/supabase/` - Supabase client instances
-- `src/lib/database.types.ts` - Generated database type definitions
-- `src/lib/xp.ts` - XP calculation system
+- `src/lib/data/health.ts`: HP/prestige system
+- `src/lib/data/currency.ts`: Gold/gem system
+- `src/lib/data/habits.ts`: Habit tracking & streaks
+- `src/lib/ai/skill-tools.ts`: Claude tool definitions (LARGE: 63KB)
+- `src/lib/ai/memory-rag.ts`: Qdrant integration
 
-**UI Components:**
-- `src/components/index.ts` - Component barrel exports
-- `src/components/dashboard/` - Main dashboard widgets
-- `src/components/factions/` - Faction display components
+**Authentication:**
+- `src/middleware.ts`: Session check, redirect logic
+- `src/lib/supabase/client.ts`: Browser auth client
+- `src/lib/supabase/server.ts`: Server auth client
+- `src/hooks/use-auth.ts`: Current user hook
 
-**Testing:**
-- `src/__tests__/xp.test.ts` - XP system tests
-- `src/__tests__/habits-integration.test.ts` - Habit workflow tests
-- `vitest.config.ts` - Test runner configuration
+**Integrations:**
+- `src/app/api/integrations/telegram/`: Telegram bot & webhooks
+- `src/app/api/integrations/google-calendar/`: Calendar sync
+- `src/app/api/integrations/health-import/`: Apple Health webhook
+- `src/lib/telegram.ts`: Telegram bot client
 
 ## Naming Conventions
 
 **Files:**
-- React components: PascalCase (e.g., `Orb.tsx`, `DomainForm.tsx`)
-- Utility functions: camelCase (e.g., `getTotalSkillCount.ts`, `updateFactionStats.ts`)
-- Data access functions: camelCase with descriptive names (e.g., `getHabits.ts`, `createDomain.ts`)
-- API routes: kebab-case directories with `route.ts` file (e.g., `api/habits/create/route.ts`)
-- Test files: same name as source + `.test.ts` (e.g., `xp.test.ts`)
+- Pages: `page.tsx` (e.g., `src/app/page.tsx`, `src/app/quests/page.tsx`)
+- API routes: `route.ts` (e.g., `src/app/api/habits/create/route.ts`)
+- Components: PascalCase (e.g., `CharacterHeader.tsx`, `HealthBar.tsx`)
+- Data layer: camelCase (e.g., `health.ts`, `habits.ts`)
+- Hooks: camelCase with `use-` prefix (e.g., `use-auth.ts`)
 
 **Directories:**
-- Feature-based: `/koerper`, `/geist`, `/finanzen`, `/soziales` (German faction names)
-- Component groups: `/dashboard`, `/components/habits`, `/components/finanzen`
-- API endpoints: `/api/habits/create`, `/api/skills/xp` (nested by resource then action)
-- Utilities: `/lib/data`, `/lib/supabase`, `/lib/ai`
+- Pages (App Router): snake-case, brackets for dynamic (e.g., `skill/[id]/`)
+- Components: domain-based namespaces (e.g., `health/`, `habits/`, `dashboard/modals/`)
+- Data: domain name (e.g., `data/health.ts`, `data/habits.ts`)
 
-**Exports & Imports:**
-- Barrel exports: `index.ts` in component directories
-- Absolute imports: `@/` alias for `src/` (configured in tsconfig.json)
-- Data layer: Import from `src/lib/data/` for all database operations
-- Components: Import from `src/components/` using absolute imports
+**Functions & Variables:**
+- Data layer: `get*()`, `create*()`, `update*()`, `delete*()` (e.g., `getUserHealth()`)
+- Components: Props interfaces suffixed with `Props` (e.g., `HealthBarProps`)
+- Utilities: camelCase (e.g., `buildHybridContext()`, `storeConversationBatch()`)
+
+**CSS Classes:**
+- Tailwind utility classes (e.g., `flex`, `gap-4`, `bg-purple-500/20`)
+- CSS variables via theme (e.g., `var(--accent-primary)`, `var(--background-secondary)`)
 
 ## Where to Add New Code
 
-**New Feature (Domain/Faction):**
-1. Create page: `src/app/[faction-name]/page.tsx`
-2. Create components: `src/components/[faction-name]/`
-3. Create data access: `src/lib/data/[faction-name].ts`
-4. Create API endpoints: `src/app/api/[faction-name]/[action]/route.ts`
-5. Add tests: `src/__tests__/[feature-name].test.ts`
+**New Feature (e.g., new domain like "Skills"):**
+1. **Database:** Add migration in `supabase/migrations/`
+2. **Types:** Auto-generate types from Supabase (or add custom in `src/lib/types/`)
+3. **Data layer:** Create `src/lib/data/skills.ts` with CRUD functions
+4. **API:** Create `src/app/api/skills/` with route handlers
+   - `src/app/api/skills/create/route.ts` (POST)
+   - `src/app/api/skills/[id]/route.ts` (GET, PUT, DELETE)
+5. **Components:** Create `src/components/skills/` with feature components
+6. **Page:** Create `src/app/skills/page.tsx` for the main UI
+7. **Tests:** Add `src/app/skills/page.test.tsx` or `src/lib/data/skills.test.ts`
 
-**New Component/UI:**
-1. Create component file: `src/components/[name].tsx` (or subdirectory if part of feature)
-2. Export from barrel: `src/components/[feature]/index.ts`
-3. Use Tailwind classes and CSS variables for styling
-4. Add Framer Motion for animations if interactive
+**New Component (e.g., SkillCard):**
+1. Determine domain (e.g., `skills`, `habits`, `dashboard`)
+2. Create file: `src/components/{domain}/{ComponentName}.tsx`
+3. Define `interface {ComponentName}Props` for typing
+4. Export component with 'use client' if uses hooks/interactivity
+5. Use in appropriate page or other component
 
-**New API Endpoint:**
-1. Create nested route: `src/app/api/[resource]/[action]/route.ts`
-2. Authenticate user at start of handler
-3. Call data access layer from `src/lib/data/`
-4. Return JSON response with `NextResponse.json()`
+**New API Endpoint (e.g., POST /api/skills/train):**
+1. Create directory: `src/app/api/skills/train/`
+2. Create file: `src/app/api/skills/train/route.ts`
+3. Implement POST handler: `export async function POST(request)`
+4. Use server client: `const supabase = await createClient()`
+5. Get authenticated user: `const { data: { user } } = await supabase.auth.getUser()`
+6. Call data layer: `await updateSkillXp(user.id, skillId, xpGain)`
+7. Return JSON response: `NextResponse.json(result)`
 
-**Database Changes:**
-1. Create migration file: `supabase/migrations/[timestamp]_[description].sql`
-2. Update `src/lib/database.types.ts` (auto-generated by Supabase CLI)
-3. Add data access functions to `src/lib/data/`
+**New Scheduled Task (e.g., daily skill review):**
+1. Create file: `src/lib/cron/skill-review-scheduler.ts`
+2. Use node-cron: `cron.schedule('0 9 * * *', async () => { ... })`
+3. Fetch users: `await getUsersForSkillReview()`
+4. Process each: `for (const userId of users) { ... }`
+5. Call data layer or API to update records
+6. Log results: `console.log('[Skill Review] Completed X users')`
+7. Import and start in: `src/app/api/cron/route.ts` or server startup
 
-**Utilities & Helpers:**
-- Shared utilities: `src/lib/` (organize into subdirectories by domain)
-- Business logic: `src/lib/data/` if data-related
-- UI utilities: `src/lib/ui/`
+**New AI Tool (e.g., for quest suggestions):**
+1. Define tool signature in `src/lib/ai/skill-tools.ts`:
+   ```typescript
+   {
+     name: "suggest_quests",
+     description: "Generate quest suggestions based on user activity",
+     input_schema: { type: "object", properties: { ... }, required: [...] }
+   }
+   ```
+2. Add handler in `executeSkillTool()` function
+3. Import and use in `src/app/api/ai/chat/route.ts`
+4. Update system prompt to document the tool
 
-**Tests:**
-- Place test file in `src/__tests__/` with name matching source
-- Use Vitest framework: `import { describe, it, expect } from 'vitest'`
-- Test data access layer functions separately from UI
+**Utilities (e.g., data formatting, validation):**
+- Validation: `src/lib/validation/{domain}.ts`
+- Helpers: `src/lib/{util-name}.ts` (e.g., `auth-helper.ts`, `telegram.ts`)
+- UI utilities: `src/lib/ui/{util-name}.ts`
 
 ## Special Directories
 
-**src/app/api/**
-- Purpose: Server-side API endpoints
-- Generated: No
+**`.planning/`**
+- Purpose: GSD (Guided Strategic Development) planning artifacts
+- Generated: Yes, by GSD commands
+- Committed: No (in .gitignore)
+- Contents: Phase plans, analysis documents, work logs
+
+**`supabase/migrations/`**
+- Purpose: Version control for database schema
+- Generated: No (manually written)
 - Committed: Yes
-- Pattern: RESTful endpoints that handle authentication and data operations
-- Each route: Starts with user authentication check, then calls data layer
+- Contents: SQL files that define tables, RLS policies, functions
 
-**src/lib/data/**
-- Purpose: Data access layer (REQUIRED for all DB operations)
-- Generated: No
-- Committed: Yes
-- Pattern: Every function is async, handles errors gracefully, returns typed data
-- NEVER access database directly from components - ALWAYS use these functions
-
-**src/components/dashboard/**
-- Purpose: Main dashboard UI widgets
-- Generated: No
-- Committed: Yes
-- Pattern: Stateless widgets receiving data as props
-- Modals subdirectory: Quick action modals (habits, mood, transactions)
-
-**supabase/migrations/**
-- Purpose: Versioned database schema changes
-- Generated: No
-- Committed: Yes
-- Pattern: One migration file per change, timestamp-prefixed
-- Never modify existing migrations - always create new ones
-
-**.env (NOT COMMITTED)**
-- Purpose: Store secrets (API keys, database URLs, auth keys)
-- Generated: No
-- Committed: NO (in .gitignore)
-- Create from: `.env.example` template
-- Required vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, etc.
-
-**src/lib/supabase/**
-- Purpose: Supabase client instances
-- Files:
-  - `client.ts` - Browser client (public anon key)
-  - `server.ts` - Server client (same as browser for SSR)
-  - `admin.ts` - Admin client (service role key, bypasses RLS)
-  - `index.ts` - Exports
-
-## Import Path Patterns
-
-**Within app (pages/routes):**
-```typescript
-import { getUserProfile } from '@/lib/data/user-skills';
-import { Orb, Modal } from '@/components';
-import { useAuth } from '@/hooks/useAuth';
-import type { SkillDomain } from '@/lib/database.types';
-```
-
-**Within components:**
-```typescript
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import { getHabits } from '@/lib/data/habits';
-import { createClient } from '@/lib/supabase/client';
-```
-
-**Within data layer:**
-```typescript
-import { createBrowserClient } from '@/lib/supabase';
-import type { Habit, FactionWithStats } from '@/lib/database.types';
-import { logActivity } from './activity-log';
-```
+**`node_modules/`**
+- Purpose: Dependencies installed by npm
+- Generated: Yes (npm install)
+- Committed: No (.gitignore)
+- Contents: Third-party packages
 
 ---
 
-*Structure analysis: 2026-01-22*
+*Structure analysis: 2026-02-02*

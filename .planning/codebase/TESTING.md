@@ -1,86 +1,194 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-01-22
+**Analysis Date:** 2026-02-02
 
 ## Test Framework
 
-**Runner:**
-- Vitest 4.0.16
+**Unit Test Runner:**
+- Framework: Vitest v4.0.16
+- Environment: jsdom (browser-like DOM for React components)
 - Config: `vitest.config.ts`
-- Environment: jsdom (browser-like environment)
+
+**E2E Test Framework:**
+- Framework: Playwright v1.57.0
+- Config: `playwright.config.ts`
+- Base URL: `http://localhost:3050` (served from `npm run dev -- --port 3050`)
 
 **Assertion Library:**
-- Vitest built-in expect API (compatible with Jest)
-- Imported from 'vitest': `expect`
+- Unit tests: Vitest's built-in `expect()` (matches Jest API)
+- E2E tests: Playwright's built-in `expect()` (web-specific assertions)
 
 **Run Commands:**
 ```bash
-npm run test              # Run tests in watch mode
-npm run test:run         # Run tests once (CI mode)
-npm run test:coverage    # Run tests with coverage report
+npm run test              # Vitest watch mode
+npm run test:run         # Vitest single run
+npm run test:coverage   # Generate coverage report (v8 provider)
+npm run test:e2e         # Playwright tests (headless)
+npm run test:e2e:ui      # Playwright UI mode
+npm run test:e2e:headed  # Playwright with visible browser
+npm run test:e2e:debug   # Playwright debug mode
 ```
 
 ## Test File Organization
 
 **Location:**
-- Co-located with source code in `src/__tests__/` directory
-- Shared test setup in `src/__tests__/setup.ts`
+- Unit tests: Co-located in `src/__tests__/` directory
+- E2E tests: Separate directory `tests/e2e/`
+- Naming: Same filename as source with `.test.ts` or `.spec.ts` suffix
 
-**Naming:**
-- Pattern: `[feature].test.ts` (e.g., `xp.test.ts`, `factions.test.ts`)
-- Test files for utilities, not for components (focus on business logic)
-
-**Structure:**
+**Test Directory Structure:**
 ```
-src/__tests__/
-├── setup.ts                      # Global test setup & mocks
-├── xp.test.ts                    # XP calculation tests
-├── factions.test.ts              # Faction level tests
-├── activity-log.test.ts          # Activity logging tests
-├── parsers.test.ts               # Import parser tests
-├── contacts-types.test.ts        # Contact type tests
-├── habits-integration.test.ts    # Habit integration tests
-├── faction-ids.test.ts           # Faction ID tests
-└── weisheit.test.ts              # Weisheit system tests
+src/
+├── __tests__/
+│   ├── setup.ts              # Vitest setup (mocks, globals)
+│   ├── xp.test.ts
+│   ├── factions.test.ts
+│   ├── habits-integration.test.ts
+│   └── ...
+└── lib/
+    └── [source files]
+
+tests/
+└── e2e/
+    ├── auth.setup.ts         # Playwright auth setup (runs once)
+    ├── .auth/
+    │   └── user.json         # Generated auth state
+    ├── skills.spec.ts
+    ├── quest-crud.spec.ts
+    ├── habit-crud.spec.ts
+    └── api-security.spec.ts
 ```
 
 ## Test Structure
 
-**Suite Organization:**
+**Unit Test Suite Organization:**
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 
 describe('Feature Name', () => {
-  describe('Function Name', () => {
-    it('does something specific', () => {
+  describe('Specific Function', () => {
+    it('should behave in case X', () => {
       // Arrange
-      const input = someValue;
+      const input = ...;
 
       // Act
       const result = functionUnderTest(input);
 
       // Assert
-      expect(result).toBe(expected);
+      expect(result).toBe(expectedValue);
     });
   });
 });
 ```
 
-**Patterns:**
-- Top-level `describe` for feature/system
-- Nested `describe` for individual functions
-- `it` blocks describe specific behavior
-- AAA pattern: Arrange, Act, Assert (implicit in structure)
-- One assertion per `it` block preferred, multiple assertions allowed if testing one behavior
+**Example from `src/__tests__/xp.test.ts`:**
+```typescript
+describe('XP System', () => {
+  describe('xpForLevel', () => {
+    it('returns 0 for level 0 or negative', () => {
+      expect(xpForLevel(0)).toBe(0);
+      expect(xpForLevel(-1)).toBe(0);
+      expect(xpForLevel(-100)).toBe(0);
+    });
+
+    it('calculates XP correctly using 100 * level^1.5 formula', () => {
+      // Level 1: 100 * 1^1.5 = 100
+      expect(xpForLevel(1)).toBe(100);
+
+      // Level 2: 100 * 2^1.5 ≈ 282
+      expect(xpForLevel(2)).toBe(282);
+
+      // Level 10: 100 * 10^1.5 ≈ 3162
+      expect(xpForLevel(10)).toBe(3162);
+
+      // Level 25: 100 * 25^1.5 = 12,500
+      expect(xpForLevel(25)).toBe(12500);
+
+      // Level 100: 100 * 100^1.5 = 100,000
+      expect(xpForLevel(100)).toBe(100000);
+    });
+
+    it('always returns an integer (floored)', () => {
+      for (let level = 1; level <= 50; level++) {
+        const xp = xpForLevel(level);
+        expect(Number.isInteger(xp)).toBe(true);
+      }
+    });
+  });
+});
+```
+
+**E2E Test Suite Organization:**
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Feature Name (TEST-XX)', () => {
+  test.beforeEach(async ({ page }) => {
+    // Setup before each test
+    await page.goto('/feature-path');
+    await page.waitForLoadState('domcontentloaded');
+  });
+
+  test('User can do action X', async ({ page }) => {
+    // Arrange: Navigate/setup
+    // Act: Perform action
+    // Assert: Verify result
+  });
+});
+```
+
+**Example from `tests/e2e/skills.spec.ts`:**
+```typescript
+test.describe('Skills Display (TEST-04)', () => {
+  test('Skills API returns skills for authenticated user', async ({ page }) => {
+    const response = await page.request.get('/api/skills');
+
+    expect(response.status()).toBe(200);
+
+    const data = await response.json();
+    expect(data).toHaveProperty('skills');
+    expect(Array.isArray(data.skills)).toBe(true);
+
+    // If user has skills, verify structure
+    if (data.skills.length > 0) {
+      expect(data.skills[0]).toHaveProperty('id');
+      expect(data.skills[0]).toHaveProperty('name');
+    }
+  });
+
+  test('Skill detail page loads with progress display', async ({ page }) => {
+    const response = await page.request.get('/api/skills');
+
+    if (response.status() === 200) {
+      const data = await response.json();
+      if (data.skills && data.skills.length > 0) {
+        const skillId = data.skills[0].id;
+
+        await page.goto(`/skill/${skillId}`);
+        await page.waitForLoadState('networkidle');
+
+        await expect(page.locator('h1, h2')).toBeVisible();
+        await expect(page).toHaveURL(`/skill/${skillId}`);
+        await expect(page.locator('main')).toBeVisible();
+      }
+    }
+  });
+});
+```
 
 ## Mocking
 
-**Framework:** Vitest's `vi` module
+**Framework:** Vitest's `vi` module (Jest-compatible API)
 
-**Global Mocks Setup:**
-Location: `src/__tests__/setup.ts`
+**Setup File Location:** `src/__tests__/setup.ts`
+
+**Mocking Pattern - Supabase Client:**
 
 ```typescript
+import { vi } from 'vitest';
+
 vi.mock('@/lib/supabase', () => ({
   createBrowserClient: vi.fn(() => ({
     from: vi.fn(() => ({
@@ -102,232 +210,269 @@ vi.mock('@/lib/supabase', () => ({
 }));
 ```
 
-**Patterns:**
-- Mock Supabase client for all tests (setup.ts)
-- Return chainable objects that resolve to `{ data: T | null, error: Error | null }`
-- Mock RPC calls for stored procedures
-- Testing library imports: `@testing-library/jest-dom`, `@testing-library/react`
-
 **What to Mock:**
-- External API calls (Supabase)
-- Database operations
-- Network requests
-- Third-party services
+- Database clients (Supabase) - returns test data or empty results
+- External API calls (OpenAI, Anthropic, etc.) - returns mock responses
+- File system operations - simulated in memory
+- Network requests - when integration test is not the goal
 
 **What NOT to Mock:**
-- Pure calculation functions (e.g., XP formulas)
-- Date/time (unless testing time-based behavior)
-- Built-in JavaScript functions
+- Utility functions like `xpForLevel()` - test them as-is
+- Date/Math utilities - only mock if testing time-dependent logic
+- React hooks - usually test their behavior through components
+- Business logic - should be tested without mocks when possible
+
+**Playwright-Specific:**
+- No mocking needed for UI tests (real browser interaction)
+- Use `page.request.get()` for real API calls to test server
+- Database state managed via E2E test server (`.env.local` credentials)
 
 ## Fixtures and Factories
 
-**Test Data:**
+**Test Data Pattern from Unit Tests:**
+
 ```typescript
-// From activity-log.test.ts
-const mockActivities: Partial<ActivityLog>[] = [
-  {
-    id: '1',
-    activity_type: 'xp_gained',
-    faction_id: 'karriere',
-    xp_amount: 100,
-    occurred_at: '2024-01-15T10:00:00Z',
-  },
-  // ... more mock data
-];
+// In xp.test.ts - data used inline for clarity
+it('calculates level correctly', () => {
+  // Just under level 2 threshold
+  expect(levelFromXp(99)).toBe(1);
+
+  // Exactly at level 2 threshold
+  expect(levelFromXp(100)).toBe(1);
+
+  // Just over level 2 threshold (100 + 282 = 382)
+  expect(levelFromXp(382)).toBe(2);
+});
+```
+
+**E2E Test Data Pattern:**
+
+```typescript
+// From quest-crud.spec.ts - fetch from API first
+test('User can edit quest from detail page', async ({ page }) => {
+  const response = await page.request.get('/api/quests');
+
+  if (response.status() === 200) {
+    const data = await response.json();
+    const quests = data.quests || data;
+
+    if (Array.isArray(quests) && quests.length > 0) {
+      const questId = quests[0].id;
+      // ... use questId for test
+    }
+  }
+});
 ```
 
 **Location:**
-- Mock data defined in test files (not extracted to fixtures)
-- Inline constants for small datasets
-- Descriptive variable names (e.g., `mockActivities`, `mockAccounts`)
-
-**Characteristics:**
-- Use partial types when not all fields needed
-- Include realistic test values
-- ISO date strings for timestamps (YYYY-MM-DDTHH:mm:ssZ)
-- Faction IDs as string literals matching actual IDs
+- Unit test fixtures: Inline in test files (no factory pattern detected)
+- E2E test data: Fetched from running API server (Supabase database)
+- Auth state: Pre-generated in `.auth/user.json` via auth.setup.ts
 
 ## Coverage
 
-**Requirements:** Not enforced (no coverage threshold in config)
-
-**Configuration:**
-Location: `vitest.config.ts`
-
-```typescript
-coverage: {
-  provider: 'v8',
-  reporter: ['text', 'json', 'html'],
-  exclude: [
-    'node_modules/',
-    'src/__tests__/setup.ts',
-    '**/*.d.ts',
-    '**/*.config.*',
-    '**/types/**',
-  ],
-}
-```
+**Requirements:** Not enforced by CI
+- Coverage reports generated by v8 provider
+- Reporter types: `['text', 'json', 'html']`
 
 **View Coverage:**
 ```bash
-npm run test:coverage    # Generates HTML report in coverage/
+npm run test:coverage
+# Generates: coverage/index.html (open in browser)
 ```
 
-**Excluded from Coverage:**
-- Setup files
-- Type definition files
-- Configuration files
-- Type-only exports
+**Coverage Exclusions:**
+- `node_modules/`
+- `src/__tests__/setup.ts` (test infrastructure)
+- `**/*.d.ts` (type declaration files)
+- `**/*.config.*` (config files)
+- `**/types/**` (type-only directories)
 
 ## Test Types
 
 **Unit Tests:**
-- Scope: Pure functions (XP calculations, parsers, formatters)
-- Approach: Test input/output relationships
-- Examples: `xp.test.ts`, `factions.test.ts`, `parsers.test.ts`
-- No mocking of the function under test, only external dependencies
+
+**Scope:** Individual function/module behavior
+**Approach:**
+- Test pure functions (XP calculations, validators)
+- Test data layer queries with mocked Supabase
+- Vitest with jsdom environment
+
+**Examples:**
+- `src/__tests__/xp.test.ts` - XP formula calculations
+- `src/__tests__/factions.test.ts` - Faction level system
+- `src/__tests__/parsers.test.ts` - Data parsing utilities
+- `src/__tests__/habits-integration.test.ts` - Habit business logic
 
 **Integration Tests:**
-- Scope: Functions that interact with Supabase
-- Approach: Mock Supabase, test business logic flow
-- Examples: `habits-integration.test.ts`, `activity-log.test.ts`
-- Test data flows between functions
+
+**Scope:** API routes, database operations
+**Approach:**
+- Test full request-response cycle
+- Playwright making real HTTP requests to dev server
+- Tests actually call Supabase (uses test user credentials)
+
+**Examples:**
+- `tests/e2e/skills.spec.ts` - Skills API and page loading
+- `tests/e2e/api-security.spec.ts` - Authentication requirements
+- `tests/e2e/quest-crud.spec.ts` - Full quest lifecycle
 
 **E2E Tests:**
-- Status: Not found (would use Playwright per CLAUDE.md)
-- Scope: Full user workflows (for future implementation)
-- Tool: Playwright MCP Server (when implemented)
+
+**Scope:** User workflows across pages
+**Approach:**
+- Playwright browser automation
+- Real user interactions (click, type, submit)
+- Tests full authentication flow and multi-page navigation
+- Parallel disabled: `fullyParallel: false` (avoid test data conflicts)
+- Single worker: `workers: 1`
+
+**Configuration from `playwright.config.ts`:**
+```typescript
+export default defineConfig({
+  testDir: './tests/e2e',
+  fullyParallel: false,           // Sequential execution
+  forbidOnly: !!process.env.CI,   // Fail on test.only in CI
+  retries: 3,                     // Retry flaky tests
+  workers: 1,                     // Single worker (no concurrency)
+  reporter: 'html',
+  timeout: 90000,                 // 90s per test
+  expect: { timeout: 15000 },     // 15s for assertions
+
+  projects: [
+    { name: 'setup' },                    // Auth setup
+    { name: 'unauthenticated' },          // No auth tests
+    { name: 'chromium' },                 // Desktop tests
+    { name: 'mobile-chrome' },            // Mobile Chrome
+    { name: 'mobile-safari' },            // Mobile Safari
+  ],
+});
+```
+
+**Test Project Isolation:**
+- `setup`: Runs first, generates auth state
+- `unauthenticated`: Tests API security (no auth)
+- `chromium`: Main desktop tests (auth required)
+- `mobile-*`: Responsive design tests (auth required)
 
 ## Common Patterns
 
-**Boundary Testing:**
+**Async Testing (Vitest):**
+
 ```typescript
-it('returns level 1 for 0 XP', () => {
-  expect(calculateFactionLevel(0)).toBe(1);
+it('should complete async operation', async () => {
+  const result = await getSkillsByDomain('some-id');
+  expect(result).toEqual([]);
 });
 
-it('returns level 1 for negative XP', () => {
-  expect(calculateFactionLevel(-100)).toBe(1);
-});
-
-it('handles boundary cases correctly', () => {
-  expect(calculateFactionLevel(399)).toBe(1);      // Just below
-  expect(calculateFactionLevel(400)).toBe(2);      // Exactly at
-  expect(calculateFactionLevel(401)).toBe(2);      // Just above
+// Or with beforeEach setup
+beforeEach(async () => {
+  await setupTestData();
 });
 ```
 
-**Range/Iteration Testing:**
+**Error Testing:**
+
 ```typescript
-it('never returns less than 1', () => {
-  for (let i = -100; i <= 100; i += 10) {
-    expect(calculateFactionLevel(i)).toBeGreaterThanOrEqual(1);
+// Unit test: Mock error response
+vi.mocked(createBrowserClient).mockImplementation(() => ({
+  from: () => ({
+    select: () => Promise.resolve({
+      data: null,
+      error: new Error('DB Error')
+    })
+  })
+}));
+
+expect(() => getSkills()).rejects.toThrow('DB Error');
+
+// E2E test: Verify error response
+test('API returns 401 for unauthenticated requests', async ({ request }) => {
+  const response = await request.get('/api/quests');
+  expect(response.status()).toBe(401);
+  const body = await response.json();
+  expect(body.error).toContain('Unauthorized');
+});
+```
+
+**Navigation with Wait State:**
+
+```typescript
+// From quest-crud.spec.ts - retry pattern for flaky server
+let lastError: Error | null = null;
+for (let attempt = 0; attempt < 3; attempt++) {
+  try {
+    await page.goto('/quests', {
+      timeout: 30000,
+      waitUntil: 'domcontentloaded'
+    });
+    await page.locator('body').waitFor({ state: 'visible', timeout: 15000 });
+    return; // Success
+  } catch (error) {
+    lastError = error as Error;
+    await page.waitForTimeout(1000 * (attempt + 1)); // Exponential backoff
   }
-});
-
-it('always returns an integer (floored)', () => {
-  for (let level = 1; level <= 50; level++) {
-    const xp = xpForLevel(level);
-    expect(Number.isInteger(xp)).toBe(true);
-  }
-});
-```
-
-**Formula Validation:**
-```typescript
-it('uses floor(sqrt(xp/100)) formula correctly', () => {
-  // Level 1: 0-99 XP
-  expect(calculateFactionLevel(0)).toBe(1);
-  expect(calculateFactionLevel(99)).toBe(1);
-
-  // Level 2: 400 XP (sqrt(400/100) = 2)
-  expect(calculateFactionLevel(400)).toBe(2);
-
-  // Level 5: 2,500 XP (sqrt(2500/100) = 5)
-  expect(calculateFactionLevel(2500)).toBe(5);
-});
-```
-
-**Cumulative Testing:**
-```typescript
-it('is cumulative (each level adds more)', () => {
-  let prevTotal = 0;
-  for (let level = 1; level <= 10; level++) {
-    const total = totalXpForLevel(level);
-    expect(total).toBeGreaterThan(prevTotal);
-    prevTotal = total;
-  }
-});
-```
-
-**Array/List Testing:**
-```typescript
-it('XP requirements grow predictably', () => {
-  const xpRequirements = [];
-  for (let level = 1; level <= 10; level++) {
-    xpRequirements.push(xpForFactionLevel(level));
-  }
-
-  expect(xpRequirements).toEqual([100, 400, 900, 1600, 2500, 3600, 4900, 6400, 8100, 10000]);
-});
-```
-
-**Error Case Testing:**
-```typescript
-it('handles empty CSV', () => {
-  const result = parseGoogleCSV('');
-  expect(result.errors).toContain('CSV ist leer oder hat keine Daten');
-  expect(result.contacts).toHaveLength(0);
-});
-
-it('handles missing first name with warning', () => {
-  const csv = `Given Name,Family Name
-,Doe
-John,Smith`;
-
-  const result = parseGoogleCSV(csv);
-  expect(result.contacts).toHaveLength(1);
-  expect(result.warnings.length).toBeGreaterThan(0);
-});
-```
-
-**Async Testing:**
-```typescript
-// Tests use async/await naturally
-export async function updateFactionStats(
-  factionId: FactionId,
-  xpAmount: number,
-): Promise<UserFactionStats> {
-  // ... test mocks return Promises
 }
-
-// Tests are standard Vitest async
-it('handles level up correctly', async () => {
-  // If async function needed
-});
+if (lastError) throw lastError;
 ```
 
-## Test Examples from Codebase
+**Element Interaction with Fallbacks:**
 
-**XP System Test:**
-Location: `src/__tests__/xp.test.ts` (207 lines)
-- Tests 7 functions: xpForLevel, totalXpForLevel, levelFromXp, progressToNextLevel, addXp, formatXp, getLevelTier
-- 46 test cases
-- Examples of boundary testing, formula validation, cumulative tests
+```typescript
+// From quest-crud.spec.ts - flexible selector pattern
+const editBtn = page.locator(
+  'button:has-text("Bearbeiten"), button:has-text("Edit"), [data-testid="edit-quest"], a[href*="/edit"]'
+).first();
 
-**Faction Level Test:**
-Location: `src/__tests__/factions.test.ts` (145 lines)
-- Tests faction level calculation formulas
-- Validates quadratic scaling (level^2 * 100)
-- Tests inverse relationships between functions
+if (await editBtn.isVisible()) {
+  await editBtn.click();
+  await page.waitForTimeout(500);
+} else {
+  // Test gracefully handles missing element
+}
+```
 
-**Parser Tests:**
-Location: `src/__tests__/parsers.test.ts` (100+ lines shown)
-- Tests CSV parsing with Google Contacts format
-- Tests vCard parsing
-- Tests error handling and warnings
-- Tests German date format handling
+**Auth for E2E Tests:**
+
+```typescript
+// From auth.setup.ts - runs once before all tests
+setup('authenticate as test user', async ({ page }) => {
+  await page.goto('/auth/login');
+  await page.fill('input[type="email"]', process.env.E2E_TEST_USER_EMAIL || '');
+  await page.fill('input[type="password"]', process.env.E2E_TEST_USER_PASSWORD || '');
+  await page.click('button[type="submit"]');
+  await page.waitForURL('/');
+  await expect(page).toHaveURL('/');
+  await page.context().storageState({ path: 'tests/e2e/.auth/user.json' });
+});
+
+// Other tests inherit auth:
+projects: [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      storageState: 'tests/e2e/.auth/user.json',  // Reuse auth
+    },
+    dependencies: ['setup'],  // Run setup first
+  }
+]
+```
+
+## Test Gaps (Observed)
+
+**Phase 1-3 Additions May Lack Tests:**
+- New features added in recent phases may not have complete unit tests
+- E2E tests provide good coverage for critical paths
+- Security tests (`api-security.spec.ts`) validate auth and authorization
+- Consider adding unit tests for new utility functions
+
+**Key Testing Advice:**
+- Every data layer function should have a unit test
+- Every API route should have an E2E test (security + happy path)
+- Components tested via E2E (no unit tests detected for UI)
+- Mocking errors is critical for robustness
 
 ---
 
-*Testing analysis: 2026-01-22*
+*Testing analysis: 2026-02-02*

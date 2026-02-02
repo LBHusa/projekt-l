@@ -1,184 +1,248 @@
 # External Integrations
 
-**Analysis Date:** 2026-01-22
+**Analysis Date:** 2026-02-02
 
 ## APIs & External Services
 
-**AI/LLM:**
-- Claude (Anthropic) - AI chatbot backend
+**AI & LLM Services:**
+- Claude API (Anthropic) - AI conversation and content generation
   - SDK: `@anthropic-ai/sdk` 0.71.2
-  - Model: `claude-sonnet-4-5-20250929`
-  - Auth: `ANTHROPIC_API_KEY` (env var, can be overridden per-user)
-  - Endpoint: `src/app/api/ai/chat/route.ts`
-  - Per-user encrypted keys stored in `user_llm_keys` table
+  - Auth: `ANTHROPIC_API_KEY` (sk-ant-...)
+  - Used in: Chat routes, weekly summaries, quest generation, proactive features
 
-**Calendar:**
-- Google Calendar - Event sync and scheduling
+- OpenAI API - Embeddings for memory search
+  - SDK: `openai` 6.17.0
+  - Auth: `OPENAI_API_KEY`
+  - Model: `text-embedding-3-large` (3072 dimensions)
+  - Used in: Memory RAG system (`src/lib/ai/memory-rag.ts`)
+
+**Communication & Bot Services:**
+- Telegram Bot API - Telegram bot integration
+  - SDK: Custom HTTP wrapper (`src/lib/telegram.ts`)
+  - Auth: `TELEGRAM_BOT_TOKEN` (8501304094:AAE...)
+  - Bot username: `ProjektL_bot` (env: `TELEGRAM_BOT_USERNAME`)
+  - Endpoints:
+    - `POST /api/integrations/telegram/webhook` - Webhook for bot updates
+    - `POST /api/integrations/telegram/connect` - Link user to Telegram account
+    - `POST /api/integrations/telegram/send` - Send message to user
+    - `POST /api/integrations/telegram/test` - Test bot connectivity
+  - Features: sendMessage, getMe, setWebhook, deleteWebhook, answerCallbackQuery
+
+**Calendar Integration:**
+- Google Calendar API - Calendar sync and event reading
   - SDK: `googleapis` 170.0.0
-  - OAuth2 Flow: `src/app/api/integrations/google-calendar/callback/route.ts`
-  - Auth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
-  - Tokens stored in `google_calendar_integrations` table
+  - OAuth 2.0 credentials: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+  - Redirect URI: `GOOGLE_REDIRECT_URI` (default: http://localhost:3000/api/integrations/google-calendar/callback)
+  - Scopes: `calendar.readonly`, `calendar.events.readonly`
   - Endpoints:
-    - `src/app/api/integrations/google-calendar/auth/route.ts` - Initiate OAuth
-    - `src/app/api/integrations/google-calendar/events/route.ts` - Fetch events
-    - `src/app/api/integrations/google-calendar/sync/route.ts` - Sync events
+    - `GET /api/integrations/google-calendar/auth` - Initiate OAuth flow
+    - `GET /api/integrations/google-calendar/callback` - OAuth callback handler
+    - `GET /api/integrations/google-calendar/events` - Fetch calendar events
+    - `POST /api/integrations/google-calendar/sync` - Sync events to app
 
-**Knowledge Base:**
-- Notion - Knowledge base integration
-  - SDK: `@notionhq/client` 5.6.0
-  - Setup: Requires Notion API key configuration
-  - Migration: `supabase/migrations/20260110190000_notion_integration.sql`
-
-**Health Data:**
-- Apple Health - Workout, sleep, metrics import
-  - Webhook endpoint: `src/app/api/integrations/health-import/webhook/route.ts`
+**Health & Fitness Data:**
+- Apple Health Integration - Health data import via webhook
   - Auth: Bearer token (`HEALTH_IMPORT_API_KEY`)
+  - Endpoint: `POST /api/integrations/health-import/webhook`
   - Rate limiting: 10 requests/minute
-  - Supported data types: workouts, bodyMetrics, steps, sleep
-  - Data layer: `src/lib/data/health-import.ts`
-  - Database table: `health_imports` (tracks external_id to avoid duplicates)
+  - Data types: Workouts, body metrics, steps, sleep
+  - Implementation: `src/lib/data/health-import.ts`
 
-**Messaging:**
-- Telegram Bot API - Bot messaging and webhooks
-  - Library: Custom HTTP wrapper in `src/lib/telegram.ts`
-  - Webhook endpoint: `src/app/api/integrations/telegram/webhook/route.ts`
-  - Auth: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`
-  - Endpoints:
-    - `src/app/api/integrations/telegram/send/route.ts` - Send message
-    - `src/app/api/integrations/telegram/connect/route.ts` - Connect user to bot
-    - `src/app/api/integrations/telegram/test/route.ts` - Test bot connection
-  - Telegram codes mapping: `src/lib/telegram-codes.ts`
+**Book Metadata:**
+- OpenLibrary API - ISBN book lookup (no auth required)
+  - Endpoint: `GET /api/books/lookup?isbn=...`
+  - Used for: Book metadata retrieval
+  - Data: Title, author, page count, cover image
+
+**Productivity:**
+- Notion API - Potential integration (package present but not actively used)
+  - SDK: `@notionhq/client` 5.6.0
+  - Status: Dependency installed but no active usage found in codebase
 
 ## Data Storage
 
 **Databases:**
-- Supabase (PostgreSQL) - Primary database
-  - Connection: `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - Client libraries: `@supabase/supabase-js` 2.89.0, `@supabase/ssr` 0.8.0
-  - Server client: `src/lib/supabase/server.ts`
-  - Browser client: `src/lib/supabase/client.ts`
-  - Admin client: `src/lib/supabase/admin.ts`
-  - RLS policies: Enabled for security
+- Supabase PostgreSQL - Primary database
+  - Connection: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - Service role: `SUPABASE_SERVICE_ROLE_KEY` (for admin operations)
+  - Client: `@supabase/supabase-js` 2.89.0
+  - Browser client: `src/lib/supabase/client.ts` (createBrowserClient)
+  - Server client: `src/lib/supabase/server.ts` (createServerClient with SSR)
+  - Migrations: `supabase/migrations/` (21+ migration files)
+  - Key tables:
+    - `conversation_history` - Stored conversations for memory search
+    - `notification_settings` - User push notification preferences
+    - `users` - Supabase Auth users
+    - Faction, skill, quest, habit tables (Phase 1-3 schema)
 
-**Database Tables (Key):**
-- `users` - User profiles
-- `user_llm_keys` - Encrypted API keys (Anthropic, OpenAI)
-- `google_calendar_integrations` - Google Calendar OAuth tokens
-- `health_imports` - Health data import history
-- `habits`, `skills`, `factions` - Gamification data
-- `notifications` - Notification settings
-- `habit_reminders` - Scheduled reminders
+**Vector Database:**
+- Qdrant - Semantic vector search for conversation memory (Phase 3)
+  - Connection: `QDRANT_HOST` (default: 87.106.191.206), `QDRANT_PORT` (default: 6333)
+  - Client: `@qdrant/js-client-rest` 1.16.2
+  - Collection: `projekt_l_memory` (NOT shared with HUSATECH collections)
+  - Dimensions: 3072 (from OpenAI text-embedding-3-large)
+  - Distance metric: Cosine similarity
+  - Payload indexes: `user_id` (keyword), `created_at` (datetime)
+  - Implementation: `src/lib/ai/memory-rag.ts`
+  - Features:
+    - Lazy initialization on server startup (via instrumentation)
+    - Per-user memory isolation via `user_id` filter
+    - Semantic search with configurable similarity threshold (default: 0.7)
 
 **File Storage:**
-- Supabase Storage - User avatars and files
-  - Upload endpoint: `src/app/api/profile/upload-avatar/route.ts`
-  - Integration: `src/lib/data/health-import.ts` references storage
+- Local filesystem only (no cloud storage integration)
+- Avatar uploads: `src/app/api/profile/upload-avatar/route.ts`
 
 **Caching:**
-- None - Application relies on Supabase caching and direct queries
+- In-memory caching via Zustand (client-side)
+- TanStack React Query for server state management and caching
+- No Redis or external cache layer
 
 ## Authentication & Identity
 
 **Auth Provider:**
-- Supabase Auth - Built-in authentication
-  - JWT-based sessions
-  - Cookie-based session management via `@supabase/ssr`
-  - Login: `src/components/auth/LoginForm.tsx`
-  - Signup: `src/components/auth/SignupForm.tsx`
-  - Middleware: `src/lib/supabase/middleware.ts` - Session refresh
+- Supabase Auth (built-in PostgreSQL authentication)
+  - Supports email/password authentication
+  - Session management via cookies (SSR)
+  - JWT tokens for API access
+  - Middleware: `src/middleware.ts` (session refresh)
 
-**User Context:**
-- Helper: `src/lib/auth-helper.ts` - `getUserIdOrCurrent()` to get current user
+**External OAuth (Optional):**
+- Google OAuth 2.0 - For Google Calendar integration
+- Telegram - User can link Telegram account via bot
 
 ## Monitoring & Observability
 
 **Error Tracking:**
-- Console logging - Development and production error logs
-- Error boundaries: Not explicitly detected in shared code
+- None detected (no Sentry, Rollbar, etc.)
+- Console logging for debugging
 
 **Logs:**
-- Server-side console logging throughout API routes
-- Client-side error handling with NextResponse
+- Server-side: `console.log()` and `console.error()`
+- Client-side: Browser console
+- Formatted with prefixes like `[Memory RAG]`, `[Instrumentation]`, etc.
+
+**Health Checks:**
+- Qdrant health check: `src/lib/ai/memory-rag.ts` → `checkHealth()`
+- Status: Returns `{ qdrantAvailable, collectionExists }`
 
 ## CI/CD & Deployment
 
 **Hosting:**
-- Vercel (assumed, uses Next.js 16 with App Router)
+- Vercel (Next.js recommended)
+- Alternative: Self-hosted Node.js server
 
 **CI Pipeline:**
-- None explicitly configured - relies on Vercel's built-in CI
+- Not detected (no GitHub Actions, GitLab CI, etc. in repository)
+- ESLint and tests should be run before commit
 
 **Build Process:**
-- `npm run build` - TypeScript compilation + Next.js build
-- `npm run dev` - Local development server (port 3000)
-- `npm start` - Production server
+- Next.js build: `npm run build`
+- TypeScript compilation with strict type checking
+- No build-time API key requirement (uses runtime env vars)
 
 ## Environment Configuration
 
 **Required env vars:**
-- **Supabase:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-- **AI:** `ANTHROPIC_API_KEY` (optional if user provides own)
-- **Encryption:** `ENCRYPTION_SECRET` (32-byte hex string for AES-256-GCM)
-- **Google OAuth:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
-- **Web Push:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
-- **Telegram:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`
-- **Health Import:** `HEALTH_IMPORT_API_KEY`
+```
+# Supabase (mandatory)
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+
+# AI (mandatory for chat/memory features)
+ANTHROPIC_API_KEY
+OPENAI_API_KEY
+
+# Qdrant (mandatory for memory RAG)
+QDRANT_HOST
+QDRANT_PORT
+
+# Telegram (mandatory for bot integration)
+TELEGRAM_BOT_TOKEN
+TELEGRAM_BOT_USERNAME
+
+# Encryption (mandatory for storing API keys)
+ENCRYPTION_SECRET
+
+# Google Calendar (optional)
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REDIRECT_URI
+
+# Web Push Notifications (optional)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY
+VAPID_PRIVATE_KEY
+VAPID_SUBJECT
+
+# Apple Health Import (optional)
+HEALTH_IMPORT_API_KEY
+
+# E2E Testing (required for Playwright tests)
+E2E_TEST_USER_EMAIL
+E2E_TEST_USER_PASSWORD
+E2E_TEST_USER_B_EMAIL
+E2E_TEST_USER_B_PASSWORD
+```
 
 **Secrets location:**
-- `.env.local` - Local development (git-ignored)
-- Vercel Secrets - Production (managed via Vercel dashboard)
-- `.env.example` - Template (committed with placeholder values)
+- Local: `.env.local` (git-ignored)
+- Production: Environment variables in deployment platform (Vercel, Docker, etc.)
+- Never commit `.env.local` or `.env` files
 
 ## Webhooks & Callbacks
 
-**Incoming:**
-- Health Import: `POST /api/integrations/health-import/webhook` - Apple Health data
-  - Authentication: Bearer token in Authorization header
-  - Rate limit: 10 req/min
-  - Supports: workouts, bodyMetrics, steps, sleep
-- Telegram: `POST /api/integrations/telegram/webhook` - Bot updates
-  - Authentication: Telegram webhook signing
-- Google Calendar: `GET /api/integrations/google-calendar/callback` - OAuth callback
+**Incoming Webhooks:**
+- Telegram Bot: `POST /api/integrations/telegram/webhook`
+  - Headers: Optional `X-Telegram-Bot-Api-Secret-Token`
+  - Updates: Messages, callback queries (button presses)
 
-**Outgoing:**
-- Google Calendar: Set webhook via `setWebhook()` in `src/lib/telegram.ts`
-- Telegram: Configured via `src/lib/telegram.ts` - `setWebhook()`, `deleteWebhook()`
-- Push Notifications: `web-push` 3.6.7 sends push notifications to clients
+- Apple Health Import: `POST /api/integrations/health-import/webhook`
+  - Auth: Bearer token in Authorization header
+  - Rate limiting: 10 requests per minute
+  - Data: Workouts, body metrics, steps, sleep
 
-## API Key Management
+- Google Calendar Callback: `GET /api/integrations/google-calendar/callback`
+  - OAuth 2.0 redirect endpoint
+  - Query params: `code` (authorization code), `state` (user ID)
 
-**User-Provided Keys:**
-- Anthropic API keys encrypted with AES-256-GCM
-- Stored in `user_llm_keys` table (encrypted_key, key_prefix for display)
-- Encryption key: `ENCRYPTION_SECRET` environment variable
-- Decryption only on-demand when calling API
+**Outgoing Webhooks:**
+- None detected (app is consumer-only)
 
-**Environment Variables:**
-- Fallback to `ANTHROPIC_API_KEY` if user hasn't provided personal key
-- Sensitive keys stored in Supabase and server environment only
+## Push Notifications
 
-## Data Flow
+**Web Push (Voluntary Feature):**
+- Service: Web Push API (W3C standard)
+- Implementation: `web-push` 3.6.7
+- VAPID keys: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`
+- Subject: `VAPID_SUBJECT` (mailto: email)
+- Storage: Push subscriptions stored in `notification_settings` table
+- Endpoint: `POST /api/notifications/subscribe`
 
-**AI Chat:**
-1. User message → `POST /api/ai/chat` (requires auth)
-2. Server fetches user's Anthropic key or uses env fallback
-3. Creates Anthropic client and calls Claude API
-4. Claude calls skill tools (list_user_skills, add_skill_xp, etc.)
-5. Tool results returned to Claude for final response
+## Background Jobs
 
-**Health Import:**
-1. Apple Health app sends JSON via `POST /api/integrations/health-import/webhook`
-2. Rate limit and API key validation
-3. `importHealthData()` processes workouts, metrics, steps, sleep
-4. Data stored in Supabase tables
-5. Activity logged and faction XP updated
+**Cron Schedulers (node-cron):**
+Configured in `src/instrumentation.ts` (runs on server startup):
 
-**Google Calendar Sync:**
-1. User initiates OAuth flow
-2. Redirected to Google consent screen
-3. OAuth callback stores tokens in `google_calendar_integrations`
-4. Tokens can be used to fetch events via `googleapis` SDK
+1. **Reminder Scheduler** - Periodic habit/quest reminders
+2. **Quest Expiry Scheduler** - Expire old quests
+3. **Proactive Reminder Scheduler** - Proactive notifications
+4. **Health Inactivity Scheduler** - Check for inactivity
+5. **Proactive Quest Generator** - Generate quests based on patterns
+6. **Weekly Summary Scheduler** - Generate summaries (Sunday 03:00 AM)
+   - Uses: Claude API, conversation history from Supabase
+   - Stores: Summaries back to user data
+
+All schedulers run within Next.js process (no external job queue).
+
+## Data Encryption
+
+**For Sensitive Data:**
+- LLM API keys stored encrypted in database
+- Method: AES encryption with `ENCRYPTION_SECRET`
+- Implementation: `src/lib/data/llm-keys.ts`
+- Algorithm: OpenSSL compatible (32-byte hex secret)
 
 ---
 
-*Integration audit: 2026-01-22*
+*Integration audit: 2026-02-02*
