@@ -1784,3 +1784,56 @@ export interface RecentMessage {
   tool_calls: Json | null;
   created_at: string;
 }
+
+// =============================================
+// Gold System Types
+// Phase 3: Lebendiger Buddy
+// =============================================
+
+export type CurrencyType = 'gold' | 'gems';
+export type CurrencyTransactionType =
+  | 'quest_complete'
+  | 'habit_complete'
+  | 'streak_bonus'
+  | 'achievement'
+  | 'daily_bonus'
+  | 'referral'
+  | 'admin_grant'
+  | 'shop_purchase'
+  | 'streak_insurance'
+  | 'premium_feature'
+  | 'admin_deduct';
+
+export interface UserCurrency {
+  user_id: string;
+  gold: number;
+  gems: number;
+  total_earned_gold: number;
+  total_earned_gems: number;
+  total_spent_gold: number;
+  total_spent_gems: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CurrencyTransaction {
+  id: string;
+  user_id: string;
+  currency: CurrencyType;
+  transaction_type: CurrencyTransactionType;
+  amount: number;
+  source_table: string | null;
+  source_id: string | null;
+  description: string | null;
+  balance_after: number;
+  created_at: string;
+}
+
+export interface StreakMilestoneAward {
+  id: string;
+  user_id: string;
+  habit_id: string;
+  milestone: number;
+  gold_awarded: number;
+  awarded_at: string;
+}

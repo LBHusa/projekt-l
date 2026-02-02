@@ -22,6 +22,7 @@ import {
 import { StreakInsuranceCard } from '@/components/streaks';
 import HealthBar from '@/components/health/HealthBar';
 import DangerZoneAlert from '@/components/health/DangerZoneAlert';
+import { GoldDisplay } from '@/components/currency';
 import PrestigeModal from '@/components/health/PrestigeModal';
 import { getUserHealth } from '@/lib/data/health';
 import type { UserHealth } from '@/lib/database.types';
@@ -316,9 +317,14 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 p-6 md:p-8">
         <div className="max-w-7xl mx-auto">
-          {/* Health Bar - Prominent HP Display */}
+          {/* Health & Currency Bar */}
           <div className="mb-8">
             <div className="max-w-md mx-auto">
+              {/* Gold Display - Above Health Bar */}
+              <div className="flex justify-end mb-2">
+                <GoldDisplay size="md" showLabel />
+              </div>
+              {/* HP Bar */}
               <HealthBar showDetails showLives />
             </div>
             {/* Danger Zone Alert - shows only when HP < 20% */}
