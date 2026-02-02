@@ -24,7 +24,7 @@ This roadmap implements the core vision: A gamified life-tracking system that tr
 
 - [x] **Phase 1: Fairness & Proaktivität** - Streak Insurance, Proaktive Notifications, Health-Habit Link
 - [x] **Phase 2: Konsequenzen (HP/Death)** - HP System, Damage/Heal Triggers, Death/Respawn, Prestige
-- [ ] **Phase 3: Lebendiger Buddy** - AI Memory, Telegram AI Chat, Gold System, Proaktive Quests
+- [x] **Phase 3: Lebendiger Buddy** - AI Memory, Telegram AI Chat, Gold System, Proaktive Quests
 - [ ] **Phase 4: Visuelle Belohnungen** - 2D Equipment System, Shop, Weekly AI Reports
 
 ## Phase Details
@@ -77,13 +77,11 @@ Plans:
   3. Telegram AI Chat funktioniert Ende-zu-Ende (freier Text → Claude → Antwort)
   4. Gold wird bei Quest/Habit Completion vergeben
   5. Proaktive Quest-Generierung basierend auf Faction-Balance
-**Plans:** TBD (4 Deliverables)
+**Plans:** 5 plans in 4 waves (including gap closure)
 
 Plans:
-- [ ] 03-01-PLAN.md — AI Conversation Memory (conversation_history + user_summaries)
-- [ ] 03-02-PLAN.md — Telegram AI Chat (Two-Way)
-- [ ] 03-03-PLAN.md — Gold-System (user_currency + Rewards)
-- [ ] 03-04-PLAN.md — Proaktive Quest-Generierung
+- [x] 03-PLAN.md — AI Memory, Telegram Chat, Gold, Proactive Quests (consolidated plan) [Waves 1-3]
+- [x] 03-05-PLAN.md — Gap Closure (Qdrant init + Weekly Summary Scheduler) [Wave 1]
 
 ### Phase 4: Visuelle Belohnungen (Woche 9-11)
 **Goal**: Visuelle Progression durch 2D Equipment, Shop und AI-powered Weekly Reports.
@@ -121,5 +119,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|--------|
 | 1. Fairness & Proaktivität | 4/4 | COMPLETE | Woche 1-2 |
 | 2. Konsequenzen (HP/Death) | 6/6 | COMPLETE | Woche 3-5 |
-| 3. Lebendiger Buddy | 0/4 | READY | Woche 6-8 |
-| 4. Visuelle Belohnungen | 0/3 | BLOCKED | Woche 9-11 |
+| 3. Lebendiger Buddy | 2/2 | COMPLETE | Woche 6-8 |
+| 4. Visuelle Belohnungen | 0/3 | READY | Woche 9-11 |
