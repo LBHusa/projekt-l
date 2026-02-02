@@ -109,6 +109,7 @@ CREATE POLICY "Users can view own health events" ON health_events
 -- =============================================
 -- APPLY_HP_CHANGE RPC FUNCTION
 -- Atomic HP updates with death detection
+-- Applies 10% XP loss on death and logs notification
 -- =============================================
 
 CREATE OR REPLACE FUNCTION apply_hp_change(
@@ -133,6 +134,9 @@ DECLARE
   v_death_occurred BOOLEAN := FALSE;
   v_awaiting_prestige BOOLEAN := FALSE;
   v_health_record user_health%ROWTYPE;
+  v_xp_lost JSONB := '{}';
+  v_total_xp_lost INTEGER := 0;
+  v_faction_xp_record RECORD;
 BEGIN
   -- Lock the user's health row to prevent race conditions
   SELECT * INTO v_health_record
@@ -172,7 +176,29 @@ BEGIN
     INSERT INTO health_events (user_id, event_type, hp_change, source_table, source_id, metadata)
     VALUES (p_user_id, p_event_type, p_hp_change, p_source_table, p_source_id, p_metadata);
 
-    -- Log death event
+    -- =============================================
+    -- DEATH CONSEQUENCE: 10% XP LOSS IN ALL FACTIONS
+    -- =============================================
+
+    -- Calculate XP loss per faction before applying
+    FOR v_faction_xp_record IN
+      SELECT faction_id, current_xp, FLOOR(current_xp * 0.1)::INTEGER as xp_to_lose
+      FROM user_faction_stats
+      WHERE user_id = p_user_id AND current_xp > 0
+    LOOP
+      v_xp_lost := v_xp_lost || jsonb_build_object(
+        v_faction_xp_record.faction_id,
+        v_faction_xp_record.xp_to_lose
+      );
+      v_total_xp_lost := v_total_xp_lost + v_faction_xp_record.xp_to_lose;
+    END LOOP;
+
+    -- Apply 10% XP loss to all factions (reduce current_xp by 10%)
+    UPDATE user_faction_stats
+    SET current_xp = FLOOR(current_xp * 0.9)
+    WHERE user_id = p_user_id;
+
+    -- Log death event with XP loss details
     INSERT INTO health_events (user_id, event_type, hp_change, source_table, source_id, metadata)
     VALUES (
       p_user_id,
@@ -184,7 +210,37 @@ BEGIN
         'triggered_by', p_event_type,
         'lives_remaining', v_lives,
         'hp_before_death', v_current_hp,
-        'damage_taken', p_hp_change
+        'damage_taken', p_hp_change,
+        'xp_lost_total', v_total_xp_lost,
+        'xp_lost_by_faction', v_xp_lost
+      )
+    );
+
+    -- Log death notification to notification_log
+    INSERT INTO notification_log (
+      user_id,
+      channel,
+      notification_type,
+      title,
+      message,
+      status,
+      metadata
+    ) VALUES (
+      p_user_id,
+      'system',
+      'death',
+      'Du bist gestorben',
+      format(
+        'Dein Avatar ist auf 0 HP gefallen. Du hast ein Leben verloren (%s/3 verbleibend) und %s XP in allen Factions.',
+        GREATEST(0, v_lives),
+        v_total_xp_lost
+      ),
+      'sent',
+      jsonb_build_object(
+        'event', 'death',
+        'lives_remaining', GREATEST(0, v_lives),
+        'xp_lost', v_total_xp_lost,
+        'xp_lost_by_faction', v_xp_lost
       )
     );
 
