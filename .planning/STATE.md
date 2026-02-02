@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Den User durch echte Stakes, proaktive Begleitung und spuerbare Belohnungen motivieren, sein Leben bewusst auf der Meta-Ebene zu gestalten.
-**Current focus:** Vision Implementation - Phase 2 IN PROGRESS
+**Current focus:** Vision Implementation - Phase 2 COMPLETE, ready for Phase 3
 
 ## Current Position
 
 Milestone: 2 of 2 (Vision Implementation)
-Phase: 2 of 4 (Konsequenzen & HP/Death System) - IN PROGRESS
-Plan: 5 of 6 complete
-Status: In progress
-Last activity: 2026-02-02 - Completed 02-04-PLAN.md (HP Heal Triggers)
+Phase: 2 of 4 (Konsequenzen & HP/Death System) - COMPLETE
+Plan: 6 of 6 complete
+Status: Phase 2 complete
+Last activity: 2026-02-02 - Completed 02-06-PLAN.md (Prestige & Danger Zone)
 
-Progress: [████████████░] 83% (Phase 2 - 5/6 plans complete)
+Progress: [██████████████] 100% (Phase 2 complete - 6/6 plans)
 
 ## Milestone Overview
 
@@ -26,7 +26,7 @@ Progress: [████████████░] 83% (Phase 2 - 5/6 plans com
 - **Key Deliverable:** Security-hardened foundation
 
 ### Milestone 2: Vision Implementation (CURRENT)
-- **Status:** Phase 2 in progress
+- **Status:** Phase 2 COMPLETE, Phase 3 ready
 - **Timeline:** 11 Wochen (4 Phasen)
 - **Target:** HP-System, AI Memory, Telegram Chat, Equipment
 
@@ -39,7 +39,7 @@ Progress: [████████████░] 83% (Phase 2 - 5/6 plans com
 | P2-03 | Damage Triggers | `done` | GSD Executor |
 | P2-04 | Heal Triggers | `done` | GSD Executor |
 | P2-05 | HP UI Components | `done` | GSD Executor |
-| P2-06 | Death/Prestige Flow | `todo` | - |
+| P2-06 | Death/Prestige Flow | `done` | GSD Executor |
 
 ### Success Criteria Phase 2
 - [x] user_health + health_events tables created
@@ -49,7 +49,7 @@ Progress: [████████████░] 83% (Phase 2 - 5/6 plans com
 - [x] Inactivity deals damage to user HP
 - [x] Quest/Habit completion heals user HP
 - [x] HP bar visible in dashboard
-- [ ] Death modal and prestige flow
+- [x] Death modal and prestige flow
 
 ## Accumulated Decisions
 
@@ -87,6 +87,8 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-02 | Phase 2 Complete | HP/Death System (6/6 plans) |
+| 2026-02-02 | Plan 02-06 Complete | Prestige & Danger Zone (4 tasks, 8 min) |
 | 2026-02-02 | Plan 02-04 Complete | HP Heal Triggers (3 tasks, 20 min) |
 | 2026-02-02 | Plan 02-05 Complete | HP UI Components (2 tasks, 4 min) |
 | 2026-02-02 | Plan 02-03 Complete | HP Damage Triggers (3 tasks, 2 min) |
@@ -103,15 +105,15 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-02 08:00 UTC
-- **Focus:** HP Heal Triggers
-- **Completed:** 02-04-PLAN.md (3/3 tasks)
-- **Outcome:** Quest/habit/mood heal triggers with difficulty-based HP rewards
+- **Date:** 2026-02-02 09:30 UTC
+- **Focus:** Phase 2 Complete
+- **Completed:** 02-06-PLAN.md (4/4 tasks)
+- **Outcome:** Prestige modal, API, DangerZoneAlert, Phase 2 verified
 
 ### Resume Information
-- **Stopped at:** Completed 02-04-PLAN.md
+- **Stopped at:** Phase 2 complete
 - **Resume file:** None (no active checkpoint)
-- **Next:** 02-06-PLAN.md - Death/Prestige Flow
+- **Next:** Phase 3 - Lebendiger Buddy (AI Memory, Telegram Chat, Gold)
 
 ## Key Metrics
 
@@ -134,7 +136,7 @@ None currently.
 | **Streak Insurance** | 100% | Phase 1 |
 | **Proaktive Notifications** | 100% | Phase 1 |
 | **Quest Expiration Notifications** | 100% | Phase 1 |
-| **HP/Death System** | 83% | Phase 2 |
+| **HP/Death System** | 100% | Phase 2 |
 | **AI Memory** | 0% | Phase 3 |
 | **Telegram AI Chat** | 0% | Phase 3 |
 | **Gold System** | 0% | Phase 3 |
@@ -142,12 +144,12 @@ None currently.
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~70% (Phase 2 - 5/6 plans complete)
+**Overall Vision Progress:** ~50% (Phase 2 complete - 10/17 plans)
 
 ## Notes
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
-- **Phase 2 IN PROGRESS:** Schema + data layer + damage + heal triggers + UI complete, death/prestige flow remaining
+- **Phase 2 COMPLETE:** Full HP/Death system with damage/heal triggers, prestige, and UI
 - **Cron Infrastructure:** Now has 4 schedulers running (reminder, proactive, quest-expiry, health-inactivity)
 - **Notification-System:** Fully operational (Web Push + Telegram one-way)
 - **Health Import:** Complete with auto-complete feature
@@ -172,7 +174,7 @@ None currently.
 - StreakInsuranceCard and UseTokenModal UI components
 - HabitHealthMappingConfig UI component
 
-### New in Phase 2 (so far)
+### New in Phase 2
 - user_health table (HP, lives, prestige)
 - health_events table (append-only event log)
 - apply_hp_change RPC function (with XP loss on death)
@@ -192,6 +194,9 @@ None currently.
 - quest_completion_hp_trigger on quests table
 - habit_completion_hp_trigger on habit_logs table
 - mood_log_hp_trigger on mood_logs table
+- PrestigeModal component (Phoenix-themed death recovery)
+- DangerZoneAlert component (low HP warning)
+- /api/health/prestige endpoint
 
 ### To Research for Phase 3
 - AI Memory: Summary-based vs Vector-DB approach
@@ -199,4 +204,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 - Phase 2 Plan 4 Complete (02-04-PLAN.md)*
+*Last updated: 2026-02-02 - Phase 2 Complete (6/6 plans)*

@@ -23,7 +23,7 @@ This roadmap implements the core vision: A gamified life-tracking system that tr
 - Decimal phases (1.1, 2.1): Urgent insertions if needed
 
 - [x] **Phase 1: Fairness & Proaktivität** - Streak Insurance, Proaktive Notifications, Health-Habit Link
-- [ ] **Phase 2: Konsequenzen (HP/Death)** - HP System, Damage/Heal Triggers, Death/Respawn, Prestige
+- [x] **Phase 2: Konsequenzen (HP/Death)** - HP System, Damage/Heal Triggers, Death/Respawn, Prestige
 - [ ] **Phase 3: Lebendiger Buddy** - AI Memory, Telegram AI Chat, Gold System, Proaktive Quests
 - [ ] **Phase 4: Visuelle Belohnungen** - 2D Equipment System, Shop, Weekly AI Reports
 
@@ -60,12 +60,12 @@ Plans:
 **Plans:** 6 plans in 4 waves
 
 Plans:
-- [ ] 02-01-PLAN.md — Health Database Schema (user_health + health_events tables, RLS, apply_hp_change RPC) [Wave 1]
-- [ ] 02-02-PLAN.md — Data Layer & Death Flow (health.ts functions, XP loss on death) [Wave 2]
-- [ ] 02-03-PLAN.md — Damage Triggers (Quest fail, Streak break, Inactivity cron) [Wave 3]
-- [ ] 02-04-PLAN.md — Heal Triggers (Quest complete, Habit done, Mood log) [Wave 3]
-- [ ] 02-05-PLAN.md — Health Bar UI (HealthBar component + dashboard integration) [Wave 3]
-- [ ] 02-06-PLAN.md — Prestige & Danger Zone (Prestige modal + API, DangerZoneAlert, verification) [Wave 4]
+- [x] 02-01-PLAN.md — Health Database Schema (user_health + health_events tables, RLS, apply_hp_change RPC) [Wave 1]
+- [x] 02-02-PLAN.md — Data Layer & Death Flow (health.ts functions, XP loss on death) [Wave 2]
+- [x] 02-03-PLAN.md — Damage Triggers (Quest fail, Streak break, Inactivity cron) [Wave 3]
+- [x] 02-04-PLAN.md — Heal Triggers (Quest complete, Habit done, Mood log) [Wave 3]
+- [x] 02-05-PLAN.md — Health Bar UI (HealthBar component + dashboard integration) [Wave 3]
+- [x] 02-06-PLAN.md — Prestige & Danger Zone (Prestige modal + API, DangerZoneAlert, verification) [Wave 4]
 
 ### Phase 3: Lebendiger Buddy (Woche 6-8)
 **Goal**: Der Buddy wird real - er erinnert sich an Gespräche, ist via Telegram erreichbar, und der User verdient Gold.
@@ -120,6 +120,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Target |
 |-------|----------------|--------|--------|
 | 1. Fairness & Proaktivität | 4/4 | COMPLETE | Woche 1-2 |
-| 2. Konsequenzen (HP/Death) | 0/6 | PLANNED | Woche 3-5 |
-| 3. Lebendiger Buddy | 0/4 | BLOCKED | Woche 6-8 |
+| 2. Konsequenzen (HP/Death) | 6/6 | COMPLETE | Woche 3-5 |
+| 3. Lebendiger Buddy | 0/4 | READY | Woche 6-8 |
 | 4. Visuelle Belohnungen | 0/3 | BLOCKED | Woche 9-11 |
