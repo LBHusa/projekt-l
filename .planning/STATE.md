@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Milestone: 2 of 2 (Vision Implementation)
 Phase: 2 of 4 (Konsequenzen & HP/Death System) - IN PROGRESS
-Plan: 2 of 6 complete
+Plan: 3 of 6 complete
 Status: In progress
-Last activity: 2026-02-02 - Completed 02-02-PLAN.md (Health Data Layer & Death Flow)
+Last activity: 2026-02-02 - Completed 02-03-PLAN.md (HP Damage Triggers)
 
-Progress: [████████░░] 33% (Phase 2 - 2/6 plans complete)
+Progress: [█████████░] 50% (Phase 2 - 3/6 plans complete)
 
 ## Milestone Overview
 
@@ -36,7 +36,7 @@ Progress: [████████░░] 33% (Phase 2 - 2/6 plans complete)
 |----|------|--------|----------|
 | P2-01 | HP System Schema | `done` | GSD Executor |
 | P2-02 | Health Data Layer & Death Flow | `done` | GSD Executor |
-| P2-03 | Damage Triggers | `todo` | - |
+| P2-03 | Damage Triggers | `done` | GSD Executor |
 | P2-04 | Heal Triggers | `todo` | - |
 | P2-05 | HP UI Components | `todo` | - |
 | P2-06 | Death/Prestige Flow | `todo` | - |
@@ -45,8 +45,8 @@ Progress: [████████░░] 33% (Phase 2 - 2/6 plans complete)
 - [x] user_health + health_events tables created
 - [x] Health data layer with CRUD functions
 - [x] Death triggers XP loss (10% per faction)
-- [ ] Streak-Break deals damage to user HP
-- [ ] Inactivity deals damage to user HP
+- [x] Streak-Break deals damage to user HP
+- [x] Inactivity deals damage to user HP
 - [ ] Quest/Habit completion heals user HP
 - [ ] HP bar visible in dashboard
 - [ ] Death modal and prestige flow
@@ -69,6 +69,10 @@ Progress: [████████░░] 33% (Phase 2 - 2/6 plans complete)
 | 2026-02-02 | 02-01 | SECURITY DEFINER on RPC functions | Bypass RLS for system operations |
 | 2026-02-02 | 02-02 | Use notification_log for death notifications | Follows existing notification pattern |
 | 2026-02-02 | 02-02 | Track XP loss per faction in death metadata | Enables detailed death reports |
+| 2026-02-02 | 02-03 | Quest failure applies fixed -10 HP | Simplicity over difficulty-based |
+| 2026-02-02 | 02-03 | Streak break only damages if previousStreak > 0 | No punishment for day 0 |
+| 2026-02-02 | 02-03 | Inactivity check runs at 3 AM daily | Off-peak hours |
+| 2026-02-02 | 02-03 | Max 25 HP inactivity damage (5 days) | Prevent death spiral |
 
 ## Blockers
 
@@ -78,6 +82,7 @@ None currently.
 
 | Date | Event | Details |
 |------|-------|---------|
+| 2026-02-02 | Plan 02-03 Complete | HP Damage Triggers (3 tasks, 2 min) |
 | 2026-02-02 | Plan 02-02 Complete | Health Data Layer & Death Flow (2 tasks, 4 min) |
 | 2026-02-02 | Plan 02-01 Complete | HP System Schema (2 tasks, 4 min) |
 | 2026-02-01 | Plan 01-04 Complete | Quest Expiration Notifications (3 tasks, 4 min) |
@@ -91,24 +96,24 @@ None currently.
 ## Session Context
 
 ### Last Session
-- **Date:** 2026-02-02 07:35 UTC
-- **Focus:** Health Data Layer & Death Flow
-- **Completed:** 02-02-PLAN.md (2/2 tasks)
-- **Outcome:** health.ts data layer, 10% XP loss on death
+- **Date:** 2026-02-02 07:40 UTC
+- **Focus:** HP Damage Triggers
+- **Completed:** 02-03-PLAN.md (3/3 tasks)
+- **Outcome:** Quest failure trigger, streak break damage, inactivity cron
 
 ### Resume Information
-- **Stopped at:** Completed 02-02-PLAN.md
+- **Stopped at:** Completed 02-03-PLAN.md
 - **Resume file:** None (no active checkpoint)
-- **Next:** 02-03-PLAN.md - Damage Triggers
+- **Next:** 02-04-PLAN.md - Heal Triggers
 
 ## Key Metrics
 
 ### Codebase Status
-- **Existing Features:** 33 Pages, 120+ Components, 54+ APIs
+- **Existing Features:** 33 Pages, 120+ Components, 55+ APIs
 - **Test Coverage:** 126+ E2E Tests, 271 Unit Tests
 - **Build Status:** Passing
 - **Security Audit:** 3/3 Checks passing
-- **Cron Schedulers:** 3 active (reminder, proactive, quest-expiry)
+- **Cron Schedulers:** 4 active (reminder, proactive, quest-expiry, health-inactivity)
 
 ### Vision Progress
 | Feature | Status | Phase |
@@ -122,7 +127,7 @@ None currently.
 | **Streak Insurance** | 100% | Phase 1 |
 | **Proaktive Notifications** | 100% | Phase 1 |
 | **Quest Expiration Notifications** | 100% | Phase 1 |
-| **HP/Death System** | 33% | Phase 2 |
+| **HP/Death System** | 50% | Phase 2 |
 | **AI Memory** | 0% | Phase 3 |
 | **Telegram AI Chat** | 0% | Phase 3 |
 | **Gold System** | 0% | Phase 3 |
@@ -130,13 +135,13 @@ None currently.
 | **Equipment Shop** | 0% | Phase 4 |
 | **Weekly AI Reports** | 0% | Phase 4 |
 
-**Overall Vision Progress:** ~62% (Phase 2 - 2/6 plans complete)
+**Overall Vision Progress:** ~65% (Phase 2 - 3/6 plans complete)
 
 ## Notes
 
 - **Phase 1 COMPLETE:** All fairness and proactive notification features implemented
-- **Phase 2 IN PROGRESS:** Schema + data layer complete, triggers next
-- **Cron Infrastructure:** Now has 3 schedulers running (reminder, proactive, quest-expiry)
+- **Phase 2 IN PROGRESS:** Schema + data layer + damage triggers complete, heal triggers next
+- **Cron Infrastructure:** Now has 4 schedulers running (reminder, proactive, quest-expiry, health-inactivity)
 - **Notification-System:** Fully operational (Web Push + Telegram one-way)
 - **Health Import:** Complete with auto-complete feature
 
@@ -166,6 +171,11 @@ None currently.
 - perform_prestige RPC function
 - UserHealth and HealthEvent TypeScript types
 - health.ts data layer module (14 functions)
+- handle_quest_failure_hp trigger function
+- quest_failure_hp_trigger on quests table
+- /api/health/inactivity-check endpoint
+- health-inactivity-scheduler (4th cron)
+- Streak break HP damage in habits/relapse API
 
 ### To Research for Phase 3
 - AI Memory: Summary-based vs Vector-DB approach
@@ -173,4 +183,4 @@ None currently.
 
 ---
 
-*Last updated: 2026-02-02 - Phase 2 Plan 2 Complete (02-02-PLAN.md)*
+*Last updated: 2026-02-02 - Phase 2 Plan 3 Complete (02-03-PLAN.md)*
