@@ -21,6 +21,10 @@ import {
 } from '@/components/dashboard';
 import { StreakInsuranceCard } from '@/components/streaks';
 import HealthBar from '@/components/health/HealthBar';
+import DangerZoneAlert from '@/components/health/DangerZoneAlert';
+import PrestigeModal from '@/components/health/PrestigeModal';
+import { getUserHealth } from '@/lib/data/health';
+import type { UserHealth } from '@/lib/database.types';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Users, Heart, AlertCircle, Settings, Flame, Bot, Swords, Plus } from 'lucide-react';
@@ -89,6 +93,10 @@ export default function Dashboard() {
   const [achievementStats, setAchievementStats] = useState<AchievementStats | null>(null);
   const [recentActivities, setRecentActivities] = useState<ActivityLog[]>([]);
 
+  // Health state for danger zone and prestige
+  const [userHealth, setUserHealth] = useState<UserHealth | null>(null);
+  const [prestigeModalOpen, setPrestigeModalOpen] = useState(false);
+
   // Load data function - uses Promise.allSettled to prevent cascade failures
   const loadData = async () => {
     try {
@@ -109,6 +117,8 @@ export default function Dashboard() {
         getHabitsWithLogs(userId!, 1),             // 10 - for streak widget
         getAchievementStats(userId!),              // 11
         getRecentActivity(8, userId!),             // 12
+        // Health data for danger zone and prestige
+        getUserHealth(userId!),                    // 13
       ]);
 
       // Extract values with fallbacks for failed requests
@@ -126,6 +136,8 @@ export default function Dashboard() {
       const allHabitsData = results[10].status === 'fulfilled' ? results[10].value : [];
       const achievementStatsData = results[11].status === 'fulfilled' ? results[11].value : null;
       const recentActivitiesData = results[12].status === 'fulfilled' ? results[12].value : [];
+      // Health data
+      const healthData = results[13].status === 'fulfilled' ? results[13].value : null;
 
       // Log any failed requests for debugging
       results.forEach((result, index) => {
@@ -166,6 +178,12 @@ export default function Dashboard() {
       setAllHabits(allHabitsData);
       setAchievementStats(achievementStatsData);
       setRecentActivities(recentActivitiesData);
+
+      // Health data and auto-open prestige modal if awaiting
+      setUserHealth(healthData);
+      if (healthData?.awaiting_prestige) {
+        setPrestigeModalOpen(true);
+      }
 
       // Set user profile
       if (profile) {
@@ -303,6 +321,8 @@ export default function Dashboard() {
             <div className="max-w-md mx-auto">
               <HealthBar showDetails showLives />
             </div>
+            {/* Danger Zone Alert - shows only when HP < 20% */}
+            {userHealth && <DangerZoneAlert health={userHealth} />}
           </div>
 
           {/* Quick Actions + Life Balance + Today's Goals */}
@@ -602,6 +622,30 @@ export default function Dashboard() {
         onClose={() => setShowDomainForm(false)}
         onSubmit={handleDomainCreate}
         mode="create"
+      />
+
+      {/* Prestige Modal - shown when user is at 0 lives and awaiting_prestige */}
+      <PrestigeModal
+        isOpen={prestigeModalOpen}
+        onClose={() => setPrestigeModalOpen(false)}
+        currentPrestigeLevel={userHealth?.prestige_level || 0}
+        onConfirm={async () => {
+          try {
+            const response = await fetch('/api/health/prestige', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) {
+              throw new Error('Prestige request failed');
+            }
+            // Close modal and reload data
+            setPrestigeModalOpen(false);
+            await loadData();
+          } catch (error) {
+            console.error('Prestige error:', error);
+            throw error; // Re-throw so PrestigeModal can show error
+          }
+        }}
       />
     </div>
   );
