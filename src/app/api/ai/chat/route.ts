@@ -1,5 +1,6 @@
 // ============================================
 // AI Chatbot API Endpoint
+// Phase 3: Enhanced with Memory & Context
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -8,12 +9,15 @@ import { skillTools, executeSkillTool } from '@/lib/ai/skill-tools';
 import { createClient } from '@/lib/supabase/server';
 import { getApiKeyForUser } from '@/lib/data/llm-keys';
 import { canUserUseAI } from '@/lib/ai/trial';
+import { storeConversationBatch, getRecentMessages, getUserMemoryContext } from '@/lib/data/conversation-memory';
+import { buildHybridContext, storeConversationEmbedding, ensureCollection } from '@/lib/ai/memory-rag';
+import type { ConversationSource, ConversationHistory } from '@/lib/database.types';
 
 // ============================================
 // SYSTEM PROMPT
 // ============================================
 
-const SYSTEM_PROMPT = `Du bist der persönliche AI-Assistent für "Projekt L", ein Life Gamification System.
+const BASE_SYSTEM_PROMPT = `Du bist der persönliche AI-Assistent für "Projekt L", ein Life Gamification System.
 
 # DEINE ROLLE
 
@@ -164,6 +168,93 @@ User: "Ich habe 20 Minuten meditiert"
 **WICHTIG: Du antwortest IMMER auf Deutsch, auch wenn der User auf Englisch oder einer anderen Sprache schreibt.**`;
 
 // ============================================
+// SYSTEM PROMPT BUILDER WITH MEMORY CONTEXT
+// ============================================
+
+function buildSystemPrompt(memoryContext?: string): string {
+  if (!memoryContext) {
+    return BASE_SYSTEM_PROMPT;
+  }
+
+  // Inject memory context into system prompt
+  return `${BASE_SYSTEM_PROMPT}
+
+# MEMORY CONTEXT (aus vorherigen Gesprächen)
+
+Du erinnerst dich an frühere Gespräche mit diesem User. Nutze diesen Kontext um personalisiert zu antworten:
+
+${memoryContext}
+
+---
+Beachte: Beziehe dich auf frühere Gespräche wenn relevant, aber erzwinge es nicht.`;
+}
+
+// ============================================
+// MEMORY STORAGE HELPER
+// ============================================
+
+/**
+ * Store conversation messages and create embeddings
+ * Called asynchronously after response is sent
+ */
+async function storeConversationWithEmbedding(
+  inputMessages: Array<{ role: string; content: unknown }>,
+  response: Anthropic.Message,
+  userId: string,
+  source: ConversationSource
+): Promise<void> {
+  try {
+    // Get the last user message
+    const lastUserMessage = [...inputMessages].reverse().find(
+      m => m.role === 'user' && typeof m.content === 'string'
+    );
+
+    if (!lastUserMessage) return;
+
+    // Get assistant response text
+    const assistantText = response.content
+      .filter((block): block is Anthropic.TextBlock => block.type === 'text')
+      .map(block => block.text)
+      .join('\n');
+
+    if (!assistantText) return;
+
+    // Store both messages
+    const stored = await storeConversationBatch([
+      {
+        role: 'user',
+        content: lastUserMessage.content as string,
+        source,
+      },
+      {
+        role: 'assistant',
+        content: assistantText,
+        tokensUsed: response.usage?.output_tokens,
+        source,
+      },
+    ], userId);
+
+    // Create embeddings for stored messages (in background)
+    // Only embed user message - assistant responses are derived
+    const userConversation = stored.find(c => c.role === 'user');
+    if (userConversation) {
+      try {
+        await ensureCollection();
+        await storeConversationEmbedding(userConversation, userId);
+      } catch (embeddingError) {
+        console.error('[AI Chat] Embedding creation error (non-fatal):', embeddingError);
+        // Continue - embedding failures shouldn't block chat
+      }
+    }
+
+    console.log(`[AI Chat] Stored ${stored.length} messages for user ${userId}`);
+  } catch (error) {
+    console.error('[AI Chat] Conversation storage error:', error);
+    // Don't throw - storage failures shouldn't affect user experience
+  }
+}
+
+// ============================================
 // ANTHROPIC CLIENT FACTORY
 // ============================================
 
@@ -244,7 +335,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { messages } = await request.json();
+    const { messages, source = 'web', includeMemory = true } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -253,19 +344,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const conversationSource = source as ConversationSource;
+
+    // Build memory context if enabled (Phase 3: Lebendiger Buddy)
+    let memoryContextString = '';
+    if (includeMemory) {
+      try {
+        // Get memory context for personalization
+        const recentMessages = await getRecentMessages(50, currentUserId);
+        const memorySummary = await getUserMemoryContext(currentUserId);
+
+        // Get the last user message for semantic search
+        const lastUserMessage = [...messages].reverse().find(
+          (m: { role: string; content: unknown }) => m.role === 'user' && typeof m.content === 'string'
+        );
+        const searchQuery = lastUserMessage?.content as string | undefined;
+
+        // Build hybrid context (summary + patterns + RAG)
+        const hybridContext = await buildHybridContext(
+          currentUserId,
+          recentMessages,
+          memorySummary,
+          searchQuery
+        );
+
+        memoryContextString = hybridContext.contextString;
+        console.log(`[AI Chat] Memory context built: ${memoryContextString.length} chars`);
+      } catch (memoryError) {
+        console.error('[AI Chat] Memory context error (non-fatal):', memoryError);
+        // Continue without memory - non-fatal error
+      }
+    }
+
+    // Build system prompt with memory context
+    const systemPrompt = buildSystemPrompt(memoryContextString);
+
     // Create initial request to Claude
     let response;
     try {
       response = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: messages as Anthropic.MessageParam[],
         tools: skillTools,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { status?: number };
       // Handle authentication errors
-      if (error.status === 401) {
+      if (err.status === 401) {
         return NextResponse.json(
           { 
             error: 'API Key ungültig. Bitte überprüfe deinen Anthropic API Key unter Einstellungen > Integrationen.',
@@ -303,7 +430,7 @@ export async function POST(request: NextRequest) {
       const finalResponse = await anthropic.messages.create({
         model: 'claude-sonnet-4-5-20250929',
         max_tokens: 4096,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [
           ...messages,
           {
@@ -318,13 +445,28 @@ export async function POST(request: NextRequest) {
         tools: skillTools,
       });
 
+      // Store conversation in memory (async, non-blocking)
+      storeConversationWithEmbedding(
+        messages,
+        finalResponse,
+        currentUserId,
+        conversationSource
+      ).catch(err => console.error('[AI Chat] Memory storage error:', err));
+
       return NextResponse.json({
         success: true,
         response: finalResponse,
       });
     }
 
-    // No tool use, return direct response
+    // No tool use - store and return direct response
+    storeConversationWithEmbedding(
+      messages,
+      response,
+      currentUserId,
+      conversationSource
+    ).catch(err => console.error('[AI Chat] Memory storage error:', err));
+
     return NextResponse.json({
       success: true,
       response,
