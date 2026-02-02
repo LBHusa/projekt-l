@@ -1673,3 +1673,114 @@ export interface PerformPrestigeResult {
   new_hp: number;
   new_lives: number;
 }
+
+// =============================================
+// AI Memory Types
+// Phase 3: Lebendiger Buddy
+// =============================================
+
+export type ConversationRole = 'user' | 'assistant' | 'system';
+export type ConversationSource = 'web' | 'telegram' | 'api';
+
+export interface ConversationHistory {
+  id: string;
+  user_id: string;
+  role: ConversationRole;
+  content: string;
+  tool_calls: Json | null;
+  tool_results: Json | null;
+  tokens_used: number | null;
+  source: ConversationSource;
+  qdrant_point_id: number | null;
+  embedding_created_at: string | null;
+  created_at: string;
+}
+
+export interface ConversationHistoryInsert {
+  id?: string;
+  user_id: string;
+  role: ConversationRole;
+  content: string;
+  tool_calls?: Json | null;
+  tool_results?: Json | null;
+  tokens_used?: number | null;
+  source?: ConversationSource;
+  qdrant_point_id?: number | null;
+  embedding_created_at?: string | null;
+  created_at?: string;
+}
+
+export interface ConversationHistoryUpdate {
+  id?: string;
+  user_id?: string;
+  role?: ConversationRole;
+  content?: string;
+  tool_calls?: Json | null;
+  tool_results?: Json | null;
+  tokens_used?: number | null;
+  source?: ConversationSource;
+  qdrant_point_id?: number | null;
+  embedding_created_at?: string | null;
+  created_at?: string;
+}
+
+export interface UserSummary {
+  user_id: string;
+  weekly_summary: string | null;
+  preferences: Json;
+  patterns: Json;
+  conversation_count: number;
+  total_messages: number;
+  last_conversation_at: string | null;
+  last_summary_at: string | null;
+  last_summary_message_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserSummaryInsert {
+  user_id: string;
+  weekly_summary?: string | null;
+  preferences?: Json;
+  patterns?: Json;
+  conversation_count?: number;
+  total_messages?: number;
+  last_conversation_at?: string | null;
+  last_summary_at?: string | null;
+  last_summary_message_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface UserSummaryUpdate {
+  user_id?: string;
+  weekly_summary?: string | null;
+  preferences?: Json;
+  patterns?: Json;
+  conversation_count?: number;
+  total_messages?: number;
+  last_conversation_at?: string | null;
+  last_summary_at?: string | null;
+  last_summary_message_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Context for AI Memory
+export interface UserMemoryContext {
+  has_history: boolean;
+  weekly_summary: string | null;
+  preferences: Json;
+  patterns: Json;
+  conversation_count: number;
+  last_summary_at: string | null;
+}
+
+// Recent messages for sliding window
+export interface RecentMessage {
+  id: string;
+  role: ConversationRole;
+  content: string;
+  tool_calls: Json | null;
+  created_at: string;
+}
